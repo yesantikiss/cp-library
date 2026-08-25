@@ -13,6 +13,7 @@ for header in \
     "$root"/ds/*.hpp \
     "$root"/math/*.hpp \
     "$root"/string/*.hpp \
+    "$root"/tree/*.hpp \
     "$root"/utils/*.hpp; do
     source="$build_dir/header-$(basename "${header%.hpp}").cpp"
     printf '#include "%s"\n#include "%s"\nint main() {}\n' "$header" "$header" > "$source"
@@ -23,5 +24,9 @@ done
     "$root/tests/test.cpp" "$root/tests/rolling_hash_tu.cpp" \
     -o "$build_dir/tests"
 "$build_dir/tests"
+
+"$cxx" "${flags[@]}" "$root/tests/tree_randomized.cpp" \
+    -o "$build_dir/tree-randomized"
+"$build_dir/tree-randomized"
 
 echo "All tests passed with $cxx"

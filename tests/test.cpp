@@ -18,6 +18,9 @@
 #include "math/factor.hpp"
 #include "string/aho_corasick.hpp"
 #include "string/rolling_hash.hpp"
+#include "tree/heavy_light_decomposition.hpp"
+#include "tree/lca_binary_lifting.hpp"
+#include "tree/lca_euler_tour.hpp"
 #include "utils/fraction.hpp"
 #include "utils/hash.hpp"
 #include "utils/int128.hpp"
@@ -124,6 +127,73 @@ int main() {
         RollingHash hash("abracadabra");
         assert(hash.equals(0, 4, 7, 11));
         assert(hash.get(0, 4) == rolling_hash_from_other_tu("abra"));
+    }
+    {
+        std::vector<std::vector<int>> graph(7);
+        auto add_edge = [&](int u, int v) {
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        };
+        add_edge(0, 1);
+        add_edge(0, 2);
+        add_edge(1, 3);
+        add_edge(1, 4);
+        add_edge(2, 5);
+        add_edge(5, 6);
+
+        BinaryLiftingLCA doubling(graph);
+        EulerTourLCA sparse(graph);
+        assert(doubling.lca(3, 4) == 1);
+        assert(doubling.lca(3, 6) == 0);
+        assert(doubling.dist(3, 6) == 5);
+        assert(doubling.is_ancestor(0, 6));
+        assert(sparse.lca(3, 4) == 1);
+        assert(sparse.lca(3, 6) == 0);
+        assert(sparse.dist(3, 6) == 5);
+        assert(sparse.is_ancestor(0, 6));
+        assert(doubling.kth_ancestor(6, 100) == 0);
+        assert(doubling.jump(3, 6, 0) == 3);
+        assert(doubling.jump(3, 6, 2) == 0);
+        assert(doubling.jump(3, 6, 5) == 6);
+        assert(doubling.jump(3, 6, 6) == -1);
+
+        HeavyLightDecomposition hld(graph);
+        std::vector<int> path;
+        hld.path_query(3, 6, false, [&](int l, int r, bool reverse) {
+            if (reverse) {
+                for (int i = r - 1; i >= l; --i) path.push_back(hld.vertex[i]);
+            } else {
+                for (int i = l; i < r; ++i) path.push_back(hld.vertex[i]);
+            }
+        });
+        assert((path == std::vector<int>{3, 1, 0, 2, 5, 6}));
+
+        path.clear();
+        hld.path_query(3, 6, true, [&](int l, int r, bool reverse) {
+            if (reverse) {
+                for (int i = r - 1; i >= l; --i) path.push_back(hld.vertex[i]);
+            } else {
+                for (int i = l; i < r; ++i) path.push_back(hld.vertex[i]);
+            }
+        });
+        assert((path == std::vector<int>{3, 1, 2, 5, 6}));
+
+        auto [left, right] = hld.subtree_vertex(2);
+        std::vector<int> subtree(hld.vertex.begin() + left,
+                                 hld.vertex.begin() + right);
+        std::sort(subtree.begin(), subtree.end());
+        assert((subtree == std::vector<int>{2, 5, 6}));
+    }
+    {
+        std::vector<std::vector<int>> forest{{1}, {0}, {3}, {2}};
+        BinaryLiftingLCA doubling;
+        EulerTourLCA sparse;
+        doubling.build_forest(forest);
+        sparse.build_forest(forest);
+        assert(doubling.lca(0, 2) == -1);
+        assert(sparse.lca(0, 2) == -1);
+        assert(!doubling.is_ancestor(0, 2));
+        assert(!sparse.is_ancestor(0, 2));
     }
     {
         umap<long long, std::string> map;
