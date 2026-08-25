@@ -5,10 +5,13 @@ data:
   - icon: ':warning:'
     path: tests/test.cpp
     title: tests/test.cpp
-  _extendedVerifiedWith: []
+  _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/restrictive_filesystem.test.cpp
+    title: verify/restrictive_filesystem.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
     links: []
   bundledCode: "#line 2 \"ds/interval_map.hpp\"\n\n#include <algorithm>\n#include\
@@ -403,9 +406,10 @@ data:
   path: ds/interval_map.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-08-04 23:10:17+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
-  verifiedWith: []
+  timestamp: '2026-08-25 15:58:20+09:00'
+  verificationStatus: LIBRARY_ALL_AC
+  verifiedWith:
+  - verify/restrictive_filesystem.test.cpp
 documentation_of: ds/interval_map.hpp
 layout: document
 title: "\u533A\u9593 map"

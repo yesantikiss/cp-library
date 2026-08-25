@@ -27,7 +27,7 @@ data:
     - icon: ':warning:'
       path: ds/dynamic_segtree.hpp
       title: "\u52D5\u7684\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: ds/interval_map.hpp
       title: "\u533A\u9593 map"
     - icon: ':warning:'
@@ -71,6 +71,20 @@ data:
     - icon: ':warning:'
       path: tests/test.cpp
       title: tests/test.cpp
+    - icon: ':warning:'
+      path: tests/tree_randomized.cpp
+      title: tests/tree_randomized.cpp
+  - name: tree
+    pages:
+    - icon: ':heavy_check_mark:'
+      path: tree/heavy_light_decomposition.hpp
+      title: Heavy-Light Decomposition
+    - icon: ':heavy_check_mark:'
+      path: tree/lca_binary_lifting.hpp
+      title: LCA (Binary Lifting)
+    - icon: ':heavy_check_mark:'
+      path: tree/lca_euler_tour.hpp
+      title: LCA (Euler Tour + Sparse Table)
   - name: utils
     pages:
     - icon: ':warning:'
@@ -104,8 +118,20 @@ data:
       path: verify/cgl_1_c.test.cpp
       title: verify/cgl_1_c.test.cpp
     - icon: ':heavy_check_mark:'
+      path: verify/jump_on_tree.test.cpp
+      title: verify/jump_on_tree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/lca_binary_lifting.test.cpp
+      title: verify/lca_binary_lifting.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/lca_euler_tour.test.cpp
+      title: verify/lca_euler_tour.test.cpp
+    - icon: ':heavy_check_mark:'
       path: verify/many_aplusb_128bit.test.cpp
       title: verify/many_aplusb_128bit.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/restrictive_filesystem.test.cpp
+      title: verify/restrictive_filesystem.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/set_xor_min.test.cpp
       title: verify/set_xor_min.test.cpp
@@ -121,6 +147,12 @@ data:
     - icon: ':heavy_check_mark:'
       path: verify/unionfind_with_potential.test.cpp
       title: verify/unionfind_with_potential.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/vertex_add_path_sum.test.cpp
+      title: verify/vertex_add_path_sum.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/vertex_set_path_composite.test.cpp
+      title: verify/vertex_set_path_composite.test.cpp
 layout: toppage
 ---
 ## このライブラリについて

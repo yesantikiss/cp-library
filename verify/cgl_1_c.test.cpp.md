@@ -116,7 +116,7 @@ data:
   isVerificationFile: true
   path: verify/cgl_1_c.test.cpp
   requiredBy: []
-  timestamp: '2026-08-04 23:10:17+09:00'
+  timestamp: '2026-08-25 15:58:20+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/cgl_1_c.test.cpp

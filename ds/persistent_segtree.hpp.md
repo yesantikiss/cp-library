@@ -132,7 +132,7 @@ data:
   path: ds/persistent_segtree.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-08-04 23:10:17+09:00'
+  timestamp: '2026-08-25 15:58:20+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: ds/persistent_segtree.hpp

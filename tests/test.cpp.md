@@ -20,7 +20,7 @@ data:
   - icon: ':warning:'
     path: ds/dynamic_segtree.hpp
     title: "\u52D5\u7684\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
-  - icon: ':warning:'
+  - icon: ':heavy_check_mark:'
     path: ds/interval_map.hpp
     title: "\u533A\u9593 map"
   - icon: ':warning:'
@@ -38,6 +38,15 @@ data:
   - icon: ':warning:'
     path: string/rolling_hash.hpp
     title: Rolling Hash
+  - icon: ':heavy_check_mark:'
+    path: tree/heavy_light_decomposition.hpp
+    title: Heavy-Light Decomposition
+  - icon: ':heavy_check_mark:'
+    path: tree/lca_binary_lifting.hpp
+    title: LCA (Binary Lifting)
+  - icon: ':heavy_check_mark:'
+    path: tree/lca_euler_tour.hpp
+    title: LCA (Euler Tour + Sparse Table)
   - icon: ':warning:'
     path: utils/fraction.hpp
     title: "\u6709\u7406\u6570"
@@ -742,65 +751,266 @@ data:
     \u5206\u6587\u5B57\u5217\u304C\u7B49\u3057\u3044\u304B\n        bool equals(int\
     \ l1, int r1, int l2, int r2) const {\n            if (r1 - l1 != r2 - l2) return\
     \ false;\n            return get(l1, r1) == get(l2, r2);\n        }\n    };\n\
-    \    \n}\n#line 2 \"utils/fraction.hpp\"\n\n#line 4 \"utils/fraction.hpp\"\n#include\
-    \ <ios>\n#include <istream>\n#line 8 \"utils/fraction.hpp\"\n#include <stdexcept>\n\
-    #line 11 \"utils/fraction.hpp\"\n\nnamespace yesantikiss {\n    namespace fraction_detail\
-    \ {\n        using i128 = __int128;\n        using u128 = unsigned __int128;\n\
-    \n        template<class T>\n        inline constexpr bool is_supported_integer_v\
-    \ =\n            (std::is_integral_v<T> && std::is_signed_v<T> &&\n          \
-    \   !std::is_same_v<T, bool>) ||\n            std::is_same_v<T, i128>;\n\n   \
-    \     struct u256 {\n            u128 hi = 0;\n            u128 lo = 0;\n    \
-    \    };\n\n        inline bool is_zero(const u256& x) {\n            return x.hi\
-    \ == 0 && x.lo == 0;\n        }\n\n        inline int compare(const u256& a, const\
-    \ u256& b) {\n            if (a.hi != b.hi) return a.hi < b.hi ? -1 : 1;\n   \
-    \         if (a.lo != b.lo) return a.lo < b.lo ? -1 : 1;\n            return 0;\n\
-    \        }\n\n        inline u256 add(const u256& a, const u256& b) {\n      \
-    \      u256 res;\n            res.lo = a.lo + b.lo;\n            res.hi = a.hi\
-    \ + b.hi + (res.lo < a.lo);\n            return res;\n        }\n\n        //\
-    \ a >= b \u3092\u4EEE\u5B9A\u3059\u308B\u3002\n        inline u256 subtract(const\
+    \    \n}\n#line 2 \"tree/heavy_light_decomposition.hpp\"\n\n#line 7 \"tree/heavy_light_decomposition.hpp\"\
+    \n\nnamespace yesantikiss {\n    struct HeavyLightDecomposition {\n        int\
+    \ n = 0;\n        int root = -1;\n        std::vector<int> parent;\n        std::vector<int>\
+    \ depth;\n        std::vector<int> size;\n        std::vector<int> in;\n     \
+    \   std::vector<int> out;\n        std::vector<int> head;\n        std::vector<int>\
+    \ heavy;\n        std::vector<int> vertex;\n\n        HeavyLightDecomposition()\
+    \ = default;\n\n        explicit HeavyLightDecomposition(\n            const std::vector<std::vector<int>>&\
+    \ graph, int root_ = 0) {\n            build(graph, root_);\n        }\n\n   \
+    \     void build(const std::vector<std::vector<int>>& graph, int root_ = 0) {\n\
+    \            init(static_cast<int>(graph.size()));\n            if (n == 0) return;\n\
+    \            root = root_;\n\n            std::vector<int> order{root};\n    \
+    \        parent[root] = root;\n            for (int i = 0; i < static_cast<int>(order.size());\
+    \ ++i) {\n                int v = order[i];\n                for (int to : graph[v])\
+    \ {\n                    if (parent[to] != -1) continue;\n                   \
+    \ parent[to] = v;\n                    depth[to] = depth[v] + 1;\n           \
+    \         order.push_back(to);\n                }\n            }\n\n         \
+    \   for (int i = static_cast<int>(order.size()) - 1; i >= 0; --i) {\n        \
+    \        int v = order[i];\n                int largest_size = 0;\n          \
+    \      for (int to : graph[v]) {\n                    if (parent[to] != v) continue;\n\
+    \                    size[v] += size[to];\n                    if (size[to] >\
+    \ largest_size) {\n                        largest_size = size[to];\n        \
+    \                heavy[v] = to;\n                    }\n                }\n  \
+    \          }\n\n            int timer = 0;\n            std::vector<std::pair<int,\
+    \ int>> pending{{root, root}};\n            while (!pending.empty()) {\n     \
+    \           auto [v, chain_head] = pending.back();\n                pending.pop_back();\n\
+    \n                for (; v != -1; v = heavy[v]) {\n                    head[v]\
+    \ = chain_head;\n                    in[v] = timer;\n                    vertex[timer++]\
+    \ = v;\n\n                    for (int to : graph[v]) {\n                    \
+    \    if (parent[to] == v && to != heavy[v]) {\n                            pending.emplace_back(to,\
+    \ to);\n                        }\n                    }\n                }\n\
+    \            }\n\n            for (int v = 0; v < n; ++v) {\n                if\
+    \ (in[v] != -1) out[v] = in[v] + size[v];\n            }\n        }\n\n      \
+    \  int edge_vertex(int u, int v) const {\n            return depth[u] > depth[v]\
+    \ ? u : v;\n        }\n\n        int lca(int u, int v) const {\n            while\
+    \ (head[u] != head[v]) {\n                if (depth[head[u]] > depth[head[v]])\
+    \ {\n                    u = parent[head[u]];\n                } else {\n    \
+    \                v = parent[head[v]];\n                }\n            }\n    \
+    \        return depth[u] < depth[v] ? u : v;\n        }\n\n        int dist(int\
+    \ u, int v) const {\n            int ancestor = lca(u, v);\n            return\
+    \ depth[u] + depth[v] - 2 * depth[ancestor];\n        }\n\n        bool is_ancestor(int\
+    \ ancestor, int v) const {\n            return in[ancestor] <= in[v] && out[v]\
+    \ <= out[ancestor];\n        }\n\n        std::pair<int, int> subtree_vertex(int\
+    \ v) const {\n            return {in[v], out[v]};\n        }\n\n        // \u5404\
+    \u8FBA\u3092\u6DF1\u3044\u65B9\u306E\u9802\u70B9\u306B\u5BFE\u5FDC\u3055\u305B\
+    \u305F\u3068\u304D\u306E\u90E8\u5206\u6728\u5185\u306E\u8FBA\u3002\n        std::pair<int,\
+    \ int> subtree_edge(int v) const {\n            return {in[v] + 1, out[v]};\n\
+    \        }\n\n        // u -> v \u306E\u9806\u306B\u3001\u30D1\u30B9\u3092\u534A\
+    \u958B\u533A\u9593\u3078\u5206\u89E3\u3059\u308B\u3002\n        // reverse=true\
+    \ \u306E\u533A\u9593\u306F r-1, ..., l \u306E\u9806\u306B\u8AAD\u3080\u3002\n\
+    \        template <class F>\n        void path_query(int u, int v, bool edge,\
+    \ F&& callback) const {\n            std::vector<std::tuple<int, int, bool>> right;\n\
+    \n            while (head[u] != head[v]) {\n                if (depth[head[u]]\
+    \ > depth[head[v]]) {\n                    callback(in[head[u]], in[u] + 1, true);\n\
+    \                    u = parent[head[u]];\n                } else {\n        \
+    \            right.emplace_back(in[head[v]], in[v] + 1, false);\n            \
+    \        v = parent[head[v]];\n                }\n            }\n\n          \
+    \  if (depth[u] > depth[v]) {\n                int left = in[v] + (edge ? 1 :\
+    \ 0);\n                int right_end = in[u] + 1;\n                if (left <\
+    \ right_end) callback(left, right_end, true);\n            } else {\n        \
+    \        int left = in[u] + (edge ? 1 : 0);\n                int right_end = in[v]\
+    \ + 1;\n                if (left < right_end) callback(left, right_end, false);\n\
+    \            }\n\n            std::reverse(right.begin(), right.end());\n    \
+    \        for (auto [left, right_end, reverse] : right) {\n                callback(left,\
+    \ right_end, reverse);\n            }\n        }\n\n        template <class S,\
+    \ class Op, class Get>\n        S path_fold(int u, int v, bool edge, Op op, S\
+    \ identity,\n                    Get get) const {\n            S result = identity;\n\
+    \            path_query(u, v, edge,\n                       [&](int left, int\
+    \ right, bool reverse) {\n                           result = op(result, get(left,\
+    \ right, reverse));\n                       });\n            return result;\n\
+    \        }\n\n    private:\n        void init(int size_) {\n            n = size_;\n\
+    \            root = -1;\n            parent.assign(n, -1);\n            depth.assign(n,\
+    \ 0);\n            size.assign(n, 1);\n            in.assign(n, -1);\n       \
+    \     out.assign(n, -1);\n            head.assign(n, -1);\n            heavy.assign(n,\
+    \ -1);\n            vertex.assign(n, -1);\n        }\n    };\n}\n#line 2 \"tree/lca_binary_lifting.hpp\"\
+    \n\n#line 5 \"tree/lca_binary_lifting.hpp\"\n\nnamespace yesantikiss {\n    struct\
+    \ BinaryLiftingLCA {\n        int n = 0;\n        int log = 1;\n        std::vector<int>\
+    \ depth;\n        std::vector<int> parent;\n        std::vector<int> component;\n\
+    \n        BinaryLiftingLCA() = default;\n\n        explicit BinaryLiftingLCA(\n\
+    \            const std::vector<std::vector<int>>& graph, int root = 0) {\n   \
+    \         build(graph, root);\n        }\n\n        void build(const std::vector<std::vector<int>>&\
+    \ graph, int root = 0) {\n            init(static_cast<int>(graph.size()));\n\
+    \            if (n == 0) return;\n\n            build_component(graph, root, 0);\n\
+    \            build_table();\n        }\n\n        void build_forest(const std::vector<std::vector<int>>&\
+    \ graph) {\n            init(static_cast<int>(graph.size()));\n\n            int\
+    \ component_id = 0;\n            for (int root = 0; root < n; ++root) {\n    \
+    \            if (parent[root] == -1) {\n                    build_component(graph,\
+    \ root, component_id++);\n                }\n            }\n            build_table();\n\
+    \        }\n\n        int kth_ancestor(int v, int k) const {\n            if (!contains(v)\
+    \ || k < 0 || parent[v] == -1) return -1;\n            k = std::min(k, depth[v]);\n\
+    \            for (int bit = 0; bit < log; ++bit) {\n                if ((k >>\
+    \ bit) & 1) v = up_at(bit, v);\n            }\n            return v;\n       \
+    \ }\n\n        int lca(int a, int b) const {\n            if (!same_component(a,\
+    \ b)) return -1;\n            if (depth[a] < depth[b]) std::swap(a, b);\n\n  \
+    \          a = kth_ancestor(a, depth[a] - depth[b]);\n            if (a == b)\
+    \ return a;\n\n            for (int bit = log - 1; bit >= 0; --bit) {\n      \
+    \          if (up_at(bit, a) != up_at(bit, b)) {\n                    a = up_at(bit,\
+    \ a);\n                    b = up_at(bit, b);\n                }\n           \
+    \ }\n            return parent[a];\n        }\n\n        int dist(int a, int b)\
+    \ const {\n            int ancestor = lca(a, b);\n            if (ancestor ==\
+    \ -1) return -1;\n            return depth[a] + depth[b] - 2 * depth[ancestor];\n\
+    \        }\n\n        bool is_ancestor(int ancestor, int v) const {\n        \
+    \    return same_component(ancestor, v) && lca(ancestor, v) == ancestor;\n   \
+    \     }\n\n        // a -> b \u30D1\u30B9\u4E0A\u3067 a \u3092 0 \u756A\u76EE\u3068\
+    \u3059\u308B k \u756A\u76EE\u306E\u9802\u70B9\u3092\u8FD4\u3059\u3002\n      \
+    \  int jump(int a, int b, int k) const {\n            int ancestor = lca(a, b);\n\
+    \            if (ancestor == -1 || k < 0) return -1;\n\n            int up_length\
+    \ = depth[a] - depth[ancestor];\n            int down_length = depth[b] - depth[ancestor];\n\
+    \            if (k > up_length + down_length) return -1;\n            if (k <=\
+    \ up_length) return kth_ancestor(a, k);\n            return kth_ancestor(b, up_length\
+    \ + down_length - k);\n        }\n\n    private:\n        std::vector<int> up;\n\
+    \n        void init(int size) {\n            n = size;\n            log = 1;\n\
+    \            while ((1LL << log) <= std::max(1, n)) ++log;\n            depth.assign(n,\
+    \ 0);\n            parent.assign(n, -1);\n            component.assign(n, -1);\n\
+    \            up.assign(log * n, 0);\n        }\n\n        bool contains(int v)\
+    \ const { return 0 <= v && v < n; }\n\n        bool same_component(int a, int\
+    \ b) const {\n            return contains(a) && contains(b) && component[a] !=\
+    \ -1 &&\n                   component[a] == component[b];\n        }\n\n     \
+    \   int& up_at(int bit, int v) { return up[bit * n + v]; }\n        int up_at(int\
+    \ bit, int v) const { return up[bit * n + v]; }\n\n        void build_component(const\
+    \ std::vector<std::vector<int>>& graph,\n                             int root,\
+    \ int component_id) {\n            parent[root] = root;\n            depth[root]\
+    \ = 0;\n            component[root] = component_id;\n\n            std::vector<int>\
+    \ order{root};\n            for (int i = 0; i < static_cast<int>(order.size());\
+    \ ++i) {\n                int v = order[i];\n                for (int to : graph[v])\
+    \ {\n                    if (parent[to] != -1) continue;\n                   \
+    \ parent[to] = v;\n                    depth[to] = depth[v] + 1;\n           \
+    \         component[to] = component_id;\n                    order.push_back(to);\n\
+    \                }\n            }\n        }\n\n        void build_table() {\n\
+    \            for (int v = 0; v < n; ++v) {\n                if (parent[v] != -1)\
+    \ up_at(0, v) = parent[v];\n            }\n            for (int bit = 1; bit <\
+    \ log; ++bit) {\n                for (int v = 0; v < n; ++v) {\n             \
+    \       if (parent[v] != -1) {\n                        up_at(bit, v) = up_at(bit\
+    \ - 1, up_at(bit - 1, v));\n                    }\n                }\n       \
+    \     }\n        }\n    };\n}\n#line 2 \"tree/lca_euler_tour.hpp\"\n\n#line 5\
+    \ \"tree/lca_euler_tour.hpp\"\n\nnamespace yesantikiss {\n    struct EulerTourLCA\
+    \ {\n        int n = 0;\n        std::vector<int> depth;\n        std::vector<int>\
+    \ parent;\n        std::vector<int> component;\n        std::vector<int> tin;\n\
+    \        std::vector<int> tout;\n\n        EulerTourLCA() = default;\n\n     \
+    \   explicit EulerTourLCA(const std::vector<std::vector<int>>& graph,\n      \
+    \                        int root = 0) {\n            build(graph, root);\n  \
+    \      }\n\n        void build(const std::vector<std::vector<int>>& graph, int\
+    \ root = 0) {\n            init(static_cast<int>(graph.size()));\n           \
+    \ if (n == 0) return;\n\n            euler.reserve(2 * n - 1);\n            build_component(graph,\
+    \ root, 0);\n            build_sparse_table();\n        }\n\n        void build_forest(const\
+    \ std::vector<std::vector<int>>& graph) {\n            init(static_cast<int>(graph.size()));\n\
+    \            euler.reserve(n == 0 ? 0 : 2 * n - 1);\n\n            int component_id\
+    \ = 0;\n            for (int root = 0; root < n; ++root) {\n                if\
+    \ (parent[root] == -1) {\n                    build_component(graph, root, component_id++);\n\
+    \                }\n            }\n            build_sparse_table();\n       \
+    \ }\n\n        int lca(int a, int b) const {\n            if (!same_component(a,\
+    \ b)) return -1;\n            int left = first[a];\n            int right = first[b];\n\
+    \            if (left > right) std::swap(left, right);\n\n            int length\
+    \ = right - left + 1;\n            int level = lg[length];\n            return\
+    \ better(st_at(level, left),\n                          st_at(level, right - (1\
+    \ << level) + 1));\n        }\n\n        int dist(int a, int b) const {\n    \
+    \        int ancestor = lca(a, b);\n            if (ancestor == -1) return -1;\n\
+    \            return depth[a] + depth[b] - 2 * depth[ancestor];\n        }\n\n\
+    \        bool is_ancestor(int ancestor, int v) const {\n            return same_component(ancestor,\
+    \ v) && tin[ancestor] <= tin[v] &&\n                   tout[v] <= tout[ancestor];\n\
+    \        }\n\n    private:\n        int timer = 0;\n        int euler_size = 0;\n\
+    \        int levels = 0;\n        std::vector<int> first;\n        std::vector<int>\
+    \ euler;\n        std::vector<int> lg;\n        std::vector<int> sparse_table;\n\
+    \n        struct Frame {\n            int v;\n            int next_edge;\n   \
+    \     };\n\n        void init(int size) {\n            n = size;\n           \
+    \ timer = 0;\n            euler_size = 0;\n            levels = 0;\n         \
+    \   depth.assign(n, 0);\n            parent.assign(n, -1);\n            component.assign(n,\
+    \ -1);\n            tin.assign(n, -1);\n            tout.assign(n, -1);\n    \
+    \        first.assign(n, -1);\n            euler.clear();\n            lg.clear();\n\
+    \            sparse_table.clear();\n        }\n\n        bool contains(int v)\
+    \ const { return 0 <= v && v < n; }\n\n        bool same_component(int a, int\
+    \ b) const {\n            return contains(a) && contains(b) && component[a] !=\
+    \ -1 &&\n                   component[a] == component[b];\n        }\n\n     \
+    \   int& st_at(int level, int index) {\n            return sparse_table[level\
+    \ * euler_size + index];\n        }\n\n        int st_at(int level, int index)\
+    \ const {\n            return sparse_table[level * euler_size + index];\n    \
+    \    }\n\n        int better(int a, int b) const {\n            return depth[a]\
+    \ <= depth[b] ? a : b;\n        }\n\n        void enter(int v, int p, int component_id)\
+    \ {\n            parent[v] = p;\n            component[v] = component_id;\n  \
+    \          tin[v] = timer++;\n            first[v] = static_cast<int>(euler.size());\n\
+    \            euler.push_back(v);\n        }\n\n        void build_component(const\
+    \ std::vector<std::vector<int>>& graph,\n                             int root,\
+    \ int component_id) {\n            depth[root] = 0;\n            enter(root, root,\
+    \ component_id);\n            std::vector<Frame> stack{{root, 0}};\n\n       \
+    \     while (!stack.empty()) {\n                Frame& frame = stack.back();\n\
+    \                int v = frame.v;\n                if (frame.next_edge == static_cast<int>(graph[v].size()))\
+    \ {\n                    tout[v] = timer;\n                    stack.pop_back();\n\
+    \                    if (!stack.empty()) euler.push_back(stack.back().v);\n  \
+    \                  continue;\n                }\n\n                int to = graph[v][frame.next_edge++];\n\
+    \                if (parent[to] != -1) continue;\n                depth[to] =\
+    \ depth[v] + 1;\n                enter(to, v, component_id);\n               \
+    \ stack.push_back({to, 0});\n            }\n        }\n\n        void build_sparse_table()\
+    \ {\n            euler_size = static_cast<int>(euler.size());\n            if\
+    \ (euler_size == 0) return;\n\n            lg.assign(euler_size + 1, 0);\n   \
+    \         for (int i = 2; i <= euler_size; ++i) lg[i] = lg[i / 2] + 1;\n\n   \
+    \         levels = lg[euler_size] + 1;\n            sparse_table.assign(levels\
+    \ * euler_size, 0);\n            for (int i = 0; i < euler_size; ++i) st_at(0,\
+    \ i) = euler[i];\n\n            for (int level = 1; level < levels; ++level) {\n\
+    \                int length = 1 << level;\n                int half = length /\
+    \ 2;\n                for (int i = 0; i + length <= euler_size; ++i) {\n     \
+    \               st_at(level, i) =\n                        better(st_at(level\
+    \ - 1, i),\n                               st_at(level - 1, i + half));\n    \
+    \            }\n            }\n        }\n    };\n}\n#line 2 \"utils/fraction.hpp\"\
+    \n\n#line 4 \"utils/fraction.hpp\"\n#include <ios>\n#include <istream>\n#line\
+    \ 8 \"utils/fraction.hpp\"\n#include <stdexcept>\n#line 11 \"utils/fraction.hpp\"\
+    \n\nnamespace yesantikiss {\n    namespace fraction_detail {\n        using i128\
+    \ = __int128;\n        using u128 = unsigned __int128;\n\n        template<class\
+    \ T>\n        inline constexpr bool is_supported_integer_v =\n            (std::is_integral_v<T>\
+    \ && std::is_signed_v<T> &&\n             !std::is_same_v<T, bool>) ||\n     \
+    \       std::is_same_v<T, i128>;\n\n        struct u256 {\n            u128 hi\
+    \ = 0;\n            u128 lo = 0;\n        };\n\n        inline bool is_zero(const\
+    \ u256& x) {\n            return x.hi == 0 && x.lo == 0;\n        }\n\n      \
+    \  inline int compare(const u256& a, const u256& b) {\n            if (a.hi !=\
+    \ b.hi) return a.hi < b.hi ? -1 : 1;\n            if (a.lo != b.lo) return a.lo\
+    \ < b.lo ? -1 : 1;\n            return 0;\n        }\n\n        inline u256 add(const\
     \ u256& a, const u256& b) {\n            u256 res;\n            res.lo = a.lo\
-    \ - b.lo;\n            res.hi = a.hi - b.hi - (a.lo < b.lo);\n            return\
-    \ res;\n        }\n\n        inline u256 multiply(u128 a, u128 b) {\n        \
-    \    constexpr u128 mask64 = (u128(1) << 64) - 1;\n\n            u128 a0 = a &\
-    \ mask64;\n            u128 a1 = a >> 64;\n            u128 b0 = b & mask64;\n\
-    \            u128 b1 = b >> 64;\n\n            u128 p00 = a0 * b0;\n         \
-    \   u128 p01 = a0 * b1;\n            u128 p10 = a1 * b0;\n            u128 p11\
-    \ = a1 * b1;\n\n            u128 lo = p00;\n            u128 x = p01 << 64;\n\
-    \            u128 next = lo + x;\n            u128 carry = next < lo;\n      \
-    \      lo = next;\n\n            x = p10 << 64;\n            next = lo + x;\n\
-    \            carry += next < lo;\n            lo = next;\n\n            u128 hi\
-    \ = p11 + (p01 >> 64) + (p10 >> 64) + carry;\n            return {hi, lo};\n \
-    \       }\n\n        inline u256 from_u128(u128 x) {\n            return {0, x};\n\
-    \        }\n\n        struct div_result {\n            u256 quotient;\n      \
-    \      u128 remainder;\n        };\n\n        inline div_result divide(const u256&\
-    \ value, u128 divisor) {\n            if (divisor == 0) {\n                throw\
-    \ std::domain_error(\"fraction: division by zero\");\n            }\n        \
-    \    if (value.hi == 0) {\n                return {{0, value.lo / divisor}, value.lo\
-    \ % divisor};\n            }\n\n            u256 quotient;\n            u128 remainder\
-    \ = 0;\n            for (int bit_index = 255; bit_index >= 0; --bit_index) {\n\
-    \                u128 bit;\n                if (bit_index >= 128) {\n        \
-    \            bit = (value.hi >> (bit_index - 128)) & 1;\n                } else\
-    \ {\n                    bit = (value.lo >> bit_index) & 1;\n                }\n\
-    \n                bool carry = (remainder >> 127) != 0;\n                remainder\
-    \ = (remainder << 1) | bit;\n                if (carry || remainder >= divisor)\
-    \ {\n                    remainder -= divisor;\n                    if (bit_index\
-    \ >= 128) {\n                        quotient.hi |= u128(1) << (bit_index - 128);\n\
-    \                    } else {\n                        quotient.lo |= u128(1)\
-    \ << bit_index;\n                    }\n                }\n            }\n   \
-    \         return {quotient, remainder};\n        }\n\n        inline u128 modulo(const\
-    \ u256& value, u128 divisor) {\n            return divide(value, divisor).remainder;\n\
-    \        }\n\n        inline u256 divide_exact(const u256& value, u128 divisor)\
-    \ {\n            if (divisor == 1) return value;\n            div_result result\
-    \ = divide(value, divisor);\n            if (result.remainder != 0) {\n      \
-    \          throw std::logic_error(\"fraction: internal non-exact division\");\n\
-    \            }\n            return result.quotient;\n        }\n\n        inline\
-    \ u128 gcd(u128 a, u128 b) {\n            while (b != 0) {\n                u128\
-    \ r = a % b;\n                a = b;\n                b = r;\n            }\n\
-    \            return a;\n        }\n\n        struct signed_u256 {\n          \
-    \  bool negative = false;\n            u256 magnitude;\n        };\n\n       \
-    \ inline signed_u256 add(const signed_u256& a, const signed_u256& b) {\n     \
-    \       if (a.negative == b.negative) {\n                signed_u256 res{a.negative,\
-    \ add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
+    \ + b.lo;\n            res.hi = a.hi + b.hi + (res.lo < a.lo);\n            return\
+    \ res;\n        }\n\n        // a >= b \u3092\u4EEE\u5B9A\u3059\u308B\u3002\n\
+    \        inline u256 subtract(const u256& a, const u256& b) {\n            u256\
+    \ res;\n            res.lo = a.lo - b.lo;\n            res.hi = a.hi - b.hi -\
+    \ (a.lo < b.lo);\n            return res;\n        }\n\n        inline u256 multiply(u128\
+    \ a, u128 b) {\n            constexpr u128 mask64 = (u128(1) << 64) - 1;\n\n \
+    \           u128 a0 = a & mask64;\n            u128 a1 = a >> 64;\n          \
+    \  u128 b0 = b & mask64;\n            u128 b1 = b >> 64;\n\n            u128 p00\
+    \ = a0 * b0;\n            u128 p01 = a0 * b1;\n            u128 p10 = a1 * b0;\n\
+    \            u128 p11 = a1 * b1;\n\n            u128 lo = p00;\n            u128\
+    \ x = p01 << 64;\n            u128 next = lo + x;\n            u128 carry = next\
+    \ < lo;\n            lo = next;\n\n            x = p10 << 64;\n            next\
+    \ = lo + x;\n            carry += next < lo;\n            lo = next;\n\n     \
+    \       u128 hi = p11 + (p01 >> 64) + (p10 >> 64) + carry;\n            return\
+    \ {hi, lo};\n        }\n\n        inline u256 from_u128(u128 x) {\n          \
+    \  return {0, x};\n        }\n\n        struct div_result {\n            u256\
+    \ quotient;\n            u128 remainder;\n        };\n\n        inline div_result\
+    \ divide(const u256& value, u128 divisor) {\n            if (divisor == 0) {\n\
+    \                throw std::domain_error(\"fraction: division by zero\");\n  \
+    \          }\n            if (value.hi == 0) {\n                return {{0, value.lo\
+    \ / divisor}, value.lo % divisor};\n            }\n\n            u256 quotient;\n\
+    \            u128 remainder = 0;\n            for (int bit_index = 255; bit_index\
+    \ >= 0; --bit_index) {\n                u128 bit;\n                if (bit_index\
+    \ >= 128) {\n                    bit = (value.hi >> (bit_index - 128)) & 1;\n\
+    \                } else {\n                    bit = (value.lo >> bit_index) &\
+    \ 1;\n                }\n\n                bool carry = (remainder >> 127) !=\
+    \ 0;\n                remainder = (remainder << 1) | bit;\n                if\
+    \ (carry || remainder >= divisor) {\n                    remainder -= divisor;\n\
+    \                    if (bit_index >= 128) {\n                        quotient.hi\
+    \ |= u128(1) << (bit_index - 128);\n                    } else {\n           \
+    \             quotient.lo |= u128(1) << bit_index;\n                    }\n  \
+    \              }\n            }\n            return {quotient, remainder};\n \
+    \       }\n\n        inline u128 modulo(const u256& value, u128 divisor) {\n \
+    \           return divide(value, divisor).remainder;\n        }\n\n        inline\
+    \ u256 divide_exact(const u256& value, u128 divisor) {\n            if (divisor\
+    \ == 1) return value;\n            div_result result = divide(value, divisor);\n\
+    \            if (result.remainder != 0) {\n                throw std::logic_error(\"\
+    fraction: internal non-exact division\");\n            }\n            return result.quotient;\n\
+    \        }\n\n        inline u128 gcd(u128 a, u128 b) {\n            while (b\
+    \ != 0) {\n                u128 r = a % b;\n                a = b;\n         \
+    \       b = r;\n            }\n            return a;\n        }\n\n        struct\
+    \ signed_u256 {\n            bool negative = false;\n            u256 magnitude;\n\
+    \        };\n\n        inline signed_u256 add(const signed_u256& a, const signed_u256&\
+    \ b) {\n            if (a.negative == b.negative) {\n                signed_u256\
+    \ res{a.negative, add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
     \ res.negative = false;\n                return res;\n            }\n\n      \
     \      int cmp = compare(a.magnitude, b.magnitude);\n            if (cmp == 0)\
     \ return {};\n            if (cmp > 0) {\n                return {a.negative,\
@@ -1106,7 +1316,7 @@ data:
     \        return is;\n    }\n\n    constexpr yesantikiss::u128 max_value = ~yesantikiss::u128(0);\n\
     \    yesantikiss::u128 parsed;\n    if (!yesantikiss::int128_detail::parse_magnitude(\n\
     \            token, first, max_value, parsed)) {\n        is.setstate(std::ios::failbit);\n\
-    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 24 \"\
+    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 27 \"\
     tests/test.cpp\"\n\nlong long op_sum(long long a, long long b) { return a + b;\
     \ }\nlong long e_sum() { return 0; }\n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const\
     \ std::string& s);\n\nint main() {\n    using namespace yesantikiss;\n\n    {\n\
@@ -1151,24 +1361,53 @@ data:
     \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
     \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
     );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        umap<long long,\
-    \ std::string> map;\n        map[1000000007LL] = \"prime\";\n        assert(map.at(1000000007LL)\
-    \ == \"prime\");\n        assert(map.find(0) == map.end());\n\n        uset<std::pair<int,\
-    \ int>> set;\n        set.insert({2, 3});\n        set.insert({2, 3});\n     \
-    \   set.insert({3, 2});\n        assert(set.size() == 2);\n        assert(set.count({2,\
-    \ 3}) == 1);\n    }\n    {\n        using Fraction = fraction<long long>;\n\n\
-    \        assert(Fraction(6, -8) == Fraction(-3, 4));\n        assert(Fraction(-7,\
-    \ 3).floor() == -3);\n        assert(Fraction(-7, 3).ceil() == -2);\n        assert(Fraction(std::numeric_limits<long\
-    \ long>::max(), 2).ceil() ==\n               4611686018427387904LL);\n       \
-    \ assert(Fraction(std::numeric_limits<long long>::min(), 1).floor() ==\n     \
-    \          std::numeric_limits<long long>::min());\n        assert(Fraction(2,\
-    \ std::numeric_limits<long long>::min()) ==\n               Fraction(-1, 4611686018427387904LL));\n\
-    \n        Fraction small(1, 4000000000LL);\n        assert(small + small == Fraction(1,\
-    \ 2000000000LL));\n\n        Fraction left(4000000000LL, 4000000001LL);\n    \
-    \    Fraction right(4000000001LL, 2000000000LL);\n        assert(left * right\
-    \ == Fraction(2));\n        assert((left * right) / Fraction(4) == Fraction(1,\
-    \ 2));\n\n        Fraction parsed(7);\n        assert(Fraction::parse(\"-10/6\"\
-    , parsed));\n        assert(parsed == Fraction(-5, 3));\n        assert(Fraction::parse(\"\
+    \ rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        std::vector<std::vector<int>>\
+    \ graph(7);\n        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
+    \            graph[v].push_back(u);\n        };\n        add_edge(0, 1);\n   \
+    \     add_edge(0, 2);\n        add_edge(1, 3);\n        add_edge(1, 4);\n    \
+    \    add_edge(2, 5);\n        add_edge(5, 6);\n\n        BinaryLiftingLCA doubling(graph);\n\
+    \        EulerTourLCA sparse(graph);\n        assert(doubling.lca(3, 4) == 1);\n\
+    \        assert(doubling.lca(3, 6) == 0);\n        assert(doubling.dist(3, 6)\
+    \ == 5);\n        assert(doubling.is_ancestor(0, 6));\n        assert(sparse.lca(3,\
+    \ 4) == 1);\n        assert(sparse.lca(3, 6) == 0);\n        assert(sparse.dist(3,\
+    \ 6) == 5);\n        assert(sparse.is_ancestor(0, 6));\n        assert(doubling.kth_ancestor(6,\
+    \ 100) == 0);\n        assert(doubling.jump(3, 6, 0) == 3);\n        assert(doubling.jump(3,\
+    \ 6, 2) == 0);\n        assert(doubling.jump(3, 6, 5) == 6);\n        assert(doubling.jump(3,\
+    \ 6, 6) == -1);\n\n        HeavyLightDecomposition hld(graph);\n        std::vector<int>\
+    \ path;\n        hld.path_query(3, 6, false, [&](int l, int r, bool reverse) {\n\
+    \            if (reverse) {\n                for (int i = r - 1; i >= l; --i)\
+    \ path.push_back(hld.vertex[i]);\n            } else {\n                for (int\
+    \ i = l; i < r; ++i) path.push_back(hld.vertex[i]);\n            }\n        });\n\
+    \        assert((path == std::vector<int>{3, 1, 0, 2, 5, 6}));\n\n        path.clear();\n\
+    \        hld.path_query(3, 6, true, [&](int l, int r, bool reverse) {\n      \
+    \      if (reverse) {\n                for (int i = r - 1; i >= l; --i) path.push_back(hld.vertex[i]);\n\
+    \            } else {\n                for (int i = l; i < r; ++i) path.push_back(hld.vertex[i]);\n\
+    \            }\n        });\n        assert((path == std::vector<int>{3, 1, 2,\
+    \ 5, 6}));\n\n        auto [left, right] = hld.subtree_vertex(2);\n        std::vector<int>\
+    \ subtree(hld.vertex.begin() + left,\n                                 hld.vertex.begin()\
+    \ + right);\n        std::sort(subtree.begin(), subtree.end());\n        assert((subtree\
+    \ == std::vector<int>{2, 5, 6}));\n    }\n    {\n        std::vector<std::vector<int>>\
+    \ forest{{1}, {0}, {3}, {2}};\n        BinaryLiftingLCA doubling;\n        EulerTourLCA\
+    \ sparse;\n        doubling.build_forest(forest);\n        sparse.build_forest(forest);\n\
+    \        assert(doubling.lca(0, 2) == -1);\n        assert(sparse.lca(0, 2) ==\
+    \ -1);\n        assert(!doubling.is_ancestor(0, 2));\n        assert(!sparse.is_ancestor(0,\
+    \ 2));\n    }\n    {\n        umap<long long, std::string> map;\n        map[1000000007LL]\
+    \ = \"prime\";\n        assert(map.at(1000000007LL) == \"prime\");\n        assert(map.find(0)\
+    \ == map.end());\n\n        uset<std::pair<int, int>> set;\n        set.insert({2,\
+    \ 3});\n        set.insert({2, 3});\n        set.insert({3, 2});\n        assert(set.size()\
+    \ == 2);\n        assert(set.count({2, 3}) == 1);\n    }\n    {\n        using\
+    \ Fraction = fraction<long long>;\n\n        assert(Fraction(6, -8) == Fraction(-3,\
+    \ 4));\n        assert(Fraction(-7, 3).floor() == -3);\n        assert(Fraction(-7,\
+    \ 3).ceil() == -2);\n        assert(Fraction(std::numeric_limits<long long>::max(),\
+    \ 2).ceil() ==\n               4611686018427387904LL);\n        assert(Fraction(std::numeric_limits<long\
+    \ long>::min(), 1).floor() ==\n               std::numeric_limits<long long>::min());\n\
+    \        assert(Fraction(2, std::numeric_limits<long long>::min()) ==\n      \
+    \         Fraction(-1, 4611686018427387904LL));\n\n        Fraction small(1, 4000000000LL);\n\
+    \        assert(small + small == Fraction(1, 2000000000LL));\n\n        Fraction\
+    \ left(4000000000LL, 4000000001LL);\n        Fraction right(4000000001LL, 2000000000LL);\n\
+    \        assert(left * right == Fraction(2));\n        assert((left * right) /\
+    \ Fraction(4) == Fraction(1, 2));\n\n        Fraction parsed(7);\n        assert(Fraction::parse(\"\
+    -10/6\", parsed));\n        assert(parsed == Fraction(-5, 3));\n        assert(Fraction::parse(\"\
     .500000000000000000000000000000\", parsed));\n        assert(parsed == Fraction(1,\
     \ 2));\n        assert(Fraction::parse(\".0\", parsed));\n        assert(parsed\
     \ == Fraction(0));\n\n        parsed = Fraction(7);\n        assert(!Fraction::parse(\"\
@@ -1223,69 +1462,100 @@ data:
     \n#include \"ds/cartesian_tree.hpp\"\n#include \"ds/compressor.hpp\"\n#include\
     \ \"ds/dynamic_segtree.hpp\"\n#include \"ds/interval_map.hpp\"\n#include \"ds/persistent_segtree.hpp\"\
     \n#include \"ds/potential_dsu.hpp\"\n#include \"math/factor.hpp\"\n#include \"\
-    string/aho_corasick.hpp\"\n#include \"string/rolling_hash.hpp\"\n#include \"utils/fraction.hpp\"\
-    \n#include \"utils/hash.hpp\"\n#include \"utils/int128.hpp\"\n\nlong long op_sum(long\
-    \ long a, long long b) { return a + b; }\nlong long e_sum() { return 0; }\n\n\
-    yesantikiss::RollingHash::ull rolling_hash_from_other_tu(const std::string& s);\n\
-    \nint main() {\n    using namespace yesantikiss;\n\n    {\n        const std::vector<int>\
-    \ a{1, 2, 1, 3};\n        Mo mo((int)a.size());\n        mo.add_query(0, 3);\n\
-    \        mo.add_query(1, 4);\n        std::vector<int> count(4), answer(2);\n\
-    \        int distinct = 0;\n        auto add = [&](int i) { distinct += count[a[i]]++\
-    \ == 0; };\n        auto del = [&](int i) { distinct -= --count[a[i]] == 0; };\n\
-    \        mo.solve(add, del, [&](int i) { answer[i] = distinct; });\n        assert((answer\
-    \ == std::vector<int>{2, 3}));\n    }\n    {\n        PS2D<int> ps(3, 4);\n  \
-    \      ps.add_rect_imos(0, 1, 2, 3, 5);\n        ps.add_point_imos(1, 2, 2);\n\
-    \        ps.build();\n        assert(ps.at(0, 1) == 5 && ps[1][2] == 7);\n   \
-    \     assert(ps.sum(0, 0, 2, 4) == 22);\n    }\n    {\n        BinaryTrie<4> trie;\n\
-    \        trie.insert(1);\n        trie.insert(4);\n        trie.insert(4);\n \
-    \       assert(trie.size() == 3 && trie.count(4) == 2);\n        assert(trie.kth(1)\
-    \ == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4) && trie.count(4)\
-    \ == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1, 4, 2});\n     \
-    \   assert(tree.root == 1);\n        assert(tree.par[0] == 1 && tree.par[3] ==\
-    \ 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int> comp;\n     \
-    \   comp.add(10);\n        comp.add(3);\n        comp.add(10);\n        comp.build();\n\
-    \        assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);\n\
-    \        assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));\n\
-    \    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n   \
-    \     seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
-    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
-    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
-    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
-    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
-    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
-    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
-    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
-    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
-    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
-    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
-    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
-    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
-    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
-    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
-    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
-    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
-    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
-    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
-    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
-    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
-    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        umap<long\
-    \ long, std::string> map;\n        map[1000000007LL] = \"prime\";\n        assert(map.at(1000000007LL)\
-    \ == \"prime\");\n        assert(map.find(0) == map.end());\n\n        uset<std::pair<int,\
-    \ int>> set;\n        set.insert({2, 3});\n        set.insert({2, 3});\n     \
-    \   set.insert({3, 2});\n        assert(set.size() == 2);\n        assert(set.count({2,\
-    \ 3}) == 1);\n    }\n    {\n        using Fraction = fraction<long long>;\n\n\
-    \        assert(Fraction(6, -8) == Fraction(-3, 4));\n        assert(Fraction(-7,\
-    \ 3).floor() == -3);\n        assert(Fraction(-7, 3).ceil() == -2);\n        assert(Fraction(std::numeric_limits<long\
-    \ long>::max(), 2).ceil() ==\n               4611686018427387904LL);\n       \
-    \ assert(Fraction(std::numeric_limits<long long>::min(), 1).floor() ==\n     \
-    \          std::numeric_limits<long long>::min());\n        assert(Fraction(2,\
-    \ std::numeric_limits<long long>::min()) ==\n               Fraction(-1, 4611686018427387904LL));\n\
-    \n        Fraction small(1, 4000000000LL);\n        assert(small + small == Fraction(1,\
-    \ 2000000000LL));\n\n        Fraction left(4000000000LL, 4000000001LL);\n    \
-    \    Fraction right(4000000001LL, 2000000000LL);\n        assert(left * right\
-    \ == Fraction(2));\n        assert((left * right) / Fraction(4) == Fraction(1,\
-    \ 2));\n\n        Fraction parsed(7);\n        assert(Fraction::parse(\"-10/6\"\
-    , parsed));\n        assert(parsed == Fraction(-5, 3));\n        assert(Fraction::parse(\"\
+    string/aho_corasick.hpp\"\n#include \"string/rolling_hash.hpp\"\n#include \"tree/heavy_light_decomposition.hpp\"\
+    \n#include \"tree/lca_binary_lifting.hpp\"\n#include \"tree/lca_euler_tour.hpp\"\
+    \n#include \"utils/fraction.hpp\"\n#include \"utils/hash.hpp\"\n#include \"utils/int128.hpp\"\
+    \n\nlong long op_sum(long long a, long long b) { return a + b; }\nlong long e_sum()\
+    \ { return 0; }\n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const\
+    \ std::string& s);\n\nint main() {\n    using namespace yesantikiss;\n\n    {\n\
+    \        const std::vector<int> a{1, 2, 1, 3};\n        Mo mo((int)a.size());\n\
+    \        mo.add_query(0, 3);\n        mo.add_query(1, 4);\n        std::vector<int>\
+    \ count(4), answer(2);\n        int distinct = 0;\n        auto add = [&](int\
+    \ i) { distinct += count[a[i]]++ == 0; };\n        auto del = [&](int i) { distinct\
+    \ -= --count[a[i]] == 0; };\n        mo.solve(add, del, [&](int i) { answer[i]\
+    \ = distinct; });\n        assert((answer == std::vector<int>{2, 3}));\n    }\n\
+    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect_imos(0, 1, 2, 3, 5);\n\
+    \        ps.add_point_imos(1, 2, 2);\n        ps.build();\n        assert(ps.at(0,\
+    \ 1) == 5 && ps[1][2] == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22);\n    }\n\
+    \    {\n        BinaryTrie<4> trie;\n        trie.insert(1);\n        trie.insert(4);\n\
+    \        trie.insert(4);\n        assert(trie.size() == 3 && trie.count(4) ==\
+    \ 2);\n        assert(trie.kth(1) == 4 && trie.min_element(7) == 3);\n       \
+    \ assert(trie.erase(4) && trie.count(4) == 1);\n    }\n    {\n        CartesianTree<int>\
+    \ tree({3, 1, 4, 2});\n        assert(tree.root == 1);\n        assert(tree.par[0]\
+    \ == 1 && tree.par[3] == 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int>\
+    \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
+    \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
+    \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
+    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
+    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
+    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
+    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
+    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
+    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
+    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
+    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
+    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
+    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
+    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
+    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
+    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
+    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
+    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
+    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
+    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
+    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
+    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
+    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
+    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
+    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
+    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
+    \ rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        std::vector<std::vector<int>>\
+    \ graph(7);\n        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
+    \            graph[v].push_back(u);\n        };\n        add_edge(0, 1);\n   \
+    \     add_edge(0, 2);\n        add_edge(1, 3);\n        add_edge(1, 4);\n    \
+    \    add_edge(2, 5);\n        add_edge(5, 6);\n\n        BinaryLiftingLCA doubling(graph);\n\
+    \        EulerTourLCA sparse(graph);\n        assert(doubling.lca(3, 4) == 1);\n\
+    \        assert(doubling.lca(3, 6) == 0);\n        assert(doubling.dist(3, 6)\
+    \ == 5);\n        assert(doubling.is_ancestor(0, 6));\n        assert(sparse.lca(3,\
+    \ 4) == 1);\n        assert(sparse.lca(3, 6) == 0);\n        assert(sparse.dist(3,\
+    \ 6) == 5);\n        assert(sparse.is_ancestor(0, 6));\n        assert(doubling.kth_ancestor(6,\
+    \ 100) == 0);\n        assert(doubling.jump(3, 6, 0) == 3);\n        assert(doubling.jump(3,\
+    \ 6, 2) == 0);\n        assert(doubling.jump(3, 6, 5) == 6);\n        assert(doubling.jump(3,\
+    \ 6, 6) == -1);\n\n        HeavyLightDecomposition hld(graph);\n        std::vector<int>\
+    \ path;\n        hld.path_query(3, 6, false, [&](int l, int r, bool reverse) {\n\
+    \            if (reverse) {\n                for (int i = r - 1; i >= l; --i)\
+    \ path.push_back(hld.vertex[i]);\n            } else {\n                for (int\
+    \ i = l; i < r; ++i) path.push_back(hld.vertex[i]);\n            }\n        });\n\
+    \        assert((path == std::vector<int>{3, 1, 0, 2, 5, 6}));\n\n        path.clear();\n\
+    \        hld.path_query(3, 6, true, [&](int l, int r, bool reverse) {\n      \
+    \      if (reverse) {\n                for (int i = r - 1; i >= l; --i) path.push_back(hld.vertex[i]);\n\
+    \            } else {\n                for (int i = l; i < r; ++i) path.push_back(hld.vertex[i]);\n\
+    \            }\n        });\n        assert((path == std::vector<int>{3, 1, 2,\
+    \ 5, 6}));\n\n        auto [left, right] = hld.subtree_vertex(2);\n        std::vector<int>\
+    \ subtree(hld.vertex.begin() + left,\n                                 hld.vertex.begin()\
+    \ + right);\n        std::sort(subtree.begin(), subtree.end());\n        assert((subtree\
+    \ == std::vector<int>{2, 5, 6}));\n    }\n    {\n        std::vector<std::vector<int>>\
+    \ forest{{1}, {0}, {3}, {2}};\n        BinaryLiftingLCA doubling;\n        EulerTourLCA\
+    \ sparse;\n        doubling.build_forest(forest);\n        sparse.build_forest(forest);\n\
+    \        assert(doubling.lca(0, 2) == -1);\n        assert(sparse.lca(0, 2) ==\
+    \ -1);\n        assert(!doubling.is_ancestor(0, 2));\n        assert(!sparse.is_ancestor(0,\
+    \ 2));\n    }\n    {\n        umap<long long, std::string> map;\n        map[1000000007LL]\
+    \ = \"prime\";\n        assert(map.at(1000000007LL) == \"prime\");\n        assert(map.find(0)\
+    \ == map.end());\n\n        uset<std::pair<int, int>> set;\n        set.insert({2,\
+    \ 3});\n        set.insert({2, 3});\n        set.insert({3, 2});\n        assert(set.size()\
+    \ == 2);\n        assert(set.count({2, 3}) == 1);\n    }\n    {\n        using\
+    \ Fraction = fraction<long long>;\n\n        assert(Fraction(6, -8) == Fraction(-3,\
+    \ 4));\n        assert(Fraction(-7, 3).floor() == -3);\n        assert(Fraction(-7,\
+    \ 3).ceil() == -2);\n        assert(Fraction(std::numeric_limits<long long>::max(),\
+    \ 2).ceil() ==\n               4611686018427387904LL);\n        assert(Fraction(std::numeric_limits<long\
+    \ long>::min(), 1).floor() ==\n               std::numeric_limits<long long>::min());\n\
+    \        assert(Fraction(2, std::numeric_limits<long long>::min()) ==\n      \
+    \         Fraction(-1, 4611686018427387904LL));\n\n        Fraction small(1, 4000000000LL);\n\
+    \        assert(small + small == Fraction(1, 2000000000LL));\n\n        Fraction\
+    \ left(4000000000LL, 4000000001LL);\n        Fraction right(4000000001LL, 2000000000LL);\n\
+    \        assert(left * right == Fraction(2));\n        assert((left * right) /\
+    \ Fraction(4) == Fraction(1, 2));\n\n        Fraction parsed(7);\n        assert(Fraction::parse(\"\
+    -10/6\", parsed));\n        assert(parsed == Fraction(-5, 3));\n        assert(Fraction::parse(\"\
     .500000000000000000000000000000\", parsed));\n        assert(parsed == Fraction(1,\
     \ 2));\n        assert(Fraction::parse(\".0\", parsed));\n        assert(parsed\
     \ == Fraction(0));\n\n        parsed = Fraction(7);\n        assert(!Fraction::parse(\"\
@@ -1347,13 +1617,16 @@ data:
   - math/factor.hpp
   - string/aho_corasick.hpp
   - string/rolling_hash.hpp
+  - tree/heavy_light_decomposition.hpp
+  - tree/lca_binary_lifting.hpp
+  - tree/lca_euler_tour.hpp
   - utils/fraction.hpp
   - utils/hash.hpp
   - utils/int128.hpp
   isVerificationFile: false
   path: tests/test.cpp
   requiredBy: []
-  timestamp: '2026-08-04 23:10:17+09:00'
+  timestamp: '2026-08-25 15:58:20+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: tests/test.cpp
