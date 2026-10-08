@@ -159,9 +159,9 @@ data:
   isVerificationFile: false
   path: tree/lca_euler_tour.hpp
   requiredBy:
-  - tests/test.cpp
   - tests/tree_randomized.cpp
-  timestamp: '2026-08-25 15:58:20+09:00'
+  - tests/test.cpp
+  timestamp: '2026-10-08 13:39:00+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/lca_euler_tour.test.cpp

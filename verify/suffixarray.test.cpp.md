@@ -8,13 +8,17 @@ data:
   _extendedVerifiedWith: []
   _isVerificationFailed: false
   _pathExtension: cpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
-    links: []
-  bundledCode: "#line 1 \"tests/rolling_hash_tu.cpp\"\n#include <string>\n\n#line\
-    \ 2 \"string/rolling_hash.hpp\"\n\n#include <algorithm>\n#include <cassert>\n\
-    #include <random>\n#line 7 \"string/rolling_hash.hpp\"\n#include <vector>\n\n\
-    namespace yesantikiss {\n    struct RollingHash {\n        using ull = unsigned\
+    '*NOT_SPECIAL_COMMENTS*': ''
+    PROBLEM: https://judge.yosupo.jp/problem/suffixarray
+    links:
+    - https://judge.yosupo.jp/problem/suffixarray
+  bundledCode: "#line 1 \"verify/suffixarray.test.cpp\"\n#define PROBLEM \"https://judge.yosupo.jp/problem/suffixarray\"\
+    \n\n#include <algorithm>\n#include <iostream>\n#include <numeric>\n#include <string>\n\
+    #include <vector>\n\n#line 2 \"string/rolling_hash.hpp\"\n\n#line 4 \"string/rolling_hash.hpp\"\
+    \n#include <cassert>\n#include <random>\n#line 8 \"string/rolling_hash.hpp\"\n\
+    \nnamespace yesantikiss {\n    struct RollingHash {\n        using ull = unsigned\
     \ long long;\n        static constexpr ull MOD = (1ULL << 61) - 1;\n    \n   \
     \     // \u5171\u6709\u8CC7\u6E90\uFF08\u5168\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\
     \u3067\u5171\u901A\uFF09\n        inline static ull base = 0;\n        inline\
@@ -103,24 +107,35 @@ data:
     \u306E\n            ull c1 = a.get(l1 + k, l1 + k + 1), c2 = b.get(l2 + k, l2\
     \ + k + 1);\n            return (c1 > c2) - (c1 < c2);\n        }\n        int\
     \ compare(int l1, int r1, int l2, int r2) const {\n            return compare(*this,\
-    \ l1, r1, *this, l2, r2);\n        }\n    };\n    \n}\n#line 4 \"tests/rolling_hash_tu.cpp\"\
-    \n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const std::string&\
-    \ s) {\n    return yesantikiss::RollingHash(s).get(0, (int)s.size());\n}\n"
-  code: "#include <string>\n\n#include \"string/rolling_hash.hpp\"\n\nyesantikiss::RollingHash::ull\
-    \ rolling_hash_from_other_tu(const std::string& s) {\n    return yesantikiss::RollingHash(s).get(0,\
-    \ (int)s.size());\n}\n"
+    \ l1, r1, *this, l2, r2);\n        }\n    };\n    \n}\n#line 10 \"verify/suffixarray.test.cpp\"\
+    \n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n\
+    \n    std::string s;\n    std::cin >> s;\n    const int n = (int)s.size();\n\n\
+    \    yesantikiss::RollingHash hash(s);\n    std::vector<int> order(n);\n    std::iota(order.begin(),\
+    \ order.end(), 0);\n    std::sort(order.begin(), order.end(),\n              [&](int\
+    \ i, int j) { return hash.compare(i, n, j, n) < 0; });\n\n    for (int i = 0;\
+    \ i < n; ++i) {\n        if (i != 0) std::cout << ' ';\n        std::cout << order[i];\n\
+    \    }\n    std::cout << '\\n';\n}\n"
+  code: "#define PROBLEM \"https://judge.yosupo.jp/problem/suffixarray\"\n\n#include\
+    \ <algorithm>\n#include <iostream>\n#include <numeric>\n#include <string>\n#include\
+    \ <vector>\n\n#include \"string/rolling_hash.hpp\"\n\nint main() {\n    std::ios::sync_with_stdio(false);\n\
+    \    std::cin.tie(nullptr);\n\n    std::string s;\n    std::cin >> s;\n    const\
+    \ int n = (int)s.size();\n\n    yesantikiss::RollingHash hash(s);\n    std::vector<int>\
+    \ order(n);\n    std::iota(order.begin(), order.end(), 0);\n    std::sort(order.begin(),\
+    \ order.end(),\n              [&](int i, int j) { return hash.compare(i, n, j,\
+    \ n) < 0; });\n\n    for (int i = 0; i < n; ++i) {\n        if (i != 0) std::cout\
+    \ << ' ';\n        std::cout << order[i];\n    }\n    std::cout << '\\n';\n}\n"
   dependsOn:
   - string/rolling_hash.hpp
-  isVerificationFile: false
-  path: tests/rolling_hash_tu.cpp
+  isVerificationFile: true
+  path: verify/suffixarray.test.cpp
   requiredBy: []
   timestamp: '2026-10-08 13:39:00+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
+  verificationStatus: TEST_ACCEPTED
   verifiedWith: []
-documentation_of: tests/rolling_hash_tu.cpp
+documentation_of: verify/suffixarray.test.cpp
 layout: document
 redirect_from:
-- /library/tests/rolling_hash_tu.cpp
-- /library/tests/rolling_hash_tu.cpp.html
-title: tests/rolling_hash_tu.cpp
+- /verify/verify/suffixarray.test.cpp
+- /verify/verify/suffixarray.test.cpp.html
+title: verify/suffixarray.test.cpp
 ---

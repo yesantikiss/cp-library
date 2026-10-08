@@ -110,12 +110,12 @@ data:
   isVerificationFile: false
   path: geometry/line.hpp
   requiredBy: []
-  timestamp: '2026-08-25 15:58:20+09:00'
+  timestamp: '2026-10-08 13:39:00+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
-  - verify/cgl_1_a.test.cpp
-  - verify/cgl_1_c.test.cpp
   - verify/cgl_1_b.test.cpp
+  - verify/cgl_1_c.test.cpp
+  - verify/cgl_1_a.test.cpp
 documentation_of: geometry/line.hpp
 layout: document
 title: "\u76F4\u7DDA\u3068\u70B9\u306E\u4F4D\u7F6E\u95A2\u4FC2"

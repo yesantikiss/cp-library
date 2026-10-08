@@ -35,7 +35,7 @@ data:
   - icon: ':heavy_check_mark:'
     path: string/aho_corasick.hpp
     title: Aho-Corasick automaton
-  - icon: ':warning:'
+  - icon: ':heavy_check_mark:'
     path: string/rolling_hash.hpp
     title: Rolling Hash
   - icon: ':heavy_check_mark:'
@@ -717,8 +717,8 @@ data:
     \ int link(int v) const {\n            return nodes[v].link;\n        }\n    \n\
     \        int parent(int v) const {\n            return nodes[v].parent;\n    \
     \    }\n    \n        int size() const {\n            return (int)nodes.size();\n\
-    \        }\n    };\n}\n#line 2 \"string/rolling_hash.hpp\"\n\n#line 4 \"string/rolling_hash.hpp\"\
-    \n#include <random>\n#line 7 \"string/rolling_hash.hpp\"\n\nnamespace yesantikiss\
+    \        }\n    };\n}\n#line 2 \"string/rolling_hash.hpp\"\n\n#line 5 \"string/rolling_hash.hpp\"\
+    \n#include <random>\n#line 8 \"string/rolling_hash.hpp\"\n\nnamespace yesantikiss\
     \ {\n    struct RollingHash {\n        using ull = unsigned long long;\n     \
     \   static constexpr ull MOD = (1ULL << 61) - 1;\n    \n        // \u5171\u6709\
     \u8CC7\u6E90\uFF08\u5168\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u3067\u5171\u901A\
@@ -727,19 +727,41 @@ data:
     \u30CF\u30C3\u30B7\u30E5\n        int n = 0;\n    \n        // 2^61-1 \u7528\u306E\
     \u6F14\u7B97\n        static inline ull add(ull a, ull b) {\n            ull c\
     \ = a + b;\n            if (c >= MOD) c -= MOD;\n            return c;\n     \
-    \   }\n        static inline ull mul(ull a, ull b) {\n            __int128 t =\
-    \ (__int128)a * b;\n            t = (t >> 61) + (t & MOD);\n            if (t\
-    \ >= MOD) t -= MOD;\n            return (ull)t;\n        }\n    \n        static\
-    \ void init_base() {\n            if (base != 0) return;\n            std::mt19937_64\
-    \ rng(std::random_device{}());\n            std::uniform_int_distribution<ull>\
-    \ dist(1ULL, MOD - 1);\n            base = dist(rng);\n            pow_base =\
-    \ {1};  // pow_base[0] = 1\n        }\n    \n        static void ensure_pow(int\
-    \ len) {\n            if ((int)pow_base.size() >= len + 1) return;\n         \
-    \   int cur = (int)pow_base.size();\n            pow_base.resize(len + 1);\n \
-    \           for (int i = cur; i <= len; ++i) {\n                pow_base[i] =\
-    \ mul(pow_base[i - 1], base);\n            }\n        }\n    \n        RollingHash()\
-    \ : n(0) {}\n    \n        RollingHash(const std::string &s) {\n            build(s);\n\
-    \        }\n    \n        void build(const std::string &s) {\n            init_base();\n\
+    \   }\n        static inline ull mul(ull a, ull b) {\n            unsigned __int128\
+    \ t = (unsigned __int128)a * b;\n            ull res = (ull)(t >> 61) + ((ull)t\
+    \ & MOD);\n            if (res >= MOD) res -= MOD;\n            return res;\n\
+    \        }\n    \n        static void init_base() {\n            if (base != 0)\
+    \ return;\n            std::mt19937_64 rng(std::random_device{}());\n        \
+    \    std::uniform_int_distribution<ull> dist(1ULL, MOD - 1);\n            base\
+    \ = dist(rng);\n            pow_base = {1};  // pow_base[0] = 1\n        }\n \
+    \   \n        static void ensure_pow(int len) {\n            if ((int)pow_base.size()\
+    \ >= len + 1) return;\n            int cur = (int)pow_base.size();\n         \
+    \   pow_base.resize(len + 1);\n            for (int i = cur; i <= len; ++i) {\n\
+    \                pow_base[i] = mul(pow_base[i - 1], base);\n            }\n  \
+    \      }\n    \n        // hash(A + B) \u3092 hash(A), hash(B), |B| \u304B\u3089\
+    \u6C42\u3081\u308B\n        static ull concat(ull h1, ull h2, int len2) {\n  \
+    \          assert(len2 >= 0);\n            init_base();\n            ensure_pow(len2);\n\
+    \            return add(mul(h1, pow_base[len2]), h2);\n        }\n\n        //\
+    \ \u9577\u3055\u4ED8\u304D\u306E\u30CF\u30C3\u30B7\u30E5\u5024\u3002+ \u3067\u6587\
+    \u5B57\u5217\u306E\u9023\u7D50\u306B\u5BFE\u5FDC\u3059\u308B\u30CF\u30C3\u30B7\
+    \u30E5\u304C\u5F97\u3089\u308C\u308B\n        // \u65E2\u5B9A\u5024\u306F\u7A7A\
+    \u6587\u5B57\u5217\uFF08+ \u306E\u5358\u4F4D\u5143\uFF09\n        struct Hash\
+    \ {\n            ull val = 0;\n            int len = 0;\n\n            Hash()\
+    \ = default;\n            Hash(ull val, int len) : val(val), len(len) {}\n   \
+    \         // 1 \u6587\u5B57 / \u6587\u5B57\u5217\u5168\u4F53\u306E\u30CF\u30C3\
+    \u30B7\u30E5\uFF08prefix hash \u3092\u6301\u305F\u305A\u306B\u6C42\u3081\u308B\
+    \uFF09\n            explicit Hash(char c) : val((ull)(unsigned char)c + 1), len(1)\
+    \ { init_base(); }\n            explicit Hash(const std::string &s) : len((int)s.size())\
+    \ {\n                init_base();\n                for (char c : s) val = add(mul(val,\
+    \ base), (ull)(unsigned char)c + 1);\n            }\n\n            friend Hash\
+    \ operator+(const Hash &a, const Hash &b) {\n                return {concat(a.val,\
+    \ b.val, b.len), a.len + b.len};\n            }\n            Hash &operator+=(const\
+    \ Hash &o) { return *this = *this + o; }\n            friend bool operator==(const\
+    \ Hash &a, const Hash &b) {\n                return a.val == b.val && a.len ==\
+    \ b.len;\n            }\n            friend bool operator!=(const Hash &a, const\
+    \ Hash &b) { return !(a == b); }\n        };\n\n        RollingHash() : n(0) {}\n\
+    \    \n        RollingHash(const std::string &s) {\n            build(s);\n  \
+    \      }\n    \n        void build(const std::string &s) {\n            init_base();\n\
     \            n = (int)s.size();\n            ensure_pow(n);\n            hash.assign(n\
     \ + 1, 0);\n            for (int i = 0; i < n; ++i) {\n                hash[i\
     \ + 1] = add(mul(hash[i], base), (ull)(unsigned char)s[i] + 1);\n            }\n\
@@ -747,17 +769,53 @@ data:
     \u5F97\n        ull get(int l, int r) const {\n            assert(0 <= l && l\
     \ <= r && r <= n);\n            ull res = hash[r] + MOD - mul(hash[l], pow_base[r\
     \ - l]);\n            if (res >= MOD) res -= MOD;\n            return res;\n \
-    \       }\n    \n        // \u540C\u3058\u6587\u5B57\u5217\u306E\u4E2D\u3067\u90E8\
-    \u5206\u6587\u5B57\u5217\u304C\u7B49\u3057\u3044\u304B\n        bool equals(int\
+    \       }\n    \n        // S[l..r) \u306E\u9577\u3055\u4ED8\u304D\u30CF\u30C3\
+    \u30B7\u30E5\u3092\u53D6\u5F97\uFF08+ \u3067\u9023\u7D50\u3067\u304D\u308B\uFF09\
+    \n        Hash slice(int l, int r) const {\n            return {get(l, r), r -\
+    \ l};\n        }\n\n        // \u540C\u3058\u6587\u5B57\u5217\u306E\u4E2D\u3067\
+    \u90E8\u5206\u6587\u5B57\u5217\u304C\u7B49\u3057\u3044\u304B\n        bool equals(int\
     \ l1, int r1, int l2, int r2) const {\n            if (r1 - l1 != r2 - l2) return\
-    \ false;\n            return get(l1, r1) == get(l2, r2);\n        }\n    };\n\
-    \    \n}\n#line 2 \"tree/heavy_light_decomposition.hpp\"\n\n#line 7 \"tree/heavy_light_decomposition.hpp\"\
-    \n\nnamespace yesantikiss {\n    struct HeavyLightDecomposition {\n        int\
-    \ n = 0;\n        int root = -1;\n        std::vector<int> parent;\n        std::vector<int>\
-    \ depth;\n        std::vector<int> size;\n        std::vector<int> in;\n     \
-    \   std::vector<int> out;\n        std::vector<int> head;\n        std::vector<int>\
-    \ heavy;\n        std::vector<int> vertex;\n\n        HeavyLightDecomposition()\
-    \ = default;\n\n        explicit HeavyLightDecomposition(\n            const std::vector<std::vector<int>>&\
+    \ false;\n            return get(l1, r1) == get(l2, r2);\n        }\n\n      \
+    \  // a \u306E [l1, r1) \u3068 b \u306E [l2, r2) \u306E\u6700\u9577\u5171\u901A\
+    \u63A5\u982D\u8F9E\u306E\u9577\u3055  O(log N)\n        static int lcp(const RollingHash\
+    \ &a, int l1, int r1, const RollingHash &b, int l2, int r2) {\n            assert(0\
+    \ <= l1 && l1 <= r1 && r1 <= a.n);\n            assert(0 <= l2 && l2 <= r2 &&\
+    \ r2 <= b.n);\n            // get(l1, l1 + len) == get(l2, l2 + len) \u3092\u4E57\
+    \u7B97 1 \u56DE\u3067\u5224\u5B9A\u3059\u308B\n            const ull diff = add(a.hash[l1],\
+    \ MOD - b.hash[l2]);\n            auto same = [&](int len) {\n               \
+    \ return add(a.hash[l1 + len], MOD - b.hash[l2 + len]) == mul(diff, pow_base[len]);\n\
+    \            };\n            const int limit = std::min(r1 - l1, r2 - l2);\n \
+    \           // \u7B54\u3048\u304C\u77ED\u3044\u5834\u5408\u306B\u901F\u3044\u3088\
+    \u3046\u3001\u9577\u3055 32 \u307E\u3067\u306F\u500D\u3005\u3067\u78BA\u304B\u3081\
+    \u3066\u304B\u3089\u4E8C\u5206\u63A2\u7D22\u3059\u308B\n            int ok = 0,\
+    \ ng = 1;\n            while (true) {\n                if (ng > limit || !same(ng))\
+    \ break;\n                ok = ng;\n                if (ng >= 32) {\n        \
+    \            ng = limit + 1;\n                    break;\n                }\n\
+    \                ng *= 2;\n            }\n            if (ng > limit + 1) ng =\
+    \ limit + 1;\n            while (ng - ok > 1) {\n                int mid = ok\
+    \ + (ng - ok) / 2;\n                if (same(mid)) ok = mid;\n               \
+    \ else ng = mid;\n            }\n            return ok;\n        }\n        int\
+    \ lcp(int l1, int r1, int l2, int r2) const {\n            return lcp(*this, l1,\
+    \ r1, *this, l2, r2);\n        }\n\n        // a \u306E [l1, r1) \u3068 b \u306E\
+    \ [l2, r2) \u3092\u8F9E\u66F8\u9806\u3067\u6BD4\u8F03  O(log N)\n        // \u8CA0\
+    : a \u5074\u304C\u5C0F\u3055\u3044\u30010: \u7B49\u3057\u3044\u3001\u6B63: a \u5074\
+    \u304C\u5927\u304D\u3044\uFF08std::string::compare \u3068\u540C\u3058\u9806\u5E8F\
+    \uFF09\n        static int compare(const RollingHash &a, int l1, int r1, const\
+    \ RollingHash &b, int l2, int r2) {\n            int len1 = r1 - l1, len2 = r2\
+    \ - l2;\n            int k = lcp(a, l1, r1, b, l2, r2);\n            if (k ==\
+    \ len1 || k == len2) return (len1 > len2) - (len1 < len2);\n            // \u9577\
+    \u3055 1 \u306E\u30CF\u30C3\u30B7\u30E5\u306F \u6587\u5B57 + 1 \u305D\u306E\u3082\
+    \u306E\n            ull c1 = a.get(l1 + k, l1 + k + 1), c2 = b.get(l2 + k, l2\
+    \ + k + 1);\n            return (c1 > c2) - (c1 < c2);\n        }\n        int\
+    \ compare(int l1, int r1, int l2, int r2) const {\n            return compare(*this,\
+    \ l1, r1, *this, l2, r2);\n        }\n    };\n    \n}\n#line 2 \"tree/heavy_light_decomposition.hpp\"\
+    \n\n#line 7 \"tree/heavy_light_decomposition.hpp\"\n\nnamespace yesantikiss {\n\
+    \    struct HeavyLightDecomposition {\n        int n = 0;\n        int root =\
+    \ -1;\n        std::vector<int> parent;\n        std::vector<int> depth;\n   \
+    \     std::vector<int> size;\n        std::vector<int> in;\n        std::vector<int>\
+    \ out;\n        std::vector<int> head;\n        std::vector<int> heavy;\n    \
+    \    std::vector<int> vertex;\n\n        HeavyLightDecomposition() = default;\n\
+    \n        explicit HeavyLightDecomposition(\n            const std::vector<std::vector<int>>&\
     \ graph, int root_ = 0) {\n            build(graph, root_);\n        }\n\n   \
     \     void build(const std::vector<std::vector<int>>& graph, int root_ = 0) {\n\
     \            init(static_cast<int>(graph.size()));\n            if (n == 0) return;\n\
@@ -1361,8 +1419,36 @@ data:
     \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
     \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
     );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        std::vector<std::vector<int>>\
-    \ graph(7);\n        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
+    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
+    \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
+    \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
+    \        assert(hash.slice(l, m) + hash.slice(m, r) == hash.slice(l, r));\n  \
+    \                  assert(RollingHash::concat(hash.get(l, m), hash.get(m, r),\
+    \ r - m) ==\n                           hash.get(l, r));\n                }\n\
+    \            }\n        }\n        RollingHash other(\"cadabra\");\n        assert(hash.slice(0,\
+    \ 4) + other.slice(0, 7) == hash.slice(0, 11));\n        assert(hash.slice(0,\
+    \ 4) + other.slice(0, 3) != hash.slice(0, 4) + other.slice(1, 4));\n        assert(Hash(\"\
+    abra\") + Hash(\"cad\") == hash.slice(0, 7));\n        assert(Hash(std::string(\"\
+    abra\")).val == hash.get(0, 4));\n        Hash acc;\n        for (char c : s)\
+    \ acc += Hash(c);\n        assert(acc == hash.slice(0, 11) && acc.len == 11);\n\
+    \        assert(Hash() + acc == acc && acc + Hash() == acc);\n        const std::string\
+    \ t = \"abracadabrb\";\n        RollingHash hash_t(t);\n        auto sign = [](int\
+    \ x) { return (x > 0) - (x < 0); };\n        for (int l1 = 0; l1 <= (int)s.size();\
+    \ ++l1) {\n            for (int r1 = l1; r1 <= (int)s.size(); ++r1) {\n      \
+    \          for (int l2 = 0; l2 <= (int)t.size(); ++l2) {\n                   \
+    \ for (int r2 = l2; r2 <= (int)t.size(); ++r2) {\n                        const\
+    \ std::string x = s.substr(l1, r1 - l1), y = t.substr(l2, r2 - l2);\n        \
+    \                int k = 0;\n                        while (k < (int)x.size()\
+    \ && k < (int)y.size() && x[k] == y[k]) ++k;\n                        assert(RollingHash::lcp(hash,\
+    \ l1, r1, hash_t, l2, r2) == k);\n                        assert(RollingHash::compare(hash,\
+    \ l1, r1, hash_t, l2, r2) ==\n                               sign(x.compare(y)));\n\
+    \                    }\n                }\n            }\n        }\n        assert(hash.lcp(0,\
+    \ 11, 7, 11) == 4 && hash.compare(0, 11, 7, 11) > 0);\n        assert(hash.compare(0,\
+    \ 4, 7, 11) == 0 && hash.compare(1, 4, 0, 4) > 0);\n        RollingHash high(std::string(\"\
+    a\\xff\")), low(\"ab\");\n        assert(RollingHash::compare(high, 0, 2, low,\
+    \ 0, 2) > 0);\n    }\n    {\n        std::vector<std::vector<int>> graph(7);\n\
+    \        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
     \            graph[v].push_back(u);\n        };\n        add_edge(0, 1);\n   \
     \     add_edge(0, 2);\n        add_edge(1, 3);\n        add_edge(1, 4);\n    \
     \    add_edge(2, 5);\n        add_edge(5, 6);\n\n        BinaryLiftingLCA doubling(graph);\n\
@@ -1509,8 +1595,36 @@ data:
     \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
     \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
     );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n    }\n    {\n        std::vector<std::vector<int>>\
-    \ graph(7);\n        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
+    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
+    \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
+    \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
+    \        assert(hash.slice(l, m) + hash.slice(m, r) == hash.slice(l, r));\n  \
+    \                  assert(RollingHash::concat(hash.get(l, m), hash.get(m, r),\
+    \ r - m) ==\n                           hash.get(l, r));\n                }\n\
+    \            }\n        }\n        RollingHash other(\"cadabra\");\n        assert(hash.slice(0,\
+    \ 4) + other.slice(0, 7) == hash.slice(0, 11));\n        assert(hash.slice(0,\
+    \ 4) + other.slice(0, 3) != hash.slice(0, 4) + other.slice(1, 4));\n        assert(Hash(\"\
+    abra\") + Hash(\"cad\") == hash.slice(0, 7));\n        assert(Hash(std::string(\"\
+    abra\")).val == hash.get(0, 4));\n        Hash acc;\n        for (char c : s)\
+    \ acc += Hash(c);\n        assert(acc == hash.slice(0, 11) && acc.len == 11);\n\
+    \        assert(Hash() + acc == acc && acc + Hash() == acc);\n        const std::string\
+    \ t = \"abracadabrb\";\n        RollingHash hash_t(t);\n        auto sign = [](int\
+    \ x) { return (x > 0) - (x < 0); };\n        for (int l1 = 0; l1 <= (int)s.size();\
+    \ ++l1) {\n            for (int r1 = l1; r1 <= (int)s.size(); ++r1) {\n      \
+    \          for (int l2 = 0; l2 <= (int)t.size(); ++l2) {\n                   \
+    \ for (int r2 = l2; r2 <= (int)t.size(); ++r2) {\n                        const\
+    \ std::string x = s.substr(l1, r1 - l1), y = t.substr(l2, r2 - l2);\n        \
+    \                int k = 0;\n                        while (k < (int)x.size()\
+    \ && k < (int)y.size() && x[k] == y[k]) ++k;\n                        assert(RollingHash::lcp(hash,\
+    \ l1, r1, hash_t, l2, r2) == k);\n                        assert(RollingHash::compare(hash,\
+    \ l1, r1, hash_t, l2, r2) ==\n                               sign(x.compare(y)));\n\
+    \                    }\n                }\n            }\n        }\n        assert(hash.lcp(0,\
+    \ 11, 7, 11) == 4 && hash.compare(0, 11, 7, 11) > 0);\n        assert(hash.compare(0,\
+    \ 4, 7, 11) == 0 && hash.compare(1, 4, 0, 4) > 0);\n        RollingHash high(std::string(\"\
+    a\\xff\")), low(\"ab\");\n        assert(RollingHash::compare(high, 0, 2, low,\
+    \ 0, 2) > 0);\n    }\n    {\n        std::vector<std::vector<int>> graph(7);\n\
+    \        auto add_edge = [&](int u, int v) {\n            graph[u].push_back(v);\n\
     \            graph[v].push_back(u);\n        };\n        add_edge(0, 1);\n   \
     \     add_edge(0, 2);\n        add_edge(1, 3);\n        add_edge(1, 4);\n    \
     \    add_edge(2, 5);\n        add_edge(5, 6);\n\n        BinaryLiftingLCA doubling(graph);\n\
@@ -1626,7 +1740,7 @@ data:
   isVerificationFile: false
   path: tests/test.cpp
   requiredBy: []
-  timestamp: '2026-08-25 15:58:20+09:00'
+  timestamp: '2026-10-08 13:39:00+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: tests/test.cpp

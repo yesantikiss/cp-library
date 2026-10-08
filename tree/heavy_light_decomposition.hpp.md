@@ -173,13 +173,13 @@ data:
   isVerificationFile: false
   path: tree/heavy_light_decomposition.hpp
   requiredBy:
-  - tests/test.cpp
   - tests/tree_randomized.cpp
-  timestamp: '2026-08-25 15:58:20+09:00'
+  - tests/test.cpp
+  timestamp: '2026-10-08 13:39:00+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
-  - verify/vertex_set_path_composite.test.cpp
   - verify/vertex_add_path_sum.test.cpp
+  - verify/vertex_set_path_composite.test.cpp
 documentation_of: tree/heavy_light_decomposition.hpp
 layout: document
 title: Heavy-Light Decomposition

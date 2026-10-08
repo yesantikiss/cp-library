@@ -111,15 +111,15 @@ data:
   isVerificationFile: false
   path: geometry/point.hpp
   requiredBy:
-  - geometry/argument_sort.hpp
   - geometry/line.hpp
-  timestamp: '2026-08-25 15:58:20+09:00'
+  - geometry/argument_sort.hpp
+  timestamp: '2026-10-08 13:39:00+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
+  - verify/cgl_1_b.test.cpp
+  - verify/cgl_1_c.test.cpp
   - verify/sort_points_by_argument.test.cpp
   - verify/cgl_1_a.test.cpp
-  - verify/cgl_1_c.test.cpp
-  - verify/cgl_1_b.test.cpp
 documentation_of: geometry/point.hpp
 layout: document
 title: "\u4E8C\u6B21\u5143\u306E\u70B9\u30FB\u30D9\u30AF\u30C8\u30EB"

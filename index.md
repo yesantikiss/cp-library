@@ -60,7 +60,7 @@ data:
     - icon: ':heavy_check_mark:'
       path: string/aho_corasick.hpp
       title: Aho-Corasick automaton
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: string/rolling_hash.hpp
       title: Rolling Hash
   - name: tests
@@ -142,6 +142,9 @@ data:
       path: verify/static_range_count_distinct.test.cpp
       title: verify/static_range_count_distinct.test.cpp
     - icon: ':heavy_check_mark:'
+      path: verify/suffixarray.test.cpp
+      title: verify/suffixarray.test.cpp
+    - icon: ':heavy_check_mark:'
       path: verify/unionfind.test.cpp
       title: verify/unionfind.test.cpp
     - icon: ':heavy_check_mark:'
@@ -153,6 +156,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: verify/vertex_set_path_composite.test.cpp
       title: verify/vertex_set_path_composite.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/zalgorithm.test.cpp
+      title: verify/zalgorithm.test.cpp
 layout: toppage
 ---
 ## このライブラリについて
