@@ -127,6 +127,48 @@ int main() {
         RollingHash hash("abracadabra");
         assert(hash.equals(0, 4, 7, 11));
         assert(hash.get(0, 4) == rolling_hash_from_other_tu("abra"));
+
+        using Hash = RollingHash::Hash;
+        const std::string s = "abracadabra";
+        for (int l = 0; l <= (int)s.size(); ++l) {
+            for (int m = l; m <= (int)s.size(); ++m) {
+                for (int r = m; r <= (int)s.size(); ++r) {
+                    assert(hash.slice(l, m) + hash.slice(m, r) == hash.slice(l, r));
+                    assert(RollingHash::concat(hash.get(l, m), hash.get(m, r), r - m) ==
+                           hash.get(l, r));
+                }
+            }
+        }
+        RollingHash other("cadabra");
+        assert(hash.slice(0, 4) + other.slice(0, 7) == hash.slice(0, 11));
+        assert(hash.slice(0, 4) + other.slice(0, 3) != hash.slice(0, 4) + other.slice(1, 4));
+        assert(Hash("abra") + Hash("cad") == hash.slice(0, 7));
+        assert(Hash(std::string("abra")).val == hash.get(0, 4));
+        Hash acc;
+        for (char c : s) acc += Hash(c);
+        assert(acc == hash.slice(0, 11) && acc.len == 11);
+        assert(Hash() + acc == acc && acc + Hash() == acc);
+        const std::string t = "abracadabrb";
+        RollingHash hash_t(t);
+        auto sign = [](int x) { return (x > 0) - (x < 0); };
+        for (int l1 = 0; l1 <= (int)s.size(); ++l1) {
+            for (int r1 = l1; r1 <= (int)s.size(); ++r1) {
+                for (int l2 = 0; l2 <= (int)t.size(); ++l2) {
+                    for (int r2 = l2; r2 <= (int)t.size(); ++r2) {
+                        const std::string x = s.substr(l1, r1 - l1), y = t.substr(l2, r2 - l2);
+                        int k = 0;
+                        while (k < (int)x.size() && k < (int)y.size() && x[k] == y[k]) ++k;
+                        assert(RollingHash::lcp(hash, l1, r1, hash_t, l2, r2) == k);
+                        assert(RollingHash::compare(hash, l1, r1, hash_t, l2, r2) ==
+                               sign(x.compare(y)));
+                    }
+                }
+            }
+        }
+        assert(hash.lcp(0, 11, 7, 11) == 4 && hash.compare(0, 11, 7, 11) > 0);
+        assert(hash.compare(0, 4, 7, 11) == 0 && hash.compare(1, 4, 0, 4) > 0);
+        RollingHash high(std::string("a\xff")), low("ab");
+        assert(RollingHash::compare(high, 0, 2, low, 0, 2) > 0);
     }
     {
         std::vector<std::vector<int>> graph(7);
