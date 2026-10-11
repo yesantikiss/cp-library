@@ -47,11 +47,58 @@ int main() {
     }
     {
         PS2D<int> ps(3, 4);
-        ps.add_rect_imos(0, 1, 2, 3, 5);
-        ps.add_point_imos(1, 2, 2);
+        ps.add_rect(0, 1, 2, 3, 5);
+        ps.add(1, 2, 2);
         ps.build();
-        assert(ps.at(0, 1) == 5 && ps[1][2] == 7);
-        assert(ps.sum(0, 0, 2, 4) == 22);
+        assert(ps.get(0, 1) == 5 && ps.get(1, 2) == 7);
+        assert(ps.sum(0, 0, 2, 4) == 22 && ps.sum() == 22);
+
+        PS2D<int> from_grid({{1, 2}, {3, 4}});
+        assert(from_grid.get(1, 0) == 3 && from_grid.sum(0, 1, 2, 2) == 6);
+        from_grid.add_rect(0, 0, 2, 2, 1);
+        from_grid.build();
+        assert(from_grid.sum() == 14);
+        from_grid.clear();
+        from_grid.build();
+        assert(from_grid.sum() == 0);
+    }
+    {
+        // 点加算と長方形加算を混ぜたランダムテスト
+        unsigned seed = 12345;
+        auto rnd = [&](int n) { seed = seed * 1103515245 + 12345; return (int)(seed >> 16) % n; };
+        for (int iter = 0; iter < 200; ++iter) {
+            const int H = rnd(6) + 1, W = rnd(6) + 1;
+            PS2D<long long> ps(H, W);
+            std::vector<std::vector<long long>> naive(H, std::vector<long long>(W));
+            for (int round = 0; round < 3; ++round) {
+                for (int q = 0; q < 5; ++q) {
+                    int y1 = rnd(H + 1), y2 = rnd(H + 1), x1 = rnd(W + 1), x2 = rnd(W + 1);
+                    if (y1 > y2) std::swap(y1, y2);
+                    if (x1 > x2) std::swap(x1, x2);
+                    const long long v = rnd(21) - 10;
+                    if (rnd(2)) {
+                        ps.add_rect(y1, x1, y2, x2, v);
+                        for (int y = y1; y < y2; ++y)
+                            for (int x = x1; x < x2; ++x) naive[y][x] += v;
+                    } else if (y1 < H && x1 < W) {
+                        ps.add(y1, x1, v);
+                        naive[y1][x1] += v;
+                    }
+                }
+                ps.build();
+                for (int y1 = 0; y1 <= H; ++y1)
+                    for (int y2 = y1; y2 <= H; ++y2)
+                        for (int x1 = 0; x1 <= W; ++x1)
+                            for (int x2 = x1; x2 <= W; ++x2) {
+                                long long expected = 0;
+                                for (int y = y1; y < y2; ++y)
+                                    for (int x = x1; x < x2; ++x) expected += naive[y][x];
+                                assert(ps.sum(y1, x1, y2, x2) == expected);
+                            }
+                for (int y = 0; y < H; ++y)
+                    for (int x = 0; x < W; ++x) assert(ps.get(y, x) == naive[y][x]);
+            }
+        }
     }
     {
         BinaryTrie<4> trie;
