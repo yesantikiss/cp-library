@@ -4,7 +4,7 @@ data:
   - icon: ':heavy_check_mark:'
     path: algo/mo.hpp
     title: Mo's algorithm
-  - icon: ':warning:'
+  - icon: ':heavy_check_mark:'
     path: ds/2d_prefixsum.hpp
     title: "\u4E8C\u6B21\u5143\u7D2F\u7A4D\u548C\u30FB\u4E8C\u6B21\u5143\u3044\u3082\
       \u3059\u6CD5"
@@ -95,171 +95,149 @@ data:
     \ (l > ql) addL(--l);\n                while (r < qr) addR(r++);\n           \
     \     while (l < ql) delL(l++);\n                while (r > qr) delR(--r);\n \
     \   \n                out(idx);\n            }\n        }\n    };\n    \n}\n#line\
-    \ 2 \"ds/2d_prefixsum.hpp\"\n\n#line 6 \"ds/2d_prefixsum.hpp\"\n\nnamespace yesantikiss\
-    \ {\n    // 2D Prefix/Imos (single diff, single O(HW) build)\n    // \u4ED5\u69D8\
-    : 0-index, \u534A\u958B\u533A\u9593 [y1,y2)\xD7[x1,x2)\n    // \u4F7F\u3044\u5206\
-    \u3051: set_point\u306E\u307F\u2192SET\u30E2\u30FC\u30C9 / add_rect_imos\u306E\
-    \u307F\u2192IMOS\u30E2\u30FC\u30C9\uFF08\u4F75\u7528\u7981\u6B62\uFF09\n    template<class\
-    \ T>\n    struct PS2D {\n        enum Mode { EMPTY, SET_MODE, IMOS_MODE };\n \
-    \   \n        int H, W;\n        Mode mode = EMPTY;\n        std::vector<std::vector<T>>\
-    \ buf;   // SET: \u5024\u884C\u5217\u3068\u3057\u3066H\xD7W\u306E\u307F\u4F7F\u7528\
-    \ / IMOS: \u5DEE\u5206\u3068\u3057\u3066(H+1)\xD7(W+1)\u5168\u9762\u4F7F\u7528\
-    \n        std::vector<std::vector<T>> grid;  // build\u5F8C\u306E\u5B8C\u6210\u30B0\
-    \u30EA\u30C3\u30C9 H\xD7W\n        std::vector<std::vector<T>> pref;  // 2D\u7D2F\
-    \u7A4D\u548C (H+1)\xD7(W+1)\n        bool built = false;\n    \n        PS2D(int\
-    \ H, int W): H(H), W(W),\n            buf(H+1, std::vector<T>(W+1, T())),\n  \
-    \          grid(H, std::vector<T>(W, T())),\n            pref(H+1, std::vector<T>(W+1,\
-    \ T())) {}\n    \n        // \u5358\u70B9\u4E0A\u66F8\u304D: SET\u30E2\u30FC\u30C9\
-    \u5C02\u7528\n        void set_point(int y, int x, T v) {\n            assert(0\
-    \ <= y && y < H && 0 <= x && x < W);\n            assert(mode == EMPTY || mode\
-    \ == SET_MODE);\n            mode = SET_MODE;\n            buf[y][x] = v;   //\
-    \ buf\u306F\u5024\u884C\u5217\u3068\u3057\u3066\u4F7F\u7528\uFF08H\xD7W\u9818\u57DF\
-    \uFF09\n            built = false;\n        }\n    \n        // \u9577\u65B9\u5F62\
-    \u52A0\u7B97: IMOS\u30E2\u30FC\u30C9\u5C02\u7528\n        void add_rect_imos(int\
-    \ y1, int x1, int y2, int x2, T v) {\n            assert(0 <= y1 && y1 <= y2 &&\
-    \ y2 <= H);\n            assert(0 <= x1 && x1 <= x2 && x2 <= W);\n           \
-    \ assert(mode == EMPTY || mode == IMOS_MODE);\n            mode = IMOS_MODE;\n\
-    \            // buf\u306F\u5DEE\u5206\u3068\u3057\u3066\u4F7F\u7528\uFF08(H+1)\xD7\
-    (W+1)\uFF09\n            buf[y1][x1] += v;\n            buf[y1][x2] -= v;\n  \
-    \          buf[y2][x1] -= v;\n            buf[y2][x2] += v;\n            built\
-    \ = false;\n        }\n    \n        // \u70B9\u52A0\u7B97(imos)\n        void\
-    \ add_point_imos(int y, int x, T v) { add_rect_imos(y, x, y+1, x+1, v); }\n  \
-    \  \n        // \u30AF\u30EA\u30A2\n        void clear_all() {\n            for\
-    \ (int y = 0; y <= H; ++y) std::fill(buf[y].begin(), buf[y].end(), T());\n   \
-    \         built = false;\n            mode = EMPTY;\n        }\n    \n       \
-    \ // \u69CB\u7BC9: \u5E38\u306BO(HW) 1\u56DE\u3067 grid \u3068 pref \u3092\u540C\
-    \u6642\u306B\u751F\u6210\n        void build() {\n            for (int y = 0;\
-    \ y <= H; ++y) std::fill(pref[y].begin(), pref[y].end(), T());\n    \n       \
-    \     if (mode == SET_MODE) {\n                // buf[y][x] \u3092\u5024\u3068\
-    \u3057\u3066\u305D\u306E\u307E\u307E\u7D2F\u7A4D\n                for (int y =\
-    \ 0; y < H; ++y) {\n                    T row_sum = T();\n                   \
-    \ for (int x = 0; x < W; ++x) {\n                        T v = buf[y][x];\n  \
-    \                      grid[y][x] = v;\n                        row_sum += v;\n\
-    \                        pref[y+1][x+1] = pref[y][x+1] + row_sum;\n          \
-    \          }\n                }\n            } else {\n                // IMOS_MODE\
-    \ \u307E\u305F\u306F EMPTY\uFF08EMPTY\u306F\u51680\uFF09\n                // buf\u306F\
-    \u5DEE\u5206\u3002grid\u306Bimos\u3092\u7D2F\u7A4D\u3057\u3064\u3064pref\u3082\
-    \u540C\u6642\u306B\u4F5C\u308B\n                for (int y = 0; y < H; ++y) {\n\
-    \                    for (int x = 0; x < W; ++x) {\n                        T\
-    \ v = buf[y][x];\n                        if (y) v += grid[y-1][x];\n        \
-    \                if (x) v += grid[y][x-1];\n                        if (y && x)\
-    \ v -= grid[y-1][x-1];\n                        grid[y][x] = v;\n    \n      \
-    \                  pref[y+1][x+1] = pref[y][x+1] + pref[y+1][x] - pref[y][x] +\
-    \ v;\n                    }\n                }\n            }\n            built\
-    \ = true;\n        }\n    \n        // \u5358\u70B9\u53D6\u5F97 O(1)\n       \
-    \ T at(int y, int x) const {\n            assert(built);\n            assert(0\
-    \ <= y && y < H && 0 <= x && x < W);\n            return grid[y][x];\n       \
-    \ }\n        T operator()(int y, int x) const { return at(y, x); }\n    \n   \
-    \     struct RowProxy {\n            const PS2D* p; int y;\n            T operator[](int\
-    \ x) const {\n                assert(p->built); assert(0 <= x && x < p->W);\n\
-    \                return p->grid[y][x];\n            }\n        };\n        RowProxy\
-    \ operator[](int y) const { assert(built); return RowProxy{this, y}; }\n    \n\
-    \        // \u9577\u65B9\u5F62\u548C O(1)  [y1,y2)\xD7[x1,x2)\n        T sum(int\
-    \ y1, int x1, int y2, int x2) const {\n            assert(built);\n          \
-    \  assert(0 <= y1 && y1 <= y2 && y2 <= H);\n            assert(0 <= x1 && x1 <=\
-    \ x2 && x2 <= W);\n            return pref[y2][x2] - pref[y1][x2] - pref[y2][x1]\
-    \ + pref[y1][x1];\n        }\n    \n        // \u5168\u4F53\u548C\n        T sum_all()\
-    \ const { assert(built); return pref[H][W]; }\n    };\n}\n#line 2 \"ds/binary_trie.hpp\"\
-    \n\n#line 5 \"ds/binary_trie.hpp\"\n\nnamespace yesantikiss {\n    template<int\
-    \ B>\n    struct BinaryTrie {\n        static_assert(0 < B && B <= 63);\n    \
-    \    using ull = unsigned long long;\n    \n        struct Node {\n          \
-    \  int ch[2];\n            long long cnt; // subtree size (with multiplicity)\n\
-    \            long long end; // exact value count at leaf\n            Node() :\
-    \ ch{-1, -1}, cnt(0), end(0) {}\n        };\n    \n        std::vector<Node> tr;\n\
-    \        BinaryTrie() { tr.emplace_back(); }\n    \n        long long size() const\
-    \ { return tr[0].cnt; }\n        bool empty() const { return size() == 0; }\n\
-    \    \n        void insert(ull x) { add_raw(x, +1); }\n    \n        // erase\
-    \ one occurrence; returns false if not present\n        bool erase(ull x) {\n\
-    \            if (count_raw(x) == 0) return false;\n            add_raw(x, -1);\n\
-    \            return true;\n        }\n    \n        // count/contains in {v xor\
-    \ T} multiset (T=0 => normal)\n        long long count(ull v, ull T = 0) const\
-    \ { return count_raw(v ^ T); }\n        bool contains(ull v, ull T = 0) const\
-    \ { return count(v, T) > 0; }\n    \n        // kth (0-index) in sorted {x xor\
-    \ T}\n        ull kth(long long k, ull T = 0) const {\n            assert(0 <=\
-    \ k && k < size());\n            int v = 0;\n            ull y = 0;\n    \n  \
-    \          for (int b = B - 1; b >= 0; --b) {\n                int tb = (T >>\
-    \ b) & 1ULL;\n                int pref = tb;      // ybit=0 needs xbit=tb\n  \
-    \              int other = tb ^ 1;\n    \n                int vp = tr[v].ch[pref];\n\
-    \                long long cnt_pref = (vp == -1 ? 0 : tr[vp].cnt);\n    \n   \
-    \             if (k < cnt_pref) {\n                    v = vp; // ybit=0\n   \
-    \                 assert(v != -1);\n                } else {\n               \
-    \     k -= cnt_pref;\n                    v = tr[v].ch[other]; // ybit=1\n   \
-    \                 assert(v != -1);\n                    y |= (1ULL << b);\n  \
-    \              }\n            }\n            return y;\n        }\n    \n    \
-    \    ull min_element(ull T = 0) const {\n            assert(!empty());\n     \
-    \       return kth(0, T);\n        }\n    \n        ull max_element(ull T = 0)\
-    \ const {\n            assert(!empty());\n            return kth(size() - 1, T);\n\
-    \        }\n    \n    private:\n        void add_raw(ull x, long long delta) {\n\
-    \            int v = 0;\n            tr[v].cnt += delta;\n            for (int\
-    \ b = B - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n    \
-    \            if (tr[v].ch[bit] == -1) {\n                    tr[v].ch[bit] = (int)tr.size();\n\
-    \                    tr.emplace_back();\n                }\n                v\
-    \ = tr[v].ch[bit];\n                tr[v].cnt += delta;\n            }\n     \
-    \       tr[v].end += delta;\n        }\n    \n        long long count_raw(ull\
-    \ x) const {\n            int v = 0;\n            for (int b = B - 1; b >= 0;\
-    \ --b) {\n                int bit = (x >> b) & 1ULL;\n                v = tr[v].ch[bit];\n\
-    \                if (v == -1) return 0;\n            }\n            return tr[v].end;\n\
-    \        }\n    };\n    \n    // usage example:\n    // using BT = BinaryTrie<30>;\
-    \ // for [0, 1e9]\n    \n}\n#line 2 \"ds/cartesian_tree.hpp\"\n\n#line 5 \"ds/cartesian_tree.hpp\"\
-    \n\nnamespace yesantikiss {\n    template <class T, class Compare = std::less<T>>\n\
-    \    struct CartesianTree {\n        int n = 0;\n        std::vector<T> a;\n \
-    \       std::vector<int> par, left, right;\n        int root = -1;\n        Compare\
-    \ comp;\n    \n        CartesianTree() {}\n    \n        CartesianTree(const std::vector<T>&\
-    \ _a, Compare _comp = Compare())\n            : n((int)_a.size()),\n         \
-    \     a(_a),\n              par(n, -1),\n              left(n, -1),\n        \
-    \      right(n, -1),\n              root(-1),\n              comp(_comp) {\n \
-    \           build();\n        }\n    \n        // comp(a[i], a[j]) == true \u306A\
-    \u3089 i \u306E\u65B9\u304C j \u3088\u308A\u4E0A\u306B\u6765\u308B\n        //\
-    \ less<T>    : min Cartesian Tree\n        // greater<T> : max Cartesian Tree\n\
-    \        void build() {\n            std::vector<int> st;\n            st.reserve(n);\n\
-    \    \n            for (int i = 0; i < n; i++) {\n                int last = -1;\n\
-    \    \n                while (!st.empty() && comp(a[i], a[st.back()])) {\n   \
-    \                 last = st.back();\n                    st.pop_back();\n    \
-    \            }\n    \n                if (!st.empty()) {\n                   \
-    \ par[i] = st.back();\n                    right[st.back()] = i;\n           \
-    \     }\n    \n                if (last != -1) {\n                    par[last]\
-    \ = i;\n                    left[i] = last;\n                }\n    \n       \
-    \         st.push_back(i);\n            }\n    \n            for (int i = 0; i\
-    \ < n; i++) {\n                if (par[i] == -1) {\n                    root =\
-    \ i;\n                    break;\n                }\n            }\n        }\n\
-    \    };\n}\n#line 2 \"ds/compressor.hpp\"\n\n#line 6 \"ds/compressor.hpp\"\n\n\
-    namespace yesantikiss {\n    template <class T>\n    struct Compressor {\n   \
-    \     std::vector<T> xs;   // \u8FFD\u52A0\u3055\u308C\u305F\u5024\uFF08\u91CD\
-    \u8907\u3042\u308A\uFF09\n        std::vector<T> v;    // \u30BD\u30FC\u30C8\u6E08\
-    \u307F\u30E6\u30CB\u30FC\u30AF\u5217\n        bool built = false;\n    \n    \
-    \    // \u5024\u3092\u8FFD\u52A0: \u5E73\u5747 O(1)\n        void add(const T&\
-    \ x) {\n            xs.push_back(x);\n        }\n    \n        // \u7BC4\u56F2\
-    \u8FFD\u52A0: O(k)\n        template <class It>\n        void add_range(It first,\
-    \ It last) {\n            xs.insert(xs.end(), first, last);\n        }\n    \n\
-    \        // \u69CB\u7BC9: O(n log n)  n = add \u3055\u308C\u305F\u7DCF\u6570\n\
-    \        void build() {\n            v = xs;\n            std::sort(v.begin(),\
-    \ v.end());\n            v.erase(std::unique(v.begin(), v.end()), v.end());\n\
-    \            built = true;\n        }\n    \n        // \u5727\u7E2E\u5F8C\u306E\
-    \u8981\u7D20\u6570: O(1)\n        int size() const {\n            return (int)v.size();\n\
-    \        }\n    \n        // x \u306E\u5727\u7E2E\u5F8C\u30A4\u30F3\u30C7\u30C3\
-    \u30AF\u30B9\u3092\u8FD4\u3059\u3002\u5B58\u5728\u3057\u306A\u3051\u308C\u3070\
-    \ -1: O(log n)\n        int get(const T& x) const {\n            assert(built);\n\
-    \            auto it = std::lower_bound(v.begin(), v.end(), x);\n            if\
-    \ (it == v.end() || *it != x) return -1;\n            return (int)(it - v.begin());\n\
-    \        }\n    \n        // x \u304C\u5B58\u5728\u3059\u308B\u304B: O(log n)\n\
-    \        bool has(const T& x) const {\n            return get(x) != -1;\n    \
-    \    }\n    \n        // v[i] >= x \u3068\u306A\u308B\u6700\u5C0F i \u3092\u8FD4\
-    \u3059\u3002\u5168\u3066 < x \u306A\u3089 size(): O(log n)\n        int lower_bound(const\
-    \ T& x) const {\n            assert(built);\n            return (int)(std::lower_bound(v.begin(),\
-    \ v.end(), x) - v.begin());\n        }\n    \n        // v[i] > x \u3068\u306A\
-    \u308B\u6700\u5C0F i \u3092\u8FD4\u3059\u3002\u5168\u3066 <= x \u306A\u3089 size():\
-    \ O(log n)\n        int upper_bound(const T& x) const {\n            assert(built);\n\
-    \            return (int)(std::upper_bound(v.begin(), v.end(), x) - v.begin());\n\
-    \        }\n    \n        // \u5727\u7E2E\u5024 \u2192 \u5143\u306E\u5024: O(1)\n\
-    \        const T& value(int idx) const {\n            assert(built);\n       \
-    \     return v[idx];\n        }\n    \n        // \u914D\u5217\u3092\u5727\u7E2E\
-    \u30A4\u30F3\u30C7\u30C3\u30AF\u30B9\u5217\u306B\u5909\u63DB\u3057\u3066\u8FD4\
-    \u3059\uFF08\u5B58\u5728\u3057\u306A\u3044\u5024\u306F -1\uFF09: O(k log n)\n\
-    \        std::vector<int> map(const std::vector<T>& a) const {\n            assert(built);\n\
-    \            std::vector<int> res; res.reserve(a.size());\n            for (auto&\
-    \ x : a) res.push_back(get(x));\n            return res;\n        }\n    };\n\
-    }\n#line 2 \"ds/dynamic_segtree.hpp\"\n\n#line 5 \"ds/dynamic_segtree.hpp\"\n\
-    #include <cstddef>\n#line 7 \"ds/dynamic_segtree.hpp\"\n\n// \u52D5\u7684\uFF08\
+    \ 2 \"ds/2d_prefixsum.hpp\"\n\n#line 5 \"ds/2d_prefixsum.hpp\"\n\nnamespace yesantikiss\
+    \ {\n    // \u4E8C\u6B21\u5143\u7D2F\u7A4D\u548C + \u4E8C\u6B21\u5143\u3044\u3082\
+    \u3059\u6CD5\n    // \u4ED5\u69D8: 0-index, \u534A\u958B\u533A\u9593 [y1,y2)\xD7\
+    [x1,x2)\n    // \u66F4\u65B0\u306F\u3059\u3079\u3066\u5DEE\u5206\u914D\u5217\u3078\
+    \u306E\u52A0\u7B97\u306A\u306E\u3067\u3001\u70B9\u52A0\u7B97\u3068\u9577\u65B9\
+    \u5F62\u52A0\u7B97\u306F\u81EA\u7531\u306B\u6DF7\u305C\u3066\u3088\u3044\n   \
+    \ template <class T>\n    struct PS2D {\n        int H, W;\n        std::vector<std::vector<T>>\
+    \ diff;  // \u5DEE\u5206 (H+1)\xD7(W+1)\n        std::vector<std::vector<T>> pref;\
+    \  // \u5B8C\u6210\u30B0\u30EA\u30C3\u30C9\u306E\u7D2F\u7A4D\u548C (H+1)\xD7(W+1)\n\
+    \        bool built = false;\n\n        PS2D(int H, int W)\n            : H(H),\
+    \ W(W),\n              diff(H + 1, std::vector<T>(W + 1, T())),\n            \
+    \  pref(H + 1, std::vector<T>(W + 1, T())) {}\n\n        // \u521D\u671F\u30B0\
+    \u30EA\u30C3\u30C9\u304B\u3089\u69CB\u7BC9\u6E08\u307F\u306E\u72B6\u614B\u3067\
+    \u4F5C\u308B: O(HW)\n        explicit PS2D(const std::vector<std::vector<T>>&\
+    \ a)\n            : PS2D((int)a.size(), a.empty() ? 0 : (int)a[0].size()) {\n\
+    \            for (int y = 0; y < H; ++y) {\n                assert((int)a[y].size()\
+    \ == W);\n                for (int x = 0; x < W; ++x) add(y, x, a[y][x]);\n  \
+    \          }\n            build();\n        }\n\n        // \u9577\u65B9\u5F62\
+    \u52A0\u7B97: O(1)\n        void add_rect(int y1, int x1, int y2, int x2, const\
+    \ T& v) {\n            assert(0 <= y1 && y1 <= y2 && y2 <= H);\n            assert(0\
+    \ <= x1 && x1 <= x2 && x2 <= W);\n            diff[y1][x1] += v;\n           \
+    \ diff[y1][x2] -= v;\n            diff[y2][x1] -= v;\n            diff[y2][x2]\
+    \ += v;\n            built = false;\n        }\n\n        // \u70B9\u52A0\u7B97\
+    : O(1)\n        void add(int y, int x, const T& v) { add_rect(y, x, y + 1, x +\
+    \ 1, v); }\n\n        // \u5DEE\u5206\u30922\u56DE\u7D2F\u7A4D\u3057\u3066 pref\
+    \ \u3092\u4F5C\u308B: O(HW)\n        void build() {\n            for (int y =\
+    \ 0; y < H; ++y) {\n                for (int x = 0; x < W; ++x) pref[y + 1][x\
+    \ + 1] = diff[y][x];\n            }\n            for (int k = 0; k < 2; ++k) {\
+    \  // 1\u56DE\u76EE\u3067\u5B8C\u6210\u30B0\u30EA\u30C3\u30C9\u30012\u56DE\u76EE\
+    \u3067\u7D2F\u7A4D\u548C\n                for (int y = 1; y <= H; ++y) {\n   \
+    \                 for (int x = 1; x <= W; ++x) {\n                        pref[y][x]\
+    \ += pref[y - 1][x] + pref[y][x - 1] - pref[y - 1][x - 1];\n                 \
+    \   }\n                }\n            }\n            built = true;\n        }\n\
+    \n        // \u9577\u65B9\u5F62\u548C: O(1)\n        T sum(int y1, int x1, int\
+    \ y2, int x2) const {\n            assert(built);\n            assert(0 <= y1\
+    \ && y1 <= y2 && y2 <= H);\n            assert(0 <= x1 && x1 <= x2 && x2 <= W);\n\
+    \            return pref[y2][x2] - pref[y1][x2] - pref[y2][x1] + pref[y1][x1];\n\
+    \        }\n\n        // \u5168\u4F53\u548C: O(1)\n        T sum() const { return\
+    \ sum(0, 0, H, W); }\n\n        // \u70B9\u53D6\u5F97: O(1)\n        T get(int\
+    \ y, int x) const {\n            assert(0 <= y && y < H && 0 <= x && x < W);\n\
+    \            return sum(y, x, y + 1, x + 1);\n        }\n\n        // \u66F4\u65B0\
+    \u3092\u3059\u3079\u3066\u6D88\u53BB: O(HW)\n        void clear() {\n        \
+    \    for (auto& row : diff) row.assign(W + 1, T());\n            built = false;\n\
+    \        }\n    };\n}\n#line 2 \"ds/binary_trie.hpp\"\n\n#line 5 \"ds/binary_trie.hpp\"\
+    \n\nnamespace yesantikiss {\n    template<int B>\n    struct BinaryTrie {\n  \
+    \      static_assert(0 < B && B <= 63);\n        using ull = unsigned long long;\n\
+    \    \n        struct Node {\n            int ch[2];\n            long long cnt;\
+    \ // subtree size (with multiplicity)\n            long long end; // exact value\
+    \ count at leaf\n            Node() : ch{-1, -1}, cnt(0), end(0) {}\n        };\n\
+    \    \n        std::vector<Node> tr;\n        BinaryTrie() { tr.emplace_back();\
+    \ }\n    \n        long long size() const { return tr[0].cnt; }\n        bool\
+    \ empty() const { return size() == 0; }\n    \n        void insert(ull x) { add_raw(x,\
+    \ +1); }\n    \n        // erase one occurrence; returns false if not present\n\
+    \        bool erase(ull x) {\n            if (count_raw(x) == 0) return false;\n\
+    \            add_raw(x, -1);\n            return true;\n        }\n    \n    \
+    \    // count/contains in {v xor T} multiset (T=0 => normal)\n        long long\
+    \ count(ull v, ull T = 0) const { return count_raw(v ^ T); }\n        bool contains(ull\
+    \ v, ull T = 0) const { return count(v, T) > 0; }\n    \n        // kth (0-index)\
+    \ in sorted {x xor T}\n        ull kth(long long k, ull T = 0) const {\n     \
+    \       assert(0 <= k && k < size());\n            int v = 0;\n            ull\
+    \ y = 0;\n    \n            for (int b = B - 1; b >= 0; --b) {\n             \
+    \   int tb = (T >> b) & 1ULL;\n                int pref = tb;      // ybit=0 needs\
+    \ xbit=tb\n                int other = tb ^ 1;\n    \n                int vp =\
+    \ tr[v].ch[pref];\n                long long cnt_pref = (vp == -1 ? 0 : tr[vp].cnt);\n\
+    \    \n                if (k < cnt_pref) {\n                    v = vp; // ybit=0\n\
+    \                    assert(v != -1);\n                } else {\n            \
+    \        k -= cnt_pref;\n                    v = tr[v].ch[other]; // ybit=1\n\
+    \                    assert(v != -1);\n                    y |= (1ULL << b);\n\
+    \                }\n            }\n            return y;\n        }\n    \n  \
+    \      ull min_element(ull T = 0) const {\n            assert(!empty());\n   \
+    \         return kth(0, T);\n        }\n    \n        ull max_element(ull T =\
+    \ 0) const {\n            assert(!empty());\n            return kth(size() - 1,\
+    \ T);\n        }\n    \n    private:\n        void add_raw(ull x, long long delta)\
+    \ {\n            int v = 0;\n            tr[v].cnt += delta;\n            for\
+    \ (int b = B - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n\
+    \                if (tr[v].ch[bit] == -1) {\n                    tr[v].ch[bit]\
+    \ = (int)tr.size();\n                    tr.emplace_back();\n                }\n\
+    \                v = tr[v].ch[bit];\n                tr[v].cnt += delta;\n   \
+    \         }\n            tr[v].end += delta;\n        }\n    \n        long long\
+    \ count_raw(ull x) const {\n            int v = 0;\n            for (int b = B\
+    \ - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n          \
+    \      v = tr[v].ch[bit];\n                if (v == -1) return 0;\n          \
+    \  }\n            return tr[v].end;\n        }\n    };\n    \n    // usage example:\n\
+    \    // using BT = BinaryTrie<30>; // for [0, 1e9]\n    \n}\n#line 2 \"ds/cartesian_tree.hpp\"\
+    \n\n#line 5 \"ds/cartesian_tree.hpp\"\n\nnamespace yesantikiss {\n    template\
+    \ <class T, class Compare = std::less<T>>\n    struct CartesianTree {\n      \
+    \  int n = 0;\n        std::vector<T> a;\n        std::vector<int> par, left,\
+    \ right;\n        int root = -1;\n        Compare comp;\n    \n        CartesianTree()\
+    \ {}\n    \n        CartesianTree(const std::vector<T>& _a, Compare _comp = Compare())\n\
+    \            : n((int)_a.size()),\n              a(_a),\n              par(n,\
+    \ -1),\n              left(n, -1),\n              right(n, -1),\n            \
+    \  root(-1),\n              comp(_comp) {\n            build();\n        }\n \
+    \   \n        // comp(a[i], a[j]) == true \u306A\u3089 i \u306E\u65B9\u304C j\
+    \ \u3088\u308A\u4E0A\u306B\u6765\u308B\n        // less<T>    : min Cartesian\
+    \ Tree\n        // greater<T> : max Cartesian Tree\n        void build() {\n \
+    \           std::vector<int> st;\n            st.reserve(n);\n    \n         \
+    \   for (int i = 0; i < n; i++) {\n                int last = -1;\n    \n    \
+    \            while (!st.empty() && comp(a[i], a[st.back()])) {\n             \
+    \       last = st.back();\n                    st.pop_back();\n              \
+    \  }\n    \n                if (!st.empty()) {\n                    par[i] = st.back();\n\
+    \                    right[st.back()] = i;\n                }\n    \n        \
+    \        if (last != -1) {\n                    par[last] = i;\n             \
+    \       left[i] = last;\n                }\n    \n                st.push_back(i);\n\
+    \            }\n    \n            for (int i = 0; i < n; i++) {\n            \
+    \    if (par[i] == -1) {\n                    root = i;\n                    break;\n\
+    \                }\n            }\n        }\n    };\n}\n#line 2 \"ds/compressor.hpp\"\
+    \n\n#line 6 \"ds/compressor.hpp\"\n\nnamespace yesantikiss {\n    template <class\
+    \ T>\n    struct Compressor {\n        std::vector<T> xs;   // \u8FFD\u52A0\u3055\
+    \u308C\u305F\u5024\uFF08\u91CD\u8907\u3042\u308A\uFF09\n        std::vector<T>\
+    \ v;    // \u30BD\u30FC\u30C8\u6E08\u307F\u30E6\u30CB\u30FC\u30AF\u5217\n    \
+    \    bool built = false;\n    \n        // \u5024\u3092\u8FFD\u52A0: \u5E73\u5747\
+    \ O(1)\n        void add(const T& x) {\n            xs.push_back(x);\n       \
+    \ }\n    \n        // \u7BC4\u56F2\u8FFD\u52A0: O(k)\n        template <class\
+    \ It>\n        void add_range(It first, It last) {\n            xs.insert(xs.end(),\
+    \ first, last);\n        }\n    \n        // \u69CB\u7BC9: O(n log n)  n = add\
+    \ \u3055\u308C\u305F\u7DCF\u6570\n        void build() {\n            v = xs;\n\
+    \            std::sort(v.begin(), v.end());\n            v.erase(std::unique(v.begin(),\
+    \ v.end()), v.end());\n            built = true;\n        }\n    \n        //\
+    \ \u5727\u7E2E\u5F8C\u306E\u8981\u7D20\u6570: O(1)\n        int size() const {\n\
+    \            return (int)v.size();\n        }\n    \n        // x \u306E\u5727\
+    \u7E2E\u5F8C\u30A4\u30F3\u30C7\u30C3\u30AF\u30B9\u3092\u8FD4\u3059\u3002\u5B58\
+    \u5728\u3057\u306A\u3051\u308C\u3070 -1: O(log n)\n        int get(const T& x)\
+    \ const {\n            assert(built);\n            auto it = std::lower_bound(v.begin(),\
+    \ v.end(), x);\n            if (it == v.end() || *it != x) return -1;\n      \
+    \      return (int)(it - v.begin());\n        }\n    \n        // x \u304C\u5B58\
+    \u5728\u3059\u308B\u304B: O(log n)\n        bool has(const T& x) const {\n   \
+    \         return get(x) != -1;\n        }\n    \n        // v[i] >= x \u3068\u306A\
+    \u308B\u6700\u5C0F i \u3092\u8FD4\u3059\u3002\u5168\u3066 < x \u306A\u3089 size():\
+    \ O(log n)\n        int lower_bound(const T& x) const {\n            assert(built);\n\
+    \            return (int)(std::lower_bound(v.begin(), v.end(), x) - v.begin());\n\
+    \        }\n    \n        // v[i] > x \u3068\u306A\u308B\u6700\u5C0F i \u3092\u8FD4\
+    \u3059\u3002\u5168\u3066 <= x \u306A\u3089 size(): O(log n)\n        int upper_bound(const\
+    \ T& x) const {\n            assert(built);\n            return (int)(std::upper_bound(v.begin(),\
+    \ v.end(), x) - v.begin());\n        }\n    \n        // \u5727\u7E2E\u5024 \u2192\
+    \ \u5143\u306E\u5024: O(1)\n        const T& value(int idx) const {\n        \
+    \    assert(built);\n            return v[idx];\n        }\n    \n        // \u914D\
+    \u5217\u3092\u5727\u7E2E\u30A4\u30F3\u30C7\u30C3\u30AF\u30B9\u5217\u306B\u5909\
+    \u63DB\u3057\u3066\u8FD4\u3059\uFF08\u5B58\u5728\u3057\u306A\u3044\u5024\u306F\
+    \ -1\uFF09: O(k log n)\n        std::vector<int> map(const std::vector<T>& a)\
+    \ const {\n            assert(built);\n            std::vector<int> res; res.reserve(a.size());\n\
+    \            for (auto& x : a) res.push_back(get(x));\n            return res;\n\
+    \        }\n    };\n}\n#line 2 \"ds/dynamic_segtree.hpp\"\n\n#line 5 \"ds/dynamic_segtree.hpp\"\
+    \n#include <cstddef>\n#line 7 \"ds/dynamic_segtree.hpp\"\n\n// \u52D5\u7684\uFF08\
     implicit\uFF09\u30BB\u30B0\u30E1\u30F3\u30C8\u6728\n// - \u533A\u9593 [0, n) \u3092\
     \u6271\u3046\n// - \u66F4\u65B0\u304C\u5165\u3063\u305F\u7D4C\u8DEF\u3060\u3051\
     \u30CE\u30FC\u30C9\u751F\u6210\n// - ACL segtree \u98A8\u30A4\u30F3\u30BF\u30D5\
@@ -1384,42 +1362,71 @@ data:
     \ i) { distinct += count[a[i]]++ == 0; };\n        auto del = [&](int i) { distinct\
     \ -= --count[a[i]] == 0; };\n        mo.solve(add, del, [&](int i) { answer[i]\
     \ = distinct; });\n        assert((answer == std::vector<int>{2, 3}));\n    }\n\
-    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect_imos(0, 1, 2, 3, 5);\n\
-    \        ps.add_point_imos(1, 2, 2);\n        ps.build();\n        assert(ps.at(0,\
-    \ 1) == 5 && ps[1][2] == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22);\n    }\n\
-    \    {\n        BinaryTrie<4> trie;\n        trie.insert(1);\n        trie.insert(4);\n\
-    \        trie.insert(4);\n        assert(trie.size() == 3 && trie.count(4) ==\
-    \ 2);\n        assert(trie.kth(1) == 4 && trie.min_element(7) == 3);\n       \
-    \ assert(trie.erase(4) && trie.count(4) == 1);\n    }\n    {\n        CartesianTree<int>\
-    \ tree({3, 1, 4, 2});\n        assert(tree.root == 1);\n        assert(tree.par[0]\
-    \ == 1 && tree.par[3] == 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int>\
-    \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
-    \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
-    \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
-    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
-    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
-    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
-    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
-    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
-    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
-    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
-    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
-    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
-    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
-    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
-    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
-    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
-    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
-    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
-    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
-    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
-    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
-    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
-    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
-    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
-    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
-    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect(0, 1, 2, 3, 5);\n   \
+    \     ps.add(1, 2, 2);\n        ps.build();\n        assert(ps.get(0, 1) == 5\
+    \ && ps.get(1, 2) == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22 && ps.sum()\
+    \ == 22);\n\n        PS2D<int> from_grid({{1, 2}, {3, 4}});\n        assert(from_grid.get(1,\
+    \ 0) == 3 && from_grid.sum(0, 1, 2, 2) == 6);\n        from_grid.add_rect(0, 0,\
+    \ 2, 2, 1);\n        from_grid.build();\n        assert(from_grid.sum() == 14);\n\
+    \        from_grid.clear();\n        from_grid.build();\n        assert(from_grid.sum()\
+    \ == 0);\n    }\n    {\n        // \u70B9\u52A0\u7B97\u3068\u9577\u65B9\u5F62\u52A0\
+    \u7B97\u3092\u6DF7\u305C\u305F\u30E9\u30F3\u30C0\u30E0\u30C6\u30B9\u30C8\n   \
+    \     unsigned seed = 12345;\n        auto rnd = [&](int n) { seed = seed * 1103515245\
+    \ + 12345; return (int)(seed >> 16) % n; };\n        for (int iter = 0; iter <\
+    \ 200; ++iter) {\n            const int H = rnd(6) + 1, W = rnd(6) + 1;\n    \
+    \        PS2D<long long> ps(H, W);\n            std::vector<std::vector<long long>>\
+    \ naive(H, std::vector<long long>(W));\n            for (int round = 0; round\
+    \ < 3; ++round) {\n                for (int q = 0; q < 5; ++q) {\n           \
+    \         int y1 = rnd(H + 1), y2 = rnd(H + 1), x1 = rnd(W + 1), x2 = rnd(W +\
+    \ 1);\n                    if (y1 > y2) std::swap(y1, y2);\n                 \
+    \   if (x1 > x2) std::swap(x1, x2);\n                    const long long v = rnd(21)\
+    \ - 10;\n                    if (rnd(2)) {\n                        ps.add_rect(y1,\
+    \ x1, y2, x2, v);\n                        for (int y = y1; y < y2; ++y)\n   \
+    \                         for (int x = x1; x < x2; ++x) naive[y][x] += v;\n  \
+    \                  } else if (y1 < H && x1 < W) {\n                        ps.add(y1,\
+    \ x1, v);\n                        naive[y1][x1] += v;\n                    }\n\
+    \                }\n                ps.build();\n                for (int y1 =\
+    \ 0; y1 <= H; ++y1)\n                    for (int y2 = y1; y2 <= H; ++y2)\n  \
+    \                      for (int x1 = 0; x1 <= W; ++x1)\n                     \
+    \       for (int x2 = x1; x2 <= W; ++x2) {\n                                long\
+    \ long expected = 0;\n                                for (int y = y1; y < y2;\
+    \ ++y)\n                                    for (int x = x1; x < x2; ++x) expected\
+    \ += naive[y][x];\n                                assert(ps.sum(y1, x1, y2, x2)\
+    \ == expected);\n                            }\n                for (int y = 0;\
+    \ y < H; ++y)\n                    for (int x = 0; x < W; ++x) assert(ps.get(y,\
+    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        BinaryTrie<4>\
+    \ trie;\n        trie.insert(1);\n        trie.insert(4);\n        trie.insert(4);\n\
+    \        assert(trie.size() == 3 && trie.count(4) == 2);\n        assert(trie.kth(1)\
+    \ == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4) && trie.count(4)\
+    \ == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1, 4, 2});\n     \
+    \   assert(tree.root == 1);\n        assert(tree.par[0] == 1 && tree.par[3] ==\
+    \ 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int> comp;\n     \
+    \   comp.add(10);\n        comp.add(3);\n        comp.add(10);\n        comp.build();\n\
+    \        assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);\n\
+    \        assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));\n\
+    \    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n   \
+    \     seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
+    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
+    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
+    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
+    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
+    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
+    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
+    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
+    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
+    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
+    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
+    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
+    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
+    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
+    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
+    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
+    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
+    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
+    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
+    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
+    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
+    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1560,42 +1567,71 @@ data:
     \ i) { distinct += count[a[i]]++ == 0; };\n        auto del = [&](int i) { distinct\
     \ -= --count[a[i]] == 0; };\n        mo.solve(add, del, [&](int i) { answer[i]\
     \ = distinct; });\n        assert((answer == std::vector<int>{2, 3}));\n    }\n\
-    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect_imos(0, 1, 2, 3, 5);\n\
-    \        ps.add_point_imos(1, 2, 2);\n        ps.build();\n        assert(ps.at(0,\
-    \ 1) == 5 && ps[1][2] == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22);\n    }\n\
-    \    {\n        BinaryTrie<4> trie;\n        trie.insert(1);\n        trie.insert(4);\n\
-    \        trie.insert(4);\n        assert(trie.size() == 3 && trie.count(4) ==\
-    \ 2);\n        assert(trie.kth(1) == 4 && trie.min_element(7) == 3);\n       \
-    \ assert(trie.erase(4) && trie.count(4) == 1);\n    }\n    {\n        CartesianTree<int>\
-    \ tree({3, 1, 4, 2});\n        assert(tree.root == 1);\n        assert(tree.par[0]\
-    \ == 1 && tree.par[3] == 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int>\
-    \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
-    \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
-    \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
-    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
-    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
-    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
-    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
-    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
-    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
-    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
-    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
-    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
-    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
-    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
-    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
-    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
-    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
-    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
-    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
-    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
-    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
-    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
-    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
-    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
-    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
-    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect(0, 1, 2, 3, 5);\n   \
+    \     ps.add(1, 2, 2);\n        ps.build();\n        assert(ps.get(0, 1) == 5\
+    \ && ps.get(1, 2) == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22 && ps.sum()\
+    \ == 22);\n\n        PS2D<int> from_grid({{1, 2}, {3, 4}});\n        assert(from_grid.get(1,\
+    \ 0) == 3 && from_grid.sum(0, 1, 2, 2) == 6);\n        from_grid.add_rect(0, 0,\
+    \ 2, 2, 1);\n        from_grid.build();\n        assert(from_grid.sum() == 14);\n\
+    \        from_grid.clear();\n        from_grid.build();\n        assert(from_grid.sum()\
+    \ == 0);\n    }\n    {\n        // \u70B9\u52A0\u7B97\u3068\u9577\u65B9\u5F62\u52A0\
+    \u7B97\u3092\u6DF7\u305C\u305F\u30E9\u30F3\u30C0\u30E0\u30C6\u30B9\u30C8\n   \
+    \     unsigned seed = 12345;\n        auto rnd = [&](int n) { seed = seed * 1103515245\
+    \ + 12345; return (int)(seed >> 16) % n; };\n        for (int iter = 0; iter <\
+    \ 200; ++iter) {\n            const int H = rnd(6) + 1, W = rnd(6) + 1;\n    \
+    \        PS2D<long long> ps(H, W);\n            std::vector<std::vector<long long>>\
+    \ naive(H, std::vector<long long>(W));\n            for (int round = 0; round\
+    \ < 3; ++round) {\n                for (int q = 0; q < 5; ++q) {\n           \
+    \         int y1 = rnd(H + 1), y2 = rnd(H + 1), x1 = rnd(W + 1), x2 = rnd(W +\
+    \ 1);\n                    if (y1 > y2) std::swap(y1, y2);\n                 \
+    \   if (x1 > x2) std::swap(x1, x2);\n                    const long long v = rnd(21)\
+    \ - 10;\n                    if (rnd(2)) {\n                        ps.add_rect(y1,\
+    \ x1, y2, x2, v);\n                        for (int y = y1; y < y2; ++y)\n   \
+    \                         for (int x = x1; x < x2; ++x) naive[y][x] += v;\n  \
+    \                  } else if (y1 < H && x1 < W) {\n                        ps.add(y1,\
+    \ x1, v);\n                        naive[y1][x1] += v;\n                    }\n\
+    \                }\n                ps.build();\n                for (int y1 =\
+    \ 0; y1 <= H; ++y1)\n                    for (int y2 = y1; y2 <= H; ++y2)\n  \
+    \                      for (int x1 = 0; x1 <= W; ++x1)\n                     \
+    \       for (int x2 = x1; x2 <= W; ++x2) {\n                                long\
+    \ long expected = 0;\n                                for (int y = y1; y < y2;\
+    \ ++y)\n                                    for (int x = x1; x < x2; ++x) expected\
+    \ += naive[y][x];\n                                assert(ps.sum(y1, x1, y2, x2)\
+    \ == expected);\n                            }\n                for (int y = 0;\
+    \ y < H; ++y)\n                    for (int x = 0; x < W; ++x) assert(ps.get(y,\
+    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        BinaryTrie<4>\
+    \ trie;\n        trie.insert(1);\n        trie.insert(4);\n        trie.insert(4);\n\
+    \        assert(trie.size() == 3 && trie.count(4) == 2);\n        assert(trie.kth(1)\
+    \ == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4) && trie.count(4)\
+    \ == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1, 4, 2});\n     \
+    \   assert(tree.root == 1);\n        assert(tree.par[0] == 1 && tree.par[3] ==\
+    \ 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int> comp;\n     \
+    \   comp.add(10);\n        comp.add(3);\n        comp.add(10);\n        comp.build();\n\
+    \        assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);\n\
+    \        assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));\n\
+    \    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n   \
+    \     seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
+    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
+    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
+    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
+    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
+    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
+    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
+    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
+    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
+    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
+    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
+    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
+    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
+    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
+    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
+    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
+    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
+    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
+    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
+    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
+    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
+    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1740,7 +1776,7 @@ data:
   isVerificationFile: false
   path: tests/test.cpp
   requiredBy: []
-  timestamp: '2026-10-08 13:39:00+09:00'
+  timestamp: '2026-10-12 07:12:06+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: tests/test.cpp

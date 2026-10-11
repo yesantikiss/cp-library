@@ -11,7 +11,7 @@ data:
       title: Mo's algorithm
   - name: ds
     pages:
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: ds/2d_prefixsum.hpp
       title: "\u4E8C\u6B21\u5143\u7D2F\u7A4D\u548C\u30FB\u4E8C\u6B21\u5143\u3044\u3082\
         \u3059\u6CD5"
@@ -102,6 +102,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: verify/aho_corasick.test.cpp
       title: verify/aho_corasick.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/aoj_dsl_5_b.test.cpp
+      title: verify/aoj_dsl_5_b.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/associative_array.test.cpp
       title: verify/associative_array.test.cpp
