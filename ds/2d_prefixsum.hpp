@@ -1,121 +1,84 @@
 #pragma once
 
-#include <algorithm>
 #include <cassert>
 #include <vector>
 
 namespace yesantikiss {
-    // 2D Prefix/Imos (single diff, single O(HW) build)
+    // 二次元累積和 + 二次元いもす法
     // 仕様: 0-index, 半開区間 [y1,y2)×[x1,x2)
-    // 使い分け: set_pointのみ→SETモード / add_rect_imosのみ→IMOSモード（併用禁止）
-    template<class T>
+    // 更新はすべて差分配列への加算なので、点加算と長方形加算は自由に混ぜてよい
+    template <class T>
     struct PS2D {
-        enum Mode { EMPTY, SET_MODE, IMOS_MODE };
-    
         int H, W;
-        Mode mode = EMPTY;
-        std::vector<std::vector<T>> buf;   // SET: 値行列としてH×Wのみ使用 / IMOS: 差分として(H+1)×(W+1)全面使用
-        std::vector<std::vector<T>> grid;  // build後の完成グリッド H×W
-        std::vector<std::vector<T>> pref;  // 2D累積和 (H+1)×(W+1)
+        std::vector<std::vector<T>> diff;  // 差分 (H+1)×(W+1)
+        std::vector<std::vector<T>> pref;  // 完成グリッドの累積和 (H+1)×(W+1)
         bool built = false;
-    
-        PS2D(int H, int W): H(H), W(W),
-            buf(H+1, std::vector<T>(W+1, T())),
-            grid(H, std::vector<T>(W, T())),
-            pref(H+1, std::vector<T>(W+1, T())) {}
-    
-        // 単点上書き: SETモード専用
-        void set_point(int y, int x, T v) {
-            assert(0 <= y && y < H && 0 <= x && x < W);
-            assert(mode == EMPTY || mode == SET_MODE);
-            mode = SET_MODE;
-            buf[y][x] = v;   // bufは値行列として使用（H×W領域）
-            built = false;
+
+        PS2D(int H, int W)
+            : H(H), W(W),
+              diff(H + 1, std::vector<T>(W + 1, T())),
+              pref(H + 1, std::vector<T>(W + 1, T())) {}
+
+        // 初期グリッドから構築済みの状態で作る: O(HW)
+        explicit PS2D(const std::vector<std::vector<T>>& a)
+            : PS2D((int)a.size(), a.empty() ? 0 : (int)a[0].size()) {
+            for (int y = 0; y < H; ++y) {
+                assert((int)a[y].size() == W);
+                for (int x = 0; x < W; ++x) add(y, x, a[y][x]);
+            }
+            build();
         }
-    
-        // 長方形加算: IMOSモード専用
-        void add_rect_imos(int y1, int x1, int y2, int x2, T v) {
+
+        // 長方形加算: O(1)
+        void add_rect(int y1, int x1, int y2, int x2, const T& v) {
             assert(0 <= y1 && y1 <= y2 && y2 <= H);
             assert(0 <= x1 && x1 <= x2 && x2 <= W);
-            assert(mode == EMPTY || mode == IMOS_MODE);
-            mode = IMOS_MODE;
-            // bufは差分として使用（(H+1)×(W+1)）
-            buf[y1][x1] += v;
-            buf[y1][x2] -= v;
-            buf[y2][x1] -= v;
-            buf[y2][x2] += v;
+            diff[y1][x1] += v;
+            diff[y1][x2] -= v;
+            diff[y2][x1] -= v;
+            diff[y2][x2] += v;
             built = false;
         }
-    
-        // 点加算(imos)
-        void add_point_imos(int y, int x, T v) { add_rect_imos(y, x, y+1, x+1, v); }
-    
-        // クリア
-        void clear_all() {
-            for (int y = 0; y <= H; ++y) std::fill(buf[y].begin(), buf[y].end(), T());
-            built = false;
-            mode = EMPTY;
-        }
-    
-        // 構築: 常にO(HW) 1回で grid と pref を同時に生成
+
+        // 点加算: O(1)
+        void add(int y, int x, const T& v) { add_rect(y, x, y + 1, x + 1, v); }
+
+        // 差分を2回累積して pref を作る: O(HW)
         void build() {
-            for (int y = 0; y <= H; ++y) std::fill(pref[y].begin(), pref[y].end(), T());
-    
-            if (mode == SET_MODE) {
-                // buf[y][x] を値としてそのまま累積
-                for (int y = 0; y < H; ++y) {
-                    T row_sum = T();
-                    for (int x = 0; x < W; ++x) {
-                        T v = buf[y][x];
-                        grid[y][x] = v;
-                        row_sum += v;
-                        pref[y+1][x+1] = pref[y][x+1] + row_sum;
-                    }
-                }
-            } else {
-                // IMOS_MODE または EMPTY（EMPTYは全0）
-                // bufは差分。gridにimosを累積しつつprefも同時に作る
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        T v = buf[y][x];
-                        if (y) v += grid[y-1][x];
-                        if (x) v += grid[y][x-1];
-                        if (y && x) v -= grid[y-1][x-1];
-                        grid[y][x] = v;
-    
-                        pref[y+1][x+1] = pref[y][x+1] + pref[y+1][x] - pref[y][x] + v;
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) pref[y + 1][x + 1] = diff[y][x];
+            }
+            for (int k = 0; k < 2; ++k) {  // 1回目で完成グリッド、2回目で累積和
+                for (int y = 1; y <= H; ++y) {
+                    for (int x = 1; x <= W; ++x) {
+                        pref[y][x] += pref[y - 1][x] + pref[y][x - 1] - pref[y - 1][x - 1];
                     }
                 }
             }
             built = true;
         }
-    
-        // 単点取得 O(1)
-        T at(int y, int x) const {
-            assert(built);
-            assert(0 <= y && y < H && 0 <= x && x < W);
-            return grid[y][x];
-        }
-        T operator()(int y, int x) const { return at(y, x); }
-    
-        struct RowProxy {
-            const PS2D* p; int y;
-            T operator[](int x) const {
-                assert(p->built); assert(0 <= x && x < p->W);
-                return p->grid[y][x];
-            }
-        };
-        RowProxy operator[](int y) const { assert(built); return RowProxy{this, y}; }
-    
-        // 長方形和 O(1)  [y1,y2)×[x1,x2)
+
+        // 長方形和: O(1)
         T sum(int y1, int x1, int y2, int x2) const {
             assert(built);
             assert(0 <= y1 && y1 <= y2 && y2 <= H);
             assert(0 <= x1 && x1 <= x2 && x2 <= W);
             return pref[y2][x2] - pref[y1][x2] - pref[y2][x1] + pref[y1][x1];
         }
-    
-        // 全体和
-        T sum_all() const { assert(built); return pref[H][W]; }
+
+        // 全体和: O(1)
+        T sum() const { return sum(0, 0, H, W); }
+
+        // 点取得: O(1)
+        T get(int y, int x) const {
+            assert(0 <= y && y < H && 0 <= x && x < W);
+            return sum(y, x, y + 1, x + 1);
+        }
+
+        // 更新をすべて消去: O(HW)
+        void clear() {
+            for (auto& row : diff) row.assign(W + 1, T());
+            built = false;
+        }
     };
 }
