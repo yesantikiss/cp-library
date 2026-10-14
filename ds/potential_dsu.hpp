@@ -5,6 +5,7 @@
 
 namespace yesantikiss {
     // ACL dsu 風 + ポテンシャル(差分)管理
+    // 参考: https://qiita.com/drken/items/cce6fc5c579051e64fab
     // 約束: merge(a,b,w) は pot[b] - pot[a] = w を追加する
     //      diff(a,b)    は pot[b] - pot[a] を返す（同一成分のときのみ呼ぶ）
     template <class T>

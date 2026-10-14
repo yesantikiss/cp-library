@@ -28,3 +28,9 @@ Union-Find です。
 
 `groups()` 以外は償却 `O(alpha(N))`、`groups()` は `O(N)` です。メモリは
 `O(N)` です。
+
+## 出典
+
+ポテンシャル管理の実装は、けんちょん（drken）さんの記事
+[重みつき Union-Find 木とそれが使える問題のまとめ](https://qiita.com/drken/items/cce6fc5c579051e64fab)
+を参考に、インターフェースを AtCoder Library の `dsu` に合わせたものです。
