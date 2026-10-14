@@ -16,30 +16,32 @@ data:
   _pathExtension: hpp
   _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
-    links: []
+    links:
+    - https://qiita.com/drken/items/cce6fc5c579051e64fab
   bundledCode: "#line 2 \"ds/potential_dsu.hpp\"\n\n#include <algorithm>\n#include\
     \ <vector>\n\nnamespace yesantikiss {\n    // ACL dsu \u98A8 + \u30DD\u30C6\u30F3\
-    \u30B7\u30E3\u30EB(\u5DEE\u5206)\u7BA1\u7406\n    // \u7D04\u675F: merge(a,b,w)\
-    \ \u306F pot[b] - pot[a] = w \u3092\u8FFD\u52A0\u3059\u308B\n    //      diff(a,b)\
-    \    \u306F pot[b] - pot[a] \u3092\u8FD4\u3059\uFF08\u540C\u4E00\u6210\u5206\u306E\
-    \u3068\u304D\u306E\u307F\u547C\u3076\uFF09\n    template <class T>\n    struct\
-    \ potential_dsu {\n        int n;\n        std::vector<int> parent_or_size; //\
-    \ root: -size, else: parent\n        std::vector<T> diff_weight;      // diff_weight[v]\
-    \ = pot[v] - pot[parent[v]] (root\u306F0)\n    \n        potential_dsu() : n(0)\
-    \ {}\n        explicit potential_dsu(int n_) { init(n_); }\n    \n        void\
-    \ init(int n_) {\n            n = n_;\n            parent_or_size.assign(n, -1);\n\
-    \            diff_weight.assign(n, T{}); // 0\n        }\n    \n        // leader\
-    \ \u3092\u6C42\u3081\u3064\u3064\u3001diff_weight \u3092 root \u57FA\u6E96\u306B\
-    \u7573\u307F\u8FBC\u3080\n        int leader(int a) {\n            if (parent_or_size[a]\
-    \ < 0) return a;\n            int p = parent_or_size[a];\n            int r =\
-    \ leader(p);\n            diff_weight[a] += diff_weight[p];\n            parent_or_size[a]\
-    \ = r;\n            return r;\n        }\n    \n        bool same(int a, int b)\
-    \ { return leader(a) == leader(b); }\n    \n        int size(int a) { return -parent_or_size[leader(a)];\
-    \ }\n    \n        // pot[a] - pot[leader(a)]\n        T potential(int a) {\n\
-    \            leader(a);\n            return diff_weight[a];\n        }\n    \n\
-    \        // pot[b] - pot[a]\n        T diff(int a, int b) {\n            // \u547C\
-    \u3073\u51FA\u3057\u5074\u3067 same(a,b) \u3092\u4FDD\u8A3C\uFF08ACL dsu \u3068\
-    \u540C\u69D8\u306B\u672A\u5B9A\u7FA9\u6271\u3044\uFF09\n            return potential(b)\
+    \u30B7\u30E3\u30EB(\u5DEE\u5206)\u7BA1\u7406\n    // \u53C2\u8003: https://qiita.com/drken/items/cce6fc5c579051e64fab\n\
+    \    // \u7D04\u675F: merge(a,b,w) \u306F pot[b] - pot[a] = w \u3092\u8FFD\u52A0\
+    \u3059\u308B\n    //      diff(a,b)    \u306F pot[b] - pot[a] \u3092\u8FD4\u3059\
+    \uFF08\u540C\u4E00\u6210\u5206\u306E\u3068\u304D\u306E\u307F\u547C\u3076\uFF09\
+    \n    template <class T>\n    struct potential_dsu {\n        int n;\n       \
+    \ std::vector<int> parent_or_size; // root: -size, else: parent\n        std::vector<T>\
+    \ diff_weight;      // diff_weight[v] = pot[v] - pot[parent[v]] (root\u306F0)\n\
+    \    \n        potential_dsu() : n(0) {}\n        explicit potential_dsu(int n_)\
+    \ { init(n_); }\n    \n        void init(int n_) {\n            n = n_;\n    \
+    \        parent_or_size.assign(n, -1);\n            diff_weight.assign(n, T{});\
+    \ // 0\n        }\n    \n        // leader \u3092\u6C42\u3081\u3064\u3064\u3001\
+    diff_weight \u3092 root \u57FA\u6E96\u306B\u7573\u307F\u8FBC\u3080\n        int\
+    \ leader(int a) {\n            if (parent_or_size[a] < 0) return a;\n        \
+    \    int p = parent_or_size[a];\n            int r = leader(p);\n            diff_weight[a]\
+    \ += diff_weight[p];\n            parent_or_size[a] = r;\n            return r;\n\
+    \        }\n    \n        bool same(int a, int b) { return leader(a) == leader(b);\
+    \ }\n    \n        int size(int a) { return -parent_or_size[leader(a)]; }\n  \
+    \  \n        // pot[a] - pot[leader(a)]\n        T potential(int a) {\n      \
+    \      leader(a);\n            return diff_weight[a];\n        }\n    \n     \
+    \   // pot[b] - pot[a]\n        T diff(int a, int b) {\n            // \u547C\u3073\
+    \u51FA\u3057\u5074\u3067 same(a,b) \u3092\u4FDD\u8A3C\uFF08ACL dsu \u3068\u540C\
+    \u69D8\u306B\u672A\u5B9A\u7FA9\u6271\u3044\uFF09\n            return potential(b)\
     \ - potential(a);\n        }\n    \n        // pot[b] - pot[a] = w \u3092\u8FFD\
     \u52A0\u3057\u3066\u30DE\u30FC\u30B8\uFF08ACL dsu \u3068\u540C\u3058\u304F leader\
     \ \u3092\u8FD4\u3059\uFF09\n        int merge(int a, int b, T w) {\n         \
@@ -61,27 +63,28 @@ data:
     \    };\n}\n"
   code: "#pragma once\n\n#include <algorithm>\n#include <vector>\n\nnamespace yesantikiss\
     \ {\n    // ACL dsu \u98A8 + \u30DD\u30C6\u30F3\u30B7\u30E3\u30EB(\u5DEE\u5206\
-    )\u7BA1\u7406\n    // \u7D04\u675F: merge(a,b,w) \u306F pot[b] - pot[a] = w \u3092\
-    \u8FFD\u52A0\u3059\u308B\n    //      diff(a,b)    \u306F pot[b] - pot[a] \u3092\
-    \u8FD4\u3059\uFF08\u540C\u4E00\u6210\u5206\u306E\u3068\u304D\u306E\u307F\u547C\
-    \u3076\uFF09\n    template <class T>\n    struct potential_dsu {\n        int\
-    \ n;\n        std::vector<int> parent_or_size; // root: -size, else: parent\n\
-    \        std::vector<T> diff_weight;      // diff_weight[v] = pot[v] - pot[parent[v]]\
-    \ (root\u306F0)\n    \n        potential_dsu() : n(0) {}\n        explicit potential_dsu(int\
-    \ n_) { init(n_); }\n    \n        void init(int n_) {\n            n = n_;\n\
-    \            parent_or_size.assign(n, -1);\n            diff_weight.assign(n,\
-    \ T{}); // 0\n        }\n    \n        // leader \u3092\u6C42\u3081\u3064\u3064\
-    \u3001diff_weight \u3092 root \u57FA\u6E96\u306B\u7573\u307F\u8FBC\u3080\n   \
-    \     int leader(int a) {\n            if (parent_or_size[a] < 0) return a;\n\
-    \            int p = parent_or_size[a];\n            int r = leader(p);\n    \
-    \        diff_weight[a] += diff_weight[p];\n            parent_or_size[a] = r;\n\
-    \            return r;\n        }\n    \n        bool same(int a, int b) { return\
-    \ leader(a) == leader(b); }\n    \n        int size(int a) { return -parent_or_size[leader(a)];\
-    \ }\n    \n        // pot[a] - pot[leader(a)]\n        T potential(int a) {\n\
-    \            leader(a);\n            return diff_weight[a];\n        }\n    \n\
-    \        // pot[b] - pot[a]\n        T diff(int a, int b) {\n            // \u547C\
-    \u3073\u51FA\u3057\u5074\u3067 same(a,b) \u3092\u4FDD\u8A3C\uFF08ACL dsu \u3068\
-    \u540C\u69D8\u306B\u672A\u5B9A\u7FA9\u6271\u3044\uFF09\n            return potential(b)\
+    )\u7BA1\u7406\n    // \u53C2\u8003: https://qiita.com/drken/items/cce6fc5c579051e64fab\n\
+    \    // \u7D04\u675F: merge(a,b,w) \u306F pot[b] - pot[a] = w \u3092\u8FFD\u52A0\
+    \u3059\u308B\n    //      diff(a,b)    \u306F pot[b] - pot[a] \u3092\u8FD4\u3059\
+    \uFF08\u540C\u4E00\u6210\u5206\u306E\u3068\u304D\u306E\u307F\u547C\u3076\uFF09\
+    \n    template <class T>\n    struct potential_dsu {\n        int n;\n       \
+    \ std::vector<int> parent_or_size; // root: -size, else: parent\n        std::vector<T>\
+    \ diff_weight;      // diff_weight[v] = pot[v] - pot[parent[v]] (root\u306F0)\n\
+    \    \n        potential_dsu() : n(0) {}\n        explicit potential_dsu(int n_)\
+    \ { init(n_); }\n    \n        void init(int n_) {\n            n = n_;\n    \
+    \        parent_or_size.assign(n, -1);\n            diff_weight.assign(n, T{});\
+    \ // 0\n        }\n    \n        // leader \u3092\u6C42\u3081\u3064\u3064\u3001\
+    diff_weight \u3092 root \u57FA\u6E96\u306B\u7573\u307F\u8FBC\u3080\n        int\
+    \ leader(int a) {\n            if (parent_or_size[a] < 0) return a;\n        \
+    \    int p = parent_or_size[a];\n            int r = leader(p);\n            diff_weight[a]\
+    \ += diff_weight[p];\n            parent_or_size[a] = r;\n            return r;\n\
+    \        }\n    \n        bool same(int a, int b) { return leader(a) == leader(b);\
+    \ }\n    \n        int size(int a) { return -parent_or_size[leader(a)]; }\n  \
+    \  \n        // pot[a] - pot[leader(a)]\n        T potential(int a) {\n      \
+    \      leader(a);\n            return diff_weight[a];\n        }\n    \n     \
+    \   // pot[b] - pot[a]\n        T diff(int a, int b) {\n            // \u547C\u3073\
+    \u51FA\u3057\u5074\u3067 same(a,b) \u3092\u4FDD\u8A3C\uFF08ACL dsu \u3068\u540C\
+    \u69D8\u306B\u672A\u5B9A\u7FA9\u6271\u3044\uFF09\n            return potential(b)\
     \ - potential(a);\n        }\n    \n        // pot[b] - pot[a] = w \u3092\u8FFD\
     \u52A0\u3057\u3066\u30DE\u30FC\u30B8\uFF08ACL dsu \u3068\u540C\u3058\u304F leader\
     \ \u3092\u8FD4\u3059\uFF09\n        int merge(int a, int b, T w) {\n         \
@@ -106,7 +109,7 @@ data:
   path: ds/potential_dsu.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-12 07:12:06+09:00'
+  timestamp: '2026-10-14 19:13:13+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/unionfind.test.cpp
@@ -141,3 +144,9 @@ Union-Find です。
 
 `groups()` 以外は償却 `O(alpha(N))`、`groups()` は `O(N)` です。メモリは
 `O(N)` です。
+
+## 出典
+
+ポテンシャル管理の実装は、けんちょん（drken）さんの記事
+[重みつき Union-Find 木とそれが使える問題のまとめ](https://qiita.com/drken/items/cce6fc5c579051e64fab)
+を参考に、インターフェースを AtCoder Library の `dsu` に合わせたものです。
