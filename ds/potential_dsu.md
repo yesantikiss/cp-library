@@ -31,8 +31,6 @@ Union-Find です。
 
 ## 出典
 
-ポテンシャル管理の実装は、けんちょん（drken）さんの記事
-[重みつき Union-Find 木とそれが使える問題のまとめ](https://qiita.com/drken/items/cce6fc5c579051e64fab)
-を参考に、インターフェースを AtCoder Library の `dsu` に合わせたものです。
-同じ実装が [drken1215/algorithm](https://github.com/drken1215/algorithm/blob/master/DataStructureBasic/weighted_union_find.cpp)
-で CC0 として公開されています。
+ポテンシャル管理の実装は、けんちょん（drken）さんの
+[weighted_union_find.cpp](https://github.com/drken1215/algorithm/blob/master/DataStructureBasic/weighted_union_find.cpp)
+（CC0）をもとに、インターフェースを AtCoder Library の `dsu` に合わせたものです。
