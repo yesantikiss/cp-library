@@ -107,7 +107,7 @@ data:
   path: ds/2d_prefixsum.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-14 19:13:13+09:00'
+  timestamp: '2026-10-14 19:14:27+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/aoj_dsl_5_b.test.cpp

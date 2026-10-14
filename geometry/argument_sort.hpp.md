@@ -90,7 +90,7 @@ data:
   isVerificationFile: false
   path: geometry/argument_sort.hpp
   requiredBy: []
-  timestamp: '2026-10-14 19:13:13+09:00'
+  timestamp: '2026-10-14 19:14:27+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/sort_points_by_argument.test.cpp
