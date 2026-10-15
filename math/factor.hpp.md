@@ -79,7 +79,7 @@ data:
   path: math/factor.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-14 19:14:27+09:00'
+  timestamp: '2026-10-15 08:53:14+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: math/factor.hpp
