@@ -50,6 +50,9 @@ data:
   - icon: ':warning:'
     path: utils/fraction.hpp
     title: "\u6709\u7406\u6570"
+  - icon: ':warning:'
+    path: utils/grid_rotate.hpp
+    title: "\u4E8C\u6B21\u5143\u914D\u5217\u306E\u56DE\u8EE2"
   - icon: ':heavy_check_mark:'
     path: utils/hash.hpp
     title: "\u4E71\u6570\u5316\u30CF\u30C3\u30B7\u30E5\u30B3\u30F3\u30C6\u30CA"
@@ -1282,10 +1285,37 @@ data:
     \ is;\n            }\n            x = tmp;\n            return is;\n        }\n\
     \    };\n\n    template<class T>\n    fraction<T> abs(const fraction<T>& x) {\n\
     \        return x.num < 0 ? -x : x;\n    }\n\n    using fr = fraction<__int128>;\n\
-    }\n#line 2 \"utils/hash.hpp\"\n\n#include <chrono>\n#line 5 \"utils/hash.hpp\"\
-    \n#include <cstdint>\n#line 7 \"utils/hash.hpp\"\n#include <memory>\n#include\
-    \ <unordered_map>\n#include <unordered_set>\n#line 11 \"utils/hash.hpp\"\n\nnamespace\
-    \ yesantikiss {\n    namespace hash_detail {\n        inline std::uint64_t splitmix64(std::uint64_t\
+    }\n#line 2 \"utils/grid_rotate.hpp\"\n\n#line 5 \"utils/grid_rotate.hpp\"\n\n\
+    namespace yesantikiss {\n    // \u4E8C\u6B21\u5143\u914D\u5217\u306E\u56DE\u8EE2\
+    \uFF08\u3059\u3079\u3066\u6642\u8A08\u56DE\u308A\uFF09\n    // Row \u306F std::vector<T>\
+    \ \u3067\u3082 std::string \u3067\u3082\u3088\u3044\n    // H\xD7W \u306E a \u3092\
+    \ 90\xB0 \u56DE\u3059\u3068 W\xD7H \u306B\u306A\u308B: res[i][j] = a[H-1-j][i]\n\
+    \    template <class Row>\n    std::vector<Row> rotate90(const std::vector<Row>&\
+    \ a) {\n        const int H = (int)a.size();\n        if (H == 0) return {};\n\
+    \        const int W = (int)a[0].size();\n        std::vector<Row> res(W, Row(H,\
+    \ typename Row::value_type()));\n        for (int i = 0; i < H; ++i) {\n     \
+    \       assert((int)a[i].size() == W);\n            for (int j = 0; j < W; ++j)\
+    \ res[j][H - 1 - i] = a[i][j];\n        }\n        return res;\n    }\n\n    //\
+    \ 180\xB0: res[i][j] = a[H-1-i][W-1-j]\n    template <class Row>\n    std::vector<Row>\
+    \ rotate180(const std::vector<Row>& a) {\n        std::vector<Row> res(a.rbegin(),\
+    \ a.rend());\n        for (auto& row : res) {\n            assert(row.size() ==\
+    \ a[0].size());\n            row = Row(row.rbegin(), row.rend());\n        }\n\
+    \        return res;\n    }\n\n    // 270\xB0\uFF08\u53CD\u6642\u8A08\u56DE\u308A\
+    \u306B 90\xB0\uFF09: res[i][j] = a[j][W-1-i]\n    template <class Row>\n    std::vector<Row>\
+    \ rotate270(const std::vector<Row>& a) {\n        const int H = (int)a.size();\n\
+    \        if (H == 0) return {};\n        const int W = (int)a[0].size();\n   \
+    \     std::vector<Row> res(W, Row(H, typename Row::value_type()));\n        for\
+    \ (int i = 0; i < H; ++i) {\n            assert((int)a[i].size() == W);\n    \
+    \        for (int j = 0; j < W; ++j) res[W - 1 - j][i] = a[i][j];\n        }\n\
+    \        return res;\n    }\n\n    // \u6642\u8A08\u56DE\u308A\u306B 90k\xB0\uFF08\
+    k \u306F\u8CA0\u3067\u3082\u3088\u3044\uFF09\n    template <class Row>\n    std::vector<Row>\
+    \ rotate(const std::vector<Row>& a, int k) {\n        k = (k % 4 + 4) % 4;\n \
+    \       if (k == 1) return rotate90(a);\n        if (k == 2) return rotate180(a);\n\
+    \        if (k == 3) return rotate270(a);\n        return a;\n    }\n}\n#line\
+    \ 2 \"utils/hash.hpp\"\n\n#include <chrono>\n#line 5 \"utils/hash.hpp\"\n#include\
+    \ <cstdint>\n#line 7 \"utils/hash.hpp\"\n#include <memory>\n#include <unordered_map>\n\
+    #include <unordered_set>\n#line 11 \"utils/hash.hpp\"\n\nnamespace yesantikiss\
+    \ {\n    namespace hash_detail {\n        inline std::uint64_t splitmix64(std::uint64_t\
     \ x) {\n            x += 0x9e3779b97f4a7c15ULL;\n            x = (x ^ (x >> 30))\
     \ * 0xbf58476d1ce4e5b9ULL;\n            x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;\n\
     \            return x ^ (x >> 31);\n        }\n\n        inline std::uint64_t\
@@ -1353,7 +1383,7 @@ data:
     \        return is;\n    }\n\n    constexpr yesantikiss::u128 max_value = ~yesantikiss::u128(0);\n\
     \    yesantikiss::u128 parsed;\n    if (!yesantikiss::int128_detail::parse_magnitude(\n\
     \            token, first, max_value, parsed)) {\n        is.setstate(std::ios::failbit);\n\
-    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 27 \"\
+    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 28 \"\
     tests/test.cpp\"\n\nlong long op_sum(long long a, long long b) { return a + b;\
     \ }\nlong long e_sum() { return 0; }\n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const\
     \ std::string& s);\n\nint main() {\n    using namespace yesantikiss;\n\n    {\n\
@@ -1395,39 +1425,53 @@ data:
     \ += naive[y][x];\n                                assert(ps.sum(y1, x1, y2, x2)\
     \ == expected);\n                            }\n                for (int y = 0;\
     \ y < H; ++y)\n                    for (int x = 0; x < W; ++x) assert(ps.get(y,\
-    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        BinaryTrie<4>\
-    \ trie;\n        trie.insert(1);\n        trie.insert(4);\n        trie.insert(4);\n\
-    \        assert(trie.size() == 3 && trie.count(4) == 2);\n        assert(trie.kth(1)\
-    \ == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4) && trie.count(4)\
-    \ == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1, 4, 2});\n     \
-    \   assert(tree.root == 1);\n        assert(tree.par[0] == 1 && tree.par[3] ==\
-    \ 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int> comp;\n     \
-    \   comp.add(10);\n        comp.add(3);\n        comp.add(10);\n        comp.build();\n\
-    \        assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);\n\
-    \        assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));\n\
-    \    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n   \
-    \     seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
-    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
-    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
-    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
-    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
-    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
-    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
-    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
-    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
-    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
-    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
-    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
-    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
-    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
-    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
-    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
-    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
-    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
-    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
-    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
-    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
-    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        using Grid\
+    \ = std::vector<std::string>;\n        const Grid g{\"abc\", \"def\"};\n     \
+    \   assert((rotate90(g) == Grid{\"da\", \"eb\", \"fc\"}));\n        assert((rotate180(g)\
+    \ == Grid{\"fed\", \"cba\"}));\n        assert((rotate270(g) == Grid{\"cf\", \"\
+    be\", \"ad\"}));\n        assert(rotate(g, 0) == g && rotate(g, 5) == rotate90(g)\
+    \ && rotate(g, -1) == rotate270(g));\n        assert(rotate90(Grid{}).empty()\
+    \ && rotate180(Grid{}).empty());\n\n        using IntGrid = std::vector<std::vector<int>>;\n\
+    \        const IntGrid a{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};\n     \
+    \   for (int k = -4; k <= 4; ++k) {\n            const IntGrid r = rotate(a, k);\n\
+    \            const int H = (int)r.size(), W = (int)r[0].size();\n            assert(((k\
+    \ % 2 == 0) ? (H == 3 && W == 4) : (H == 4 && W == 3)));\n            assert(rotate(r,\
+    \ -k) == a);\n            assert(rotate90(rotate(a, k - 1)) == r);\n        }\n\
+    \n        const std::vector<std::vector<bool>> b{{true, false}};\n        assert((rotate90(b)\
+    \ == std::vector<std::vector<bool>>{{true}, {false}}));\n    }\n    {\n      \
+    \  BinaryTrie<4> trie;\n        trie.insert(1);\n        trie.insert(4);\n   \
+    \     trie.insert(4);\n        assert(trie.size() == 3 && trie.count(4) == 2);\n\
+    \        assert(trie.kth(1) == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4)\
+    \ && trie.count(4) == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1,\
+    \ 4, 2});\n        assert(tree.root == 1);\n        assert(tree.par[0] == 1 &&\
+    \ tree.par[3] == 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int>\
+    \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
+    \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
+    \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
+    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
+    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
+    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
+    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
+    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
+    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
+    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
+    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
+    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
+    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
+    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
+    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
+    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
+    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
+    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
+    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
+    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
+    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
+    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
+    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
+    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
+    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
+    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
+    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1558,19 +1602,19 @@ data:
     \n#include \"ds/potential_dsu.hpp\"\n#include \"math/factor.hpp\"\n#include \"\
     string/aho_corasick.hpp\"\n#include \"string/rolling_hash.hpp\"\n#include \"tree/heavy_light_decomposition.hpp\"\
     \n#include \"tree/lca_binary_lifting.hpp\"\n#include \"tree/lca_euler_tour.hpp\"\
-    \n#include \"utils/fraction.hpp\"\n#include \"utils/hash.hpp\"\n#include \"utils/int128.hpp\"\
-    \n\nlong long op_sum(long long a, long long b) { return a + b; }\nlong long e_sum()\
-    \ { return 0; }\n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const\
-    \ std::string& s);\n\nint main() {\n    using namespace yesantikiss;\n\n    {\n\
-    \        const std::vector<int> a{1, 2, 1, 3};\n        Mo mo((int)a.size());\n\
-    \        mo.add_query(0, 3);\n        mo.add_query(1, 4);\n        std::vector<int>\
-    \ count(4), answer(2);\n        int distinct = 0;\n        auto add = [&](int\
-    \ i) { distinct += count[a[i]]++ == 0; };\n        auto del = [&](int i) { distinct\
-    \ -= --count[a[i]] == 0; };\n        mo.solve(add, del, [&](int i) { answer[i]\
-    \ = distinct; });\n        assert((answer == std::vector<int>{2, 3}));\n    }\n\
-    \    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect(0, 1, 2, 3, 5);\n   \
-    \     ps.add(1, 2, 2);\n        ps.build();\n        assert(ps.get(0, 1) == 5\
-    \ && ps.get(1, 2) == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22 && ps.sum()\
+    \n#include \"utils/fraction.hpp\"\n#include \"utils/grid_rotate.hpp\"\n#include\
+    \ \"utils/hash.hpp\"\n#include \"utils/int128.hpp\"\n\nlong long op_sum(long long\
+    \ a, long long b) { return a + b; }\nlong long e_sum() { return 0; }\n\nyesantikiss::RollingHash::ull\
+    \ rolling_hash_from_other_tu(const std::string& s);\n\nint main() {\n    using\
+    \ namespace yesantikiss;\n\n    {\n        const std::vector<int> a{1, 2, 1, 3};\n\
+    \        Mo mo((int)a.size());\n        mo.add_query(0, 3);\n        mo.add_query(1,\
+    \ 4);\n        std::vector<int> count(4), answer(2);\n        int distinct = 0;\n\
+    \        auto add = [&](int i) { distinct += count[a[i]]++ == 0; };\n        auto\
+    \ del = [&](int i) { distinct -= --count[a[i]] == 0; };\n        mo.solve(add,\
+    \ del, [&](int i) { answer[i] = distinct; });\n        assert((answer == std::vector<int>{2,\
+    \ 3}));\n    }\n    {\n        PS2D<int> ps(3, 4);\n        ps.add_rect(0, 1,\
+    \ 2, 3, 5);\n        ps.add(1, 2, 2);\n        ps.build();\n        assert(ps.get(0,\
+    \ 1) == 5 && ps.get(1, 2) == 7);\n        assert(ps.sum(0, 0, 2, 4) == 22 && ps.sum()\
     \ == 22);\n\n        PS2D<int> from_grid({{1, 2}, {3, 4}});\n        assert(from_grid.get(1,\
     \ 0) == 3 && from_grid.sum(0, 1, 2, 2) == 6);\n        from_grid.add_rect(0, 0,\
     \ 2, 2, 1);\n        from_grid.build();\n        assert(from_grid.sum() == 14);\n\
@@ -1600,39 +1644,53 @@ data:
     \ += naive[y][x];\n                                assert(ps.sum(y1, x1, y2, x2)\
     \ == expected);\n                            }\n                for (int y = 0;\
     \ y < H; ++y)\n                    for (int x = 0; x < W; ++x) assert(ps.get(y,\
-    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        BinaryTrie<4>\
-    \ trie;\n        trie.insert(1);\n        trie.insert(4);\n        trie.insert(4);\n\
-    \        assert(trie.size() == 3 && trie.count(4) == 2);\n        assert(trie.kth(1)\
-    \ == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4) && trie.count(4)\
-    \ == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1, 4, 2});\n     \
-    \   assert(tree.root == 1);\n        assert(tree.par[0] == 1 && tree.par[3] ==\
-    \ 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int> comp;\n     \
-    \   comp.add(10);\n        comp.add(3);\n        comp.add(10);\n        comp.build();\n\
-    \        assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);\n\
-    \        assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));\n\
-    \    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n   \
-    \     seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
-    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
-    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
-    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
-    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
-    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
-    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
-    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
-    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
-    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
-    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
-    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
-    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
-    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
-    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
-    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
-    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
-    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
-    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
-    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
-    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
-    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \ x) == naive[y][x]);\n            }\n        }\n    }\n    {\n        using Grid\
+    \ = std::vector<std::string>;\n        const Grid g{\"abc\", \"def\"};\n     \
+    \   assert((rotate90(g) == Grid{\"da\", \"eb\", \"fc\"}));\n        assert((rotate180(g)\
+    \ == Grid{\"fed\", \"cba\"}));\n        assert((rotate270(g) == Grid{\"cf\", \"\
+    be\", \"ad\"}));\n        assert(rotate(g, 0) == g && rotate(g, 5) == rotate90(g)\
+    \ && rotate(g, -1) == rotate270(g));\n        assert(rotate90(Grid{}).empty()\
+    \ && rotate180(Grid{}).empty());\n\n        using IntGrid = std::vector<std::vector<int>>;\n\
+    \        const IntGrid a{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};\n     \
+    \   for (int k = -4; k <= 4; ++k) {\n            const IntGrid r = rotate(a, k);\n\
+    \            const int H = (int)r.size(), W = (int)r[0].size();\n            assert(((k\
+    \ % 2 == 0) ? (H == 3 && W == 4) : (H == 4 && W == 3)));\n            assert(rotate(r,\
+    \ -k) == a);\n            assert(rotate90(rotate(a, k - 1)) == r);\n        }\n\
+    \n        const std::vector<std::vector<bool>> b{{true, false}};\n        assert((rotate90(b)\
+    \ == std::vector<std::vector<bool>>{{true}, {false}}));\n    }\n    {\n      \
+    \  BinaryTrie<4> trie;\n        trie.insert(1);\n        trie.insert(4);\n   \
+    \     trie.insert(4);\n        assert(trie.size() == 3 && trie.count(4) == 2);\n\
+    \        assert(trie.kth(1) == 4 && trie.min_element(7) == 3);\n        assert(trie.erase(4)\
+    \ && trie.count(4) == 1);\n    }\n    {\n        CartesianTree<int> tree({3, 1,\
+    \ 4, 2});\n        assert(tree.root == 1);\n        assert(tree.par[0] == 1 &&\
+    \ tree.par[3] == 1 && tree.par[2] == 3);\n    }\n    {\n        Compressor<int>\
+    \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
+    \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
+    \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
+    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
+    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
+    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
+    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
+    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
+    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
+    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
+    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
+    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
+    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
+    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
+    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
+    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
+    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
+    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
+    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
+    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
+    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
+    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
+    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
+    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
+    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
+    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
+    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1772,12 +1830,13 @@ data:
   - tree/lca_binary_lifting.hpp
   - tree/lca_euler_tour.hpp
   - utils/fraction.hpp
+  - utils/grid_rotate.hpp
   - utils/hash.hpp
   - utils/int128.hpp
   isVerificationFile: false
   path: tests/test.cpp
   requiredBy: []
-  timestamp: '2026-10-15 08:53:14+09:00'
+  timestamp: '2026-10-17 14:30:16+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: tests/test.cpp

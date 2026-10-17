@@ -120,7 +120,7 @@ data:
   isVerificationFile: true
   path: verify/static_range_count_distinct.test.cpp
   requiredBy: []
-  timestamp: '2026-10-15 08:53:14+09:00'
+  timestamp: '2026-10-17 14:30:16+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/static_range_count_distinct.test.cpp

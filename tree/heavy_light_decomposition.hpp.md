@@ -175,7 +175,7 @@ data:
   requiredBy:
   - tests/tree_randomized.cpp
   - tests/test.cpp
-  timestamp: '2026-10-15 08:53:14+09:00'
+  timestamp: '2026-10-17 14:30:16+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/vertex_add_path_sum.test.cpp

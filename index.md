@@ -90,6 +90,9 @@ data:
     - icon: ':warning:'
       path: utils/fraction.hpp
       title: "\u6709\u7406\u6570"
+    - icon: ':warning:'
+      path: utils/grid_rotate.hpp
+      title: "\u4E8C\u6B21\u5143\u914D\u5217\u306E\u56DE\u8EE2"
     - icon: ':heavy_check_mark:'
       path: utils/hash.hpp
       title: "\u4E71\u6570\u5316\u30CF\u30C3\u30B7\u30E5\u30B3\u30F3\u30C6\u30CA"
