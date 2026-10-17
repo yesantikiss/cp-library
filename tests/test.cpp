@@ -22,6 +22,7 @@
 #include "tree/lca_binary_lifting.hpp"
 #include "tree/lca_euler_tour.hpp"
 #include "utils/fraction.hpp"
+#include "utils/grid_rotate.hpp"
 #include "utils/hash.hpp"
 #include "utils/int128.hpp"
 
@@ -99,6 +100,28 @@ int main() {
                     for (int x = 0; x < W; ++x) assert(ps.get(y, x) == naive[y][x]);
             }
         }
+    }
+    {
+        using Grid = std::vector<std::string>;
+        const Grid g{"abc", "def"};
+        assert((rotate90(g) == Grid{"da", "eb", "fc"}));
+        assert((rotate180(g) == Grid{"fed", "cba"}));
+        assert((rotate270(g) == Grid{"cf", "be", "ad"}));
+        assert(rotate(g, 0) == g && rotate(g, 5) == rotate90(g) && rotate(g, -1) == rotate270(g));
+        assert(rotate90(Grid{}).empty() && rotate180(Grid{}).empty());
+
+        using IntGrid = std::vector<std::vector<int>>;
+        const IntGrid a{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+        for (int k = -4; k <= 4; ++k) {
+            const IntGrid r = rotate(a, k);
+            const int H = (int)r.size(), W = (int)r[0].size();
+            assert(((k % 2 == 0) ? (H == 3 && W == 4) : (H == 4 && W == 3)));
+            assert(rotate(r, -k) == a);
+            assert(rotate90(rotate(a, k - 1)) == r);
+        }
+
+        const std::vector<std::vector<bool>> b{{true, false}};
+        assert((rotate90(b) == std::vector<std::vector<bool>>{{true}, {false}}));
     }
     {
         BinaryTrie<4> trie;
