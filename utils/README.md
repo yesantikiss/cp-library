@@ -37,3 +37,11 @@ SplitMix64 を用いた `yesantikiss::custom_hash` で利用するための
 
 標準のコンテナと同様に、必要に応じてハッシュ関数、等値比較、アロケータを
 追加のテンプレート引数で指定できます。
+
+## `grid_rotate.hpp`
+
+二次元配列を時計回りに回転した新しい配列を返します。`std::vector<std::vector<T>>` と `std::vector<std::string>` の両方に対応します。
+
+- `rotate90(a)`, `rotate180(a)`, `rotate270(a)`
+- `rotate(a, k)`: 時計回りに `90k°`。`k` は負でもよい
+- 計算量: `O(HW)`
