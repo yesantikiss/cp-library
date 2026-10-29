@@ -156,7 +156,7 @@ int main() {
         lines.add_all(0, 10);
         lines.add_line(0, 8);
         assert(lines.get(-3) == 7 && lines.get(4) == 8);
-        DynamicLiChaoTree<long long, false> upper(0, 4);
+        DynamicLiChaoTree<long long, std::greater<>> upper(0, 4);
         upper.add_line(1, 0);
         upper.add_line(-1, 3);
         assert(upper.get(0) == 3 && upper.get(3) == 3);

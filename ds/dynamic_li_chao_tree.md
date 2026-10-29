@@ -5,7 +5,7 @@ documentation_of: ./dynamic_li_chao_tree.hpp
 
 ## 概要
 
-`yesantikiss::DynamicLiChaoTree<T, MINIMIZE, U>` は、整数座標の範囲
+`yesantikiss::DynamicLiChaoTree<T, Compare, U>` は、整数座標の範囲
 `[lo, hi)` で直線・線分を追加しながら、点 `x` での最小値（最大値）を
 オンラインで求める Li Chao Tree です。直線が入った経路だけノードを
 生成するので、座標圧縮なしで巨大な範囲を扱えます。
@@ -13,7 +13,9 @@ documentation_of: ./dynamic_li_chao_tree.hpp
 ## テンプレート引数
 
 - `T`: 座標と入力する係数の型です。
-- `MINIMIZE`: `true` なら最小値、`false` なら最大値を扱います。既定値は `true` です。
+- `Compare`: `std::less<>` なら最小値、`std::greater<>` なら最大値を扱います。
+  既定値は `std::less<>` です。2 本の直線の大小が高々 1 回しか入れ替わらない
+  順序でないと正しく動かないので、この 2 つ以外は想定していません。
 - `U`: 直線の評価に使う型です。既定値は `T` です。`ax + b` が `T` に
   収まらない場合は `__int128` を指定してください。
 

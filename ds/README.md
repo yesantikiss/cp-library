@@ -49,14 +49,14 @@
 
 ## `dynamic_li_chao_tree.hpp`
 
-直線・線分を追加しながら点での最小値（最大値）を求める動的 Li Chao Tree `yesantikiss::DynamicLiChaoTree<T, MINIMIZE, U>` です。
+直線・線分を追加しながら点での最小値（最大値）を求める動的 Li Chao Tree `yesantikiss::DynamicLiChaoTree<T, Compare, U>` です。
 
 - 対象範囲: 整数座標 `[lo, hi)`
 - `add_line(a, b)`: 直線 `ax + b` を追加 `O(log C)`
 - `add_segment(a, b, l, r)`: 線分を `[l, r)` に追加 `O(log^2 C)`
 - `add_all(p, q)`: 追加済みの全直線に `px + q` を加算 `O(1)`
 - `has_line(x)`, `get(x)`: 直線の有無と最小値（最大値） `O(log C)`
-- `MINIMIZE = false` で最大値、`U = __int128` で評価型を拡張
+- `Compare = std::greater<>` で最大値、`U = __int128` で評価型を拡張
 
 ## `dynamic_segtree.hpp`
 

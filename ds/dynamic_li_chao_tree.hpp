@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -11,8 +12,9 @@ namespace yesantikiss {
     // - 直線が入った経路だけノード生成
     // - add_all で全直線に一次関数を一括加算
     // - T: 座標・入力の型, U: 評価に使う型（オーバーフローするなら __int128）
+    // - Compare: std::less<> なら最小値、std::greater<> なら最大値
 
-    template <class T, bool MINIMIZE = true, class U = T>
+    template <class T, class Compare = std::less<>, class U = T>
     struct DynamicLiChaoTree {
     private:
         struct Line {
@@ -32,11 +34,7 @@ namespace yesantikiss {
         std::vector<Node> pool_;
 
         static bool better(const Line& f, const Line& g, T x) {
-            if constexpr (MINIMIZE) {
-                return f.eval(x) < g.eval(x);
-            } else {
-                return f.eval(x) > g.eval(x);
-            }
+            return Compare{}(f.eval(x), g.eval(x));
         }
 
         int new_node() {
@@ -106,14 +104,8 @@ namespace yesantikiss {
                 const Node& nd = pool_[v];
                 if (nd.has) {
                     U y = nd.line.eval(x);
-                    if (!found) {
-                        best = y;
-                        found = true;
-                    } else if constexpr (MINIMIZE) {
-                        if (y < best) best = y;
-                    } else {
-                        if (y > best) best = y;
-                    }
+                    if (!found || Compare{}(y, best)) best = y;
+                    found = true;
                 }
                 if (r - l == 1) break;
                 T m = l + (r - l) / 2;
@@ -166,7 +158,7 @@ namespace yesantikiss {
 
         bool has_line(T x) const { return query(x).first; }
 
-        // x での最小値（MINIMIZE = false なら最大値）。x に直線がある必要あり
+        // x での最小値（std::greater<> なら最大値）。x に直線がある必要あり
         U get(T x) const {
             std::pair<bool, U> res = query(x);
             assert(res.first);

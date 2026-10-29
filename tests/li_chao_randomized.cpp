@@ -1,10 +1,11 @@
 #include <cassert>
+#include <functional>
 #include <random>
 #include <vector>
 
 #include "ds/dynamic_li_chao_tree.hpp"
 
-template <bool MINIMIZE, class U>
+template <class Compare, class U>
 void run(std::mt19937_64& random, long long max_coord, long long max_a,
          long long max_b) {
     auto uniform = [&](long long lo, long long hi) {
@@ -19,7 +20,7 @@ void run(std::mt19937_64& random, long long max_coord, long long max_a,
     for (int trial = 0; trial < 200; ++trial) {
         long long lo = uniform(-max_coord, max_coord);
         long long hi = lo + uniform(1, max_coord);
-        yesantikiss::DynamicLiChaoTree<long long, MINIMIZE, U> tree(lo, hi);
+        yesantikiss::DynamicLiChaoTree<long long, Compare, U> tree(lo, hi);
         std::vector<Segment> segments;
 
         for (int step = 0; step < 300; ++step) {
@@ -52,7 +53,7 @@ void run(std::mt19937_64& random, long long max_coord, long long max_a,
                 for (const Segment& s : segments) {
                     if (x < s.l || s.r <= x) continue;
                     __int128 y = s.a * x + s.b;
-                    if (!found || (MINIMIZE ? y < best : y > best)) best = y;
+                    if (!found || Compare{}(y, best)) best = y;
                     found = true;
                 }
                 assert(tree.has_line(x) == found);
@@ -64,9 +65,11 @@ void run(std::mt19937_64& random, long long max_coord, long long max_a,
 
 int main() {
     std::mt19937_64 random(987654321);
-    run<true, long long>(random, 50, 10, 100);
-    run<false, long long>(random, 50, 10, 100);
-    run<true, long long>(random, 1000000, 1000, 1000000);
-    run<true, __int128>(random, 1000000000, 1000000000, 1000000000000000000);
-    run<false, __int128>(random, 1000000000, 1000000000, 1000000000000000000);
+    run<std::less<>, long long>(random, 50, 10, 100);
+    run<std::greater<>, long long>(random, 50, 10, 100);
+    run<std::less<>, long long>(random, 1000000, 1000, 1000000);
+    run<std::less<>, __int128>(random, 1000000000, 1000000000,
+                               1000000000000000000);
+    run<std::greater<>, __int128>(random, 1000000000, 1000000000,
+                                  1000000000000000000);
 }
