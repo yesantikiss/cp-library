@@ -56,7 +56,8 @@
 - `add_segment(a, b, l, r)`: 線分を `[l, r)` に追加 `O(log^2 C)`
 - `add_all(p, q)`: 追加済みの全直線に `px + q` を加算 `O(1)`
 - `has_line(x)`, `get(x)`: 直線の有無と最小値（最大値） `O(log C)`
-- `Compare = std::greater<>` で最大値、`U = __int128` で評価型を拡張
+- 座標は整数のみ。係数と評価の型 `U` は `__int128` や `double` も指定可能
+- `Compare = std::greater<>` で最大値
 
 ## `dynamic_segtree.hpp`
 

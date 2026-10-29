@@ -160,6 +160,10 @@ int main() {
         upper.add_line(1, 0);
         upper.add_line(-1, 3);
         assert(upper.get(0) == 3 && upper.get(3) == 3);
+        DynamicLiChaoTree<int, std::less<>, double> real(0, 10);
+        real.add_line(0.5, 0.25);
+        real.add_line(-1.5, 6.0);
+        assert(real.get(1) == 0.75 && real.get(4) == 0.0);
     }
     {
         dynamic_segtree<long long, op_sum, e_sum> seg(8);
