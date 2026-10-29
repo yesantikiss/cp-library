@@ -140,7 +140,7 @@ data:
   isVerificationFile: true
   path: verify/vertex_add_path_sum.test.cpp
   requiredBy: []
-  timestamp: '2026-10-17 14:30:16+09:00'
+  timestamp: '2026-10-29 20:48:18+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/vertex_add_path_sum.test.cpp

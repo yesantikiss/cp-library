@@ -79,7 +79,7 @@ data:
   path: algo/mo.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-17 14:30:16+09:00'
+  timestamp: '2026-10-29 20:48:18+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/static_range_count_distinct.test.cpp

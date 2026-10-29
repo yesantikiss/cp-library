@@ -24,6 +24,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: ds/compressor.hpp
       title: "\u5EA7\u6A19\u5727\u7E2E"
+    - icon: ':heavy_check_mark:'
+      path: ds/dynamic_li_chao_tree.hpp
+      title: "\u52D5\u7684 Li Chao Tree"
     - icon: ':warning:'
       path: ds/dynamic_segtree.hpp
       title: "\u52D5\u7684\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
@@ -65,6 +68,9 @@ data:
       title: Rolling Hash
   - name: tests
     pages:
+    - icon: ':warning:'
+      path: tests/li_chao_randomized.cpp
+      title: tests/li_chao_randomized.cpp
     - icon: ':warning:'
       path: tests/rolling_hash_tu.cpp
       title: tests/rolling_hash_tu.cpp
@@ -133,11 +139,17 @@ data:
       path: verify/lca_euler_tour.test.cpp
       title: verify/lca_euler_tour.test.cpp
     - icon: ':heavy_check_mark:'
+      path: verify/line_add_get_min.test.cpp
+      title: verify/line_add_get_min.test.cpp
+    - icon: ':heavy_check_mark:'
       path: verify/many_aplusb_128bit.test.cpp
       title: verify/many_aplusb_128bit.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/restrictive_filesystem.test.cpp
       title: verify/restrictive_filesystem.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/segment_add_get_min.test.cpp
+      title: verify/segment_add_get_min.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/set_xor_min.test.cpp
       title: verify/set_xor_min.test.cpp

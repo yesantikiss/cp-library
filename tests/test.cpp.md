@@ -17,6 +17,9 @@ data:
   - icon: ':heavy_check_mark:'
     path: ds/compressor.hpp
     title: "\u5EA7\u6A19\u5727\u7E2E"
+  - icon: ':heavy_check_mark:'
+    path: ds/dynamic_li_chao_tree.hpp
+    title: "\u52D5\u7684 Li Chao Tree"
   - icon: ':warning:'
     path: ds/dynamic_segtree.hpp
     title: "\u52D5\u7684\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
@@ -239,53 +242,134 @@ data:
     \ -1\uFF09: O(k log n)\n        std::vector<int> map(const std::vector<T>& a)\
     \ const {\n            assert(built);\n            std::vector<int> res; res.reserve(a.size());\n\
     \            for (auto& x : a) res.push_back(get(x));\n            return res;\n\
-    \        }\n    };\n}\n#line 2 \"ds/dynamic_segtree.hpp\"\n\n#line 5 \"ds/dynamic_segtree.hpp\"\
-    \n#include <cstddef>\n#line 7 \"ds/dynamic_segtree.hpp\"\n\n// \u52D5\u7684\uFF08\
-    implicit\uFF09\u30BB\u30B0\u30E1\u30F3\u30C8\u6728\n// - \u533A\u9593 [0, n) \u3092\
-    \u6271\u3046\n// - \u66F4\u65B0\u304C\u5165\u3063\u305F\u7D4C\u8DEF\u3060\u3051\
-    \u30CE\u30FC\u30C9\u751F\u6210\n// - ACL segtree \u98A8\u30A4\u30F3\u30BF\u30D5\
-    \u30A7\u30FC\u30B9\n\nnamespace yesantikiss {\n    // \u52D5\u7684\uFF08implicit\uFF09\
-    \u30BB\u30B0\u30E1\u30F3\u30C8\u6728\n    // - \u533A\u9593 [0, n) \u3092\u6271\
-    \u3046\n    // - \u66F4\u65B0\u304C\u5165\u3063\u305F\u7D4C\u8DEF\u3060\u3051\u30CE\
-    \u30FC\u30C9\u751F\u6210\n    // - ACL segtree \u98A8\u30A4\u30F3\u30BF\u30D5\u30A7\
-    \u30FC\u30B9\n    \n    template <class S, S (*op)(S, S), S (*e)()>\n    struct\
-    \ dynamic_segtree {\n    private:\n        struct Node {\n            int l =\
-    \ -1, r = -1;\n            S val;\n            Node() : val(e()) {}\n        };\n\
-    \    \n        long long n_ = 0;\n        unsigned long long size_ = 1;\n    \
-    \    int root_ = -1;\n        std::vector<Node> pool_;\n    \n        static unsigned\
-    \ long long ceil_pow2_ull(unsigned long long x) {\n            unsigned long long\
-    \ p = 1;\n            while (p < x) p <<= 1;\n            return p;\n        }\n\
-    \    \n        int new_node() {\n            pool_.emplace_back();\n         \
-    \   return (int)pool_.size() - 1;\n        }\n    \n        S node_val(int idx)\
-    \ const {\n            return (idx == -1) ? e() : pool_[idx].val;\n        }\n\
-    \    \n        S prod_rec(int idx,\n                   unsigned long long segL,\
-    \ unsigned long long segR,\n                   unsigned long long ql, unsigned\
-    \ long long qr) const {\n            if (idx == -1) return e();\n            if\
-    \ (qr <= segL || segR <= ql) return e();\n            if (ql <= segL && segR <=\
-    \ qr) return pool_[idx].val;\n            unsigned long long mid = (segL + segR)\
-    \ >> 1;\n            S left = prod_rec(pool_[idx].l, segL, mid, ql, qr);\n   \
-    \         S right = prod_rec(pool_[idx].r, mid, segR, ql, qr);\n            return\
-    \ op(left, right);\n        }\n    \n        template <class F>\n        long\
-    \ long max_right_rec(int idx,\n                                unsigned long long\
-    \ segL, unsigned long long segR,\n                                unsigned long\
-    \ long ql,\n                                F& f, S& sm) const {\n           \
-    \ if (segR <= ql) return (long long)ql;\n            S segVal = (idx == -1) ?\
-    \ e() : pool_[idx].val;\n            if (segL >= ql) {\n                S nxt\
-    \ = op(sm, segVal);\n                if (f(nxt)) {\n                    sm = nxt;\n\
-    \                    return (long long)segR;\n                }\n            \
-    \    if (segR - segL == 1) return (long long)segL;\n            }\n          \
-    \  unsigned long long mid = (segL + segR) >> 1;\n            int lch = (idx ==\
-    \ -1) ? -1 : pool_[idx].l;\n            int rch = (idx == -1) ? -1 : pool_[idx].r;\n\
-    \            long long resL = max_right_rec(lch, segL, mid, ql, f, sm);\n    \
-    \        if ((unsigned long long)resL < mid) return resL;\n            return\
-    \ max_right_rec(rch, mid, segR, ql, f, sm);\n        }\n    \n        template\
-    \ <class F>\n        long long min_left_rec(int idx,\n                       \
-    \        unsigned long long segL, unsigned long long segR,\n                 \
-    \              unsigned long long qr,\n                               F& f, S&\
-    \ sm) const {\n            if (qr <= segL) return (long long)qr;\n           \
-    \ S segVal = (idx == -1) ? e() : pool_[idx].val;\n            if (segR <= qr)\
-    \ {\n                S nxt = op(segVal, sm);\n                if (f(nxt)) {\n\
-    \                    sm = nxt;\n                    return (long long)segL;\n\
+    \        }\n    };\n}\n#line 2 \"ds/dynamic_li_chao_tree.hpp\"\n\n#line 4 \"ds/dynamic_li_chao_tree.hpp\"\
+    \n#include <cstddef>\n#line 6 \"ds/dynamic_li_chao_tree.hpp\"\n#include <type_traits>\n\
+    #line 9 \"ds/dynamic_li_chao_tree.hpp\"\n\nnamespace yesantikiss {\n    // \u52D5\
+    \u7684 Li Chao Tree\n    // - \u5EA7\u6A19\u7BC4\u56F2 [lo, hi) \u306E\u6574\u6570\
+    \u70B9\u3067\u76F4\u7DDA\u30FB\u7DDA\u5206\u306E\u6700\u5C0F\u5024\uFF08\u6700\
+    \u5927\u5024\uFF09\u3092\u6271\u3046\n    // - \u76F4\u7DDA\u304C\u5165\u3063\u305F\
+    \u7D4C\u8DEF\u3060\u3051\u30CE\u30FC\u30C9\u751F\u6210\n    // - add_all \u3067\
+    \u5168\u76F4\u7DDA\u306B\u4E00\u6B21\u95A2\u6570\u3092\u4E00\u62EC\u52A0\u7B97\
+    \n    // - T: \u5EA7\u6A19\u306E\u578B\uFF08\u6574\u6570\u578B\u306E\u307F\uFF09\
+    , U: \u4FC2\u6570\u3068\u8A55\u4FA1\u306B\u4F7F\u3046\u578B\uFF08\u30AA\u30FC\u30D0\
+    \u30FC\u30D5\u30ED\u30FC\u3059\u308B\u306A\u3089 __int128\uFF09\n    // - Compare:\
+    \ std::less<> \u306A\u3089\u6700\u5C0F\u5024\u3001std::greater<> \u306A\u3089\u6700\
+    \u5927\u5024\n\n    template <class T, class Compare = std::less<>, class U =\
+    \ T>\n    struct DynamicLiChaoTree {\n        static_assert(std::is_integral_v<T>\
+    \ || std::is_same_v<T, __int128>,\n                      \"T must be an integer\
+    \ type\");\n\n    private:\n        struct Line {\n            U a, b;\n     \
+    \       U eval(T x) const { return a * U(x) + b; }\n        };\n\n        struct\
+    \ Node {\n            Line line{U(0), U(0)};\n            bool has = false;\n\
+    \            int l = -1, r = -1;\n        };\n\n        T lo_ = 0, hi_ = 1;\n\
+    \        U add_a_ = 0, add_b_ = 0;\n        int root_ = -1;\n        std::vector<Node>\
+    \ pool_;\n\n        static bool better(const Line& f, const Line& g, T x) {\n\
+    \            return Compare{}(f.eval(x), g.eval(x));\n        }\n\n        int\
+    \ new_node() {\n            pool_.emplace_back();\n            return (int)pool_.size()\
+    \ - 1;\n        }\n\n        int child(int v, bool right) {\n            int c\
+    \ = right ? pool_[v].r : pool_[v].l;\n            if (c == -1) {\n           \
+    \     c = new_node();\n                (right ? pool_[v].r : pool_[v].l) = c;\n\
+    \            }\n            return c;\n        }\n\n        // \u30CE\u30FC\u30C9\
+    \ v\uFF08\u62C5\u5F53\u533A\u9593 [l, r)\uFF09\u4EE5\u4E0B\u306B\u76F4\u7DDA f\
+    \ \u3092\u5165\u308C\u308B\n        void insert_line(int v, T l, T r, Line f)\
+    \ {\n            while (true) {\n                Node& nd = pool_[v];\n      \
+    \          if (!nd.has) {\n                    nd.line = f;\n                \
+    \    nd.has = true;\n                    return;\n                }\n        \
+    \        bool left_better = better(f, nd.line, l);\n                bool right_better\
+    \ = better(f, nd.line, r - 1);\n                // \u533A\u9593\u306E\u4E21\u7AEF\
+    \u3067\u8CA0\u3051\u308B\u306A\u3089\u5168\u4F53\u3067\u8CA0\u3051\u3001\u4E21\
+    \u7AEF\u3067\u52DD\u3064\u306A\u3089\u5168\u4F53\u3067\u52DD\u3061\n         \
+    \       if (!left_better && !right_better) return;\n                if (left_better\
+    \ && right_better) {\n                    nd.line = f;\n                    return;\n\
+    \                }\n                T m = l + (r - l) / 2;\n                bool\
+    \ mid_better = better(f, nd.line, m);\n                if (mid_better) std::swap(nd.line,\
+    \ f);\n                if (r - l == 1) return;\n                if (left_better\
+    \ != mid_better) {\n                    v = child(v, false);\n               \
+    \     r = m;\n                } else {\n                    v = child(v, true);\n\
+    \                    l = m;\n                }\n            }\n        }\n\n \
+    \       void insert_segment(int v, T nl, T nr, T l, T r, const Line& f) {\n  \
+    \          if (r <= nl || nr <= l) return;\n            if (l <= nl && nr <= r)\
+    \ {\n                insert_line(v, nl, nr, f);\n                return;\n   \
+    \         }\n            T m = nl + (nr - nl) / 2;\n            if (l < m) insert_segment(child(v,\
+    \ false), nl, m, l, r, f);\n            if (m < r) insert_segment(child(v, true),\
+    \ m, nr, l, r, f);\n        }\n\n        // x \u3092\u901A\u308B\u7D4C\u8DEF\u4E0A\
+    \u306E\u6700\u826F\u5024\u3002\u76F4\u7DDA\u304C\u306A\u3051\u308C\u3070 first\
+    \ = false\n        std::pair<bool, U> query(T x) const {\n            assert(lo_\
+    \ <= x && x < hi_);\n            bool found = false;\n            U best = 0;\n\
+    \            int v = root_;\n            T l = lo_, r = hi_;\n            while\
+    \ (v != -1) {\n                const Node& nd = pool_[v];\n                if\
+    \ (nd.has) {\n                    U y = nd.line.eval(x);\n                   \
+    \ if (!found || Compare{}(y, best)) best = y;\n                    found = true;\n\
+    \                }\n                if (r - l == 1) break;\n                T\
+    \ m = l + (r - l) / 2;\n                if (x < m) {\n                    v =\
+    \ nd.l;\n                    r = m;\n                } else {\n              \
+    \      v = nd.r;\n                    l = m;\n                }\n            }\n\
+    \            return {found, best};\n        }\n\n    public:\n        DynamicLiChaoTree()\
+    \ = default;\n        DynamicLiChaoTree(T lo, T hi) { init(lo, hi); }\n\n    \
+    \    void init(T lo, T hi) {\n            assert(lo < hi);\n            lo_ =\
+    \ lo;\n            hi_ = hi;\n            add_a_ = add_b_ = 0;\n            root_\
+    \ = -1;\n            pool_.clear();\n        }\n\n        void reserve_nodes(std::size_t\
+    \ m) { pool_.reserve(m); }\n\n        // \u76F4\u7DDA ax + b \u3092\u5168\u57DF\
+    \u306B\u8FFD\u52A0\n        void add_line(U a, U b) {\n            if (root_ ==\
+    \ -1) root_ = new_node();\n            insert_line(root_, lo_, hi_, Line{a - add_a_,\
+    \ b - add_b_});\n        }\n\n        // \u7DDA\u5206 ax + b \u3092 [l, r) \u306B\
+    \u3060\u3051\u8FFD\u52A0\n        void add_segment(U a, U b, T l, T r) {\n   \
+    \         assert(lo_ <= l && l <= r && r <= hi_);\n            if (l == r) return;\n\
+    \            if (root_ == -1) root_ = new_node();\n            insert_segment(root_,\
+    \ lo_, hi_, l, r,\n                           Line{a - add_a_, b - add_b_});\n\
+    \        }\n\n        // \u8FFD\u52A0\u6E08\u307F\u306E\u3059\u3079\u3066\u306E\
+    \u76F4\u7DDA\u306B px + q \u3092\u52A0\u7B97\n        void add_all(U p, U q) {\n\
+    \            add_a_ += p;\n            add_b_ += q;\n        }\n\n        bool\
+    \ has_line(T x) const { return query(x).first; }\n\n        // x \u3067\u306E\u6700\
+    \u5C0F\u5024\uFF08std::greater<> \u306A\u3089\u6700\u5927\u5024\uFF09\u3002x \u306B\
+    \u76F4\u7DDA\u304C\u3042\u308B\u5FC5\u8981\u3042\u308A\n        U get(T x) const\
+    \ {\n            std::pair<bool, U> res = query(x);\n            assert(res.first);\n\
+    \            return res.second + add_a_ * U(x) + add_b_;\n        }\n    };\n\
+    }\n#line 2 \"ds/dynamic_segtree.hpp\"\n\n#line 7 \"ds/dynamic_segtree.hpp\"\n\n\
+    // \u52D5\u7684\uFF08implicit\uFF09\u30BB\u30B0\u30E1\u30F3\u30C8\u6728\n// -\
+    \ \u533A\u9593 [0, n) \u3092\u6271\u3046\n// - \u66F4\u65B0\u304C\u5165\u3063\u305F\
+    \u7D4C\u8DEF\u3060\u3051\u30CE\u30FC\u30C9\u751F\u6210\n// - ACL segtree \u98A8\
+    \u30A4\u30F3\u30BF\u30D5\u30A7\u30FC\u30B9\n\nnamespace yesantikiss {\n    //\
+    \ \u52D5\u7684\uFF08implicit\uFF09\u30BB\u30B0\u30E1\u30F3\u30C8\u6728\n    //\
+    \ - \u533A\u9593 [0, n) \u3092\u6271\u3046\n    // - \u66F4\u65B0\u304C\u5165\u3063\
+    \u305F\u7D4C\u8DEF\u3060\u3051\u30CE\u30FC\u30C9\u751F\u6210\n    // - ACL segtree\
+    \ \u98A8\u30A4\u30F3\u30BF\u30D5\u30A7\u30FC\u30B9\n    \n    template <class\
+    \ S, S (*op)(S, S), S (*e)()>\n    struct dynamic_segtree {\n    private:\n  \
+    \      struct Node {\n            int l = -1, r = -1;\n            S val;\n  \
+    \          Node() : val(e()) {}\n        };\n    \n        long long n_ = 0;\n\
+    \        unsigned long long size_ = 1;\n        int root_ = -1;\n        std::vector<Node>\
+    \ pool_;\n    \n        static unsigned long long ceil_pow2_ull(unsigned long\
+    \ long x) {\n            unsigned long long p = 1;\n            while (p < x)\
+    \ p <<= 1;\n            return p;\n        }\n    \n        int new_node() {\n\
+    \            pool_.emplace_back();\n            return (int)pool_.size() - 1;\n\
+    \        }\n    \n        S node_val(int idx) const {\n            return (idx\
+    \ == -1) ? e() : pool_[idx].val;\n        }\n    \n        S prod_rec(int idx,\n\
+    \                   unsigned long long segL, unsigned long long segR,\n      \
+    \             unsigned long long ql, unsigned long long qr) const {\n        \
+    \    if (idx == -1) return e();\n            if (qr <= segL || segR <= ql) return\
+    \ e();\n            if (ql <= segL && segR <= qr) return pool_[idx].val;\n   \
+    \         unsigned long long mid = (segL + segR) >> 1;\n            S left = prod_rec(pool_[idx].l,\
+    \ segL, mid, ql, qr);\n            S right = prod_rec(pool_[idx].r, mid, segR,\
+    \ ql, qr);\n            return op(left, right);\n        }\n    \n        template\
+    \ <class F>\n        long long max_right_rec(int idx,\n                      \
+    \          unsigned long long segL, unsigned long long segR,\n               \
+    \                 unsigned long long ql,\n                                F& f,\
+    \ S& sm) const {\n            if (segR <= ql) return (long long)ql;\n        \
+    \    S segVal = (idx == -1) ? e() : pool_[idx].val;\n            if (segL >= ql)\
+    \ {\n                S nxt = op(sm, segVal);\n                if (f(nxt)) {\n\
+    \                    sm = nxt;\n                    return (long long)segR;\n\
+    \                }\n                if (segR - segL == 1) return (long long)segL;\n\
+    \            }\n            unsigned long long mid = (segL + segR) >> 1;\n   \
+    \         int lch = (idx == -1) ? -1 : pool_[idx].l;\n            int rch = (idx\
+    \ == -1) ? -1 : pool_[idx].r;\n            long long resL = max_right_rec(lch,\
+    \ segL, mid, ql, f, sm);\n            if ((unsigned long long)resL < mid) return\
+    \ resL;\n            return max_right_rec(rch, mid, segR, ql, f, sm);\n      \
+    \  }\n    \n        template <class F>\n        long long min_left_rec(int idx,\n\
+    \                               unsigned long long segL, unsigned long long segR,\n\
+    \                               unsigned long long qr,\n                     \
+    \          F& f, S& sm) const {\n            if (qr <= segL) return (long long)qr;\n\
+    \            S segVal = (idx == -1) ? e() : pool_[idx].val;\n            if (segR\
+    \ <= qr) {\n                S nxt = op(segVal, sm);\n                if (f(nxt))\
+    \ {\n                    sm = nxt;\n                    return (long long)segL;\n\
     \                }\n                if (segR - segL == 1) return (long long)segR;\n\
     \            }\n            unsigned long long mid = (segL + segR) >> 1;\n   \
     \         int lch = (idx == -1) ? -1 : pool_[idx].l;\n            int rch = (idx\
@@ -344,23 +428,22 @@ data:
     \ long)r, ff, sm);\n            if (res < 0) res = 0;\n            if (res > r)\
     \ res = r;\n            return res;\n        }\n    };\n}\n#line 2 \"ds/interval_map.hpp\"\
     \n\n#line 6 \"ds/interval_map.hpp\"\n#include <iterator>\n#include <ostream>\n\
-    #include <set>\n#include <tuple>\n#include <type_traits>\n#line 13 \"ds/interval_map.hpp\"\
-    \n\nnamespace yesantikiss {\n    using std::distance;\n    using std::max;\n \
-    \   using std::min;\n    using std::next;\n    using std::ostream;\n    using\
-    \ std::prev;\n    using std::set;\n    using std::vector;\n    /*\n      IntervalMap\uFF08\
-    \u533A\u9593 map / \u533A\u9593 set \u7BA1\u7406\uFF1A\u5B8C\u6210\u5F62\uFF09\
-    \n      ==============================================\n      \u534A\u958B\u533A\
-    \u9593 [l, r) \u3092 set \u3067\u7BA1\u7406\u3057\u3001\u5404\u533A\u9593\u306B\
-    \u5024 v \u3092\u6301\u305F\u305B\u308B\u3002\n    \n      \u25A0 \u4E0D\u5909\
-    \u91CF\uFF08\u3053\u308C\u304C\u5D29\u308C\u306A\u3044\u3088\u3046\u306B\u5B9F\
-    \u88C5\u3059\u308B\uFF09\n      ----------------------------------------\n   \
-    \   1) \u533A\u9593\u306F\u4E92\u3044\u306B\u4EA4\u5DEE\u3057\u306A\u3044\n  \
-    \    2) \u5E38\u306B [L, R) \u3092\u5B8C\u5168\u306B\u88AB\u8986\u3057\u3066\u3044\
-    \u308B\uFF08init \u3067 1 \u672C\u5165\u308C\u3066\u958B\u59CB\uFF09\n      3)\
-    \ \u96A3\u63A5\u3057\u3066\u5024\u304C\u540C\u3058\u533A\u9593\u306F\u5B58\u5728\
-    \u3057\u306A\u3044\uFF08\u81EA\u52D5\u30DE\u30FC\u30B8\u3067\u6F70\u3059\uFF09\
-    \n    \n      \u25A0 \u4E3B\u8981 API\n      ----------\n      - locate(x)   \
-    \     : x \u3092\u542B\u3080\u533A\u9593\u306E iterator \u3092\u8FD4\u3059\uFF08\
+    #include <set>\n#include <tuple>\n#line 13 \"ds/interval_map.hpp\"\n\nnamespace\
+    \ yesantikiss {\n    using std::distance;\n    using std::max;\n    using std::min;\n\
+    \    using std::next;\n    using std::ostream;\n    using std::prev;\n    using\
+    \ std::set;\n    using std::vector;\n    /*\n      IntervalMap\uFF08\u533A\u9593\
+    \ map / \u533A\u9593 set \u7BA1\u7406\uFF1A\u5B8C\u6210\u5F62\uFF09\n      ==============================================\n\
+    \      \u534A\u958B\u533A\u9593 [l, r) \u3092 set \u3067\u7BA1\u7406\u3057\u3001\
+    \u5404\u533A\u9593\u306B\u5024 v \u3092\u6301\u305F\u305B\u308B\u3002\n    \n\
+    \      \u25A0 \u4E0D\u5909\u91CF\uFF08\u3053\u308C\u304C\u5D29\u308C\u306A\u3044\
+    \u3088\u3046\u306B\u5B9F\u88C5\u3059\u308B\uFF09\n      ----------------------------------------\n\
+    \      1) \u533A\u9593\u306F\u4E92\u3044\u306B\u4EA4\u5DEE\u3057\u306A\u3044\n\
+    \      2) \u5E38\u306B [L, R) \u3092\u5B8C\u5168\u306B\u88AB\u8986\u3057\u3066\
+    \u3044\u308B\uFF08init \u3067 1 \u672C\u5165\u308C\u3066\u958B\u59CB\uFF09\n \
+    \     3) \u96A3\u63A5\u3057\u3066\u5024\u304C\u540C\u3058\u533A\u9593\u306F\u5B58\
+    \u5728\u3057\u306A\u3044\uFF08\u81EA\u52D5\u30DE\u30FC\u30B8\u3067\u6F70\u3059\
+    \uFF09\n    \n      \u25A0 \u4E3B\u8981 API\n      ----------\n      - locate(x)\
+    \        : x \u3092\u542B\u3080\u533A\u9593\u306E iterator \u3092\u8FD4\u3059\uFF08\
     \u8D70\u67FB\u30FB\u30B8\u30E3\u30F3\u30D7\u7528\uFF09\n      - get_val(x)   \
     \    : \u70B9 x \u306E\u5024\n      - assign(l,r,v)    : [l,r) \u3092 v \u306B\
     \u300C\u4EE3\u5165\u300D\uFF08split + erase + insert + merge\uFF09\n      - apply(l,r,f)\
@@ -1383,7 +1466,7 @@ data:
     \        return is;\n    }\n\n    constexpr yesantikiss::u128 max_value = ~yesantikiss::u128(0);\n\
     \    yesantikiss::u128 parsed;\n    if (!yesantikiss::int128_detail::parse_magnitude(\n\
     \            token, first, max_value, parsed)) {\n        is.setstate(std::ios::failbit);\n\
-    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 28 \"\
+    \        return is;\n    }\n    value = parsed;\n    return is;\n}\n#line 29 \"\
     tests/test.cpp\"\n\nlong long op_sum(long long a, long long b) { return a + b;\
     \ }\nlong long e_sum() { return 0; }\n\nyesantikiss::RollingHash::ull rolling_hash_from_other_tu(const\
     \ std::string& s);\n\nint main() {\n    using namespace yesantikiss;\n\n    {\n\
@@ -1448,30 +1531,38 @@ data:
     \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
     \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
     \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
-    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
-    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
-    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
-    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
-    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
-    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
-    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
-    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
-    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
-    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
-    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
-    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
-    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
-    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
-    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
-    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
-    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
-    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
-    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
-    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
-    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
-    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
-    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \ std::vector<int>{1, 0}));\n    }\n    {\n        DynamicLiChaoTree<long long>\
+    \ lines(-5, 5);\n        assert(!lines.has_line(0));\n        lines.add_line(1,\
+    \ 0);\n        lines.add_segment(-2, 1, -5, 0);\n        assert(lines.get(-3)\
+    \ == -3 && lines.get(2) == 2);\n        lines.add_all(0, 10);\n        lines.add_line(0,\
+    \ 8);\n        assert(lines.get(-3) == 7 && lines.get(4) == 8);\n        DynamicLiChaoTree<long\
+    \ long, std::greater<>> upper(0, 4);\n        upper.add_line(1, 0);\n        upper.add_line(-1,\
+    \ 3);\n        assert(upper.get(0) == 3 && upper.get(3) == 3);\n        DynamicLiChaoTree<int,\
+    \ std::less<>, double> real(0, 10);\n        real.add_line(0.5, 0.25);\n     \
+    \   real.add_line(-1.5, 6.0);\n        assert(real.get(1) == 0.75 && real.get(4)\
+    \ == 0.0);\n    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n\
+    \        seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
+    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
+    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
+    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
+    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
+    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
+    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
+    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
+    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
+    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
+    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
+    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
+    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
+    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
+    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
+    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
+    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
+    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
+    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
+    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
+    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
+    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1598,9 +1689,10 @@ data:
     \ <limits>\n#include <sstream>\n#include <string>\n#include <vector>\n\n#include\
     \ \"algo/mo.hpp\"\n#include \"ds/2d_prefixsum.hpp\"\n#include \"ds/binary_trie.hpp\"\
     \n#include \"ds/cartesian_tree.hpp\"\n#include \"ds/compressor.hpp\"\n#include\
-    \ \"ds/dynamic_segtree.hpp\"\n#include \"ds/interval_map.hpp\"\n#include \"ds/persistent_segtree.hpp\"\
-    \n#include \"ds/potential_dsu.hpp\"\n#include \"math/factor.hpp\"\n#include \"\
-    string/aho_corasick.hpp\"\n#include \"string/rolling_hash.hpp\"\n#include \"tree/heavy_light_decomposition.hpp\"\
+    \ \"ds/dynamic_li_chao_tree.hpp\"\n#include \"ds/dynamic_segtree.hpp\"\n#include\
+    \ \"ds/interval_map.hpp\"\n#include \"ds/persistent_segtree.hpp\"\n#include \"\
+    ds/potential_dsu.hpp\"\n#include \"math/factor.hpp\"\n#include \"string/aho_corasick.hpp\"\
+    \n#include \"string/rolling_hash.hpp\"\n#include \"tree/heavy_light_decomposition.hpp\"\
     \n#include \"tree/lca_binary_lifting.hpp\"\n#include \"tree/lca_euler_tour.hpp\"\
     \n#include \"utils/fraction.hpp\"\n#include \"utils/grid_rotate.hpp\"\n#include\
     \ \"utils/hash.hpp\"\n#include \"utils/int128.hpp\"\n\nlong long op_sum(long long\
@@ -1667,30 +1759,38 @@ data:
     \ comp;\n        comp.add(10);\n        comp.add(3);\n        comp.add(10);\n\
     \        comp.build();\n        assert(comp.size() == 2 && comp.get(3) == 0 &&\
     \ comp.value(1) == 10);\n        assert((comp.map(std::vector<int>{10, 3}) ==\
-    \ std::vector<int>{1, 0}));\n    }\n    {\n        dynamic_segtree<long long,\
-    \ op_sum, e_sum> seg(8);\n        seg.set(2, 3);\n        seg.set(5, 7);\n   \
-    \     seg.apply_point(2, 4);\n        assert(seg.get(2) == 7 && seg.prod(0, 6)\
-    \ == 14);\n        assert(seg.max_right(0, [](long long x) { return x <= 7; })\
-    \ == 5);\n        assert(seg.min_left(6, [](long long x) { return x <= 7; }) ==\
-    \ 3);\n    }\n    {\n        IntervalMap<int, int> intervals(0, 10, 0);\n    \
-    \    intervals.assign(2, 6, 1);\n        intervals.apply(4, 8, [](int x) { return\
-    \ x + 2; });\n        assert(intervals.get_val(1) == 0);\n        assert(intervals.get_val(3)\
-    \ == 1);\n        assert(intervals.get_val(5) == 3);\n        assert(intervals.get_val(7)\
-    \ == 2);\n    }\n    {\n        persistent_segtree<long long, op_sum, e_sum> seg(\n\
-    \            std::vector<long long>{1, 2, 3});\n        int version = seg.set(1,\
-    \ 10);\n        assert(seg.prod(0, 3, 0) == 6);\n        assert(seg.prod(0, 3,\
-    \ version) == 14);\n    }\n    {\n        potential_dsu<long long> dsu(4);\n \
-    \       dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n        assert(dsu.same(0,\
-    \ 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1) == 3 && dsu.groups().size()\
-    \ == 2);\n    }\n    {\n        Factor factor(30);\n        assert(factor.is_prime(29)\
-    \ && !factor.is_prime(1));\n        assert((factor.factorize(24) ==\n        \
-    \        std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n    }\n    {\n \
-    \       AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n        int he\
-    \ = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n        for\
-    \ (char c : std::string(\"she\")) state = ac.move(state, c);\n        assert(state\
-    \ == she && ac.link(she) == he);\n    }\n    {\n        RollingHash hash(\"abracadabra\"\
-    );\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0, 4) ==\
-    \ rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
+    \ std::vector<int>{1, 0}));\n    }\n    {\n        DynamicLiChaoTree<long long>\
+    \ lines(-5, 5);\n        assert(!lines.has_line(0));\n        lines.add_line(1,\
+    \ 0);\n        lines.add_segment(-2, 1, -5, 0);\n        assert(lines.get(-3)\
+    \ == -3 && lines.get(2) == 2);\n        lines.add_all(0, 10);\n        lines.add_line(0,\
+    \ 8);\n        assert(lines.get(-3) == 7 && lines.get(4) == 8);\n        DynamicLiChaoTree<long\
+    \ long, std::greater<>> upper(0, 4);\n        upper.add_line(1, 0);\n        upper.add_line(-1,\
+    \ 3);\n        assert(upper.get(0) == 3 && upper.get(3) == 3);\n        DynamicLiChaoTree<int,\
+    \ std::less<>, double> real(0, 10);\n        real.add_line(0.5, 0.25);\n     \
+    \   real.add_line(-1.5, 6.0);\n        assert(real.get(1) == 0.75 && real.get(4)\
+    \ == 0.0);\n    }\n    {\n        dynamic_segtree<long long, op_sum, e_sum> seg(8);\n\
+    \        seg.set(2, 3);\n        seg.set(5, 7);\n        seg.apply_point(2, 4);\n\
+    \        assert(seg.get(2) == 7 && seg.prod(0, 6) == 14);\n        assert(seg.max_right(0,\
+    \ [](long long x) { return x <= 7; }) == 5);\n        assert(seg.min_left(6, [](long\
+    \ long x) { return x <= 7; }) == 3);\n    }\n    {\n        IntervalMap<int, int>\
+    \ intervals(0, 10, 0);\n        intervals.assign(2, 6, 1);\n        intervals.apply(4,\
+    \ 8, [](int x) { return x + 2; });\n        assert(intervals.get_val(1) == 0);\n\
+    \        assert(intervals.get_val(3) == 1);\n        assert(intervals.get_val(5)\
+    \ == 3);\n        assert(intervals.get_val(7) == 2);\n    }\n    {\n        persistent_segtree<long\
+    \ long, op_sum, e_sum> seg(\n            std::vector<long long>{1, 2, 3});\n \
+    \       int version = seg.set(1, 10);\n        assert(seg.prod(0, 3, 0) == 6);\n\
+    \        assert(seg.prod(0, 3, version) == 14);\n    }\n    {\n        potential_dsu<long\
+    \ long> dsu(4);\n        dsu.merge(0, 1, 3);\n        dsu.merge(1, 2, -1);\n \
+    \       assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);\n        assert(dsu.size(1)\
+    \ == 3 && dsu.groups().size() == 2);\n    }\n    {\n        Factor factor(30);\n\
+    \        assert(factor.is_prime(29) && !factor.is_prime(1));\n        assert((factor.factorize(24)\
+    \ ==\n                std::vector<std::pair<int, int>>{{2, 3}, {3, 1}}));\n  \
+    \  }\n    {\n        AhoCorasick<> ac;\n        int she = ac.add(\"she\");\n \
+    \       int he = ac.add(\"he\");\n        ac.build();\n        int state = 0;\n\
+    \        for (char c : std::string(\"she\")) state = ac.move(state, c);\n    \
+    \    assert(state == she && ac.link(she) == he);\n    }\n    {\n        RollingHash\
+    \ hash(\"abracadabra\");\n        assert(hash.equals(0, 4, 7, 11));\n        assert(hash.get(0,\
+    \ 4) == rolling_hash_from_other_tu(\"abra\"));\n\n        using Hash = RollingHash::Hash;\n\
     \        const std::string s = \"abracadabra\";\n        for (int l = 0; l <=\
     \ (int)s.size(); ++l) {\n            for (int m = l; m <= (int)s.size(); ++m)\
     \ {\n                for (int r = m; r <= (int)s.size(); ++r) {\n            \
@@ -1819,6 +1919,7 @@ data:
   - ds/binary_trie.hpp
   - ds/cartesian_tree.hpp
   - ds/compressor.hpp
+  - ds/dynamic_li_chao_tree.hpp
   - ds/dynamic_segtree.hpp
   - ds/interval_map.hpp
   - ds/persistent_segtree.hpp
@@ -1836,7 +1937,7 @@ data:
   isVerificationFile: false
   path: tests/test.cpp
   requiredBy: []
-  timestamp: '2026-10-17 14:30:16+09:00'
+  timestamp: '2026-10-29 20:48:18+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: tests/test.cpp
