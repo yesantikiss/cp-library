@@ -29,4 +29,8 @@ done
     -o "$build_dir/tree-randomized"
 "$build_dir/tree-randomized"
 
+"$cxx" "${flags[@]}" "$root/tests/li_chao_randomized.cpp" \
+    -o "$build_dir/li-chao-randomized"
+"$build_dir/li-chao-randomized"
+
 echo "All tests passed with $cxx"

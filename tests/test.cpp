@@ -11,6 +11,7 @@
 #include "ds/binary_trie.hpp"
 #include "ds/cartesian_tree.hpp"
 #include "ds/compressor.hpp"
+#include "ds/dynamic_li_chao_tree.hpp"
 #include "ds/dynamic_segtree.hpp"
 #include "ds/interval_map.hpp"
 #include "ds/persistent_segtree.hpp"
@@ -145,6 +146,20 @@ int main() {
         comp.build();
         assert(comp.size() == 2 && comp.get(3) == 0 && comp.value(1) == 10);
         assert((comp.map(std::vector<int>{10, 3}) == std::vector<int>{1, 0}));
+    }
+    {
+        DynamicLiChaoTree<long long> lines(-5, 5);
+        assert(!lines.has_line(0));
+        lines.add_line(1, 0);
+        lines.add_segment(-2, 1, -5, 0);
+        assert(lines.get(-3) == -3 && lines.get(2) == 2);
+        lines.add_all(0, 10);
+        lines.add_line(0, 8);
+        assert(lines.get(-3) == 7 && lines.get(4) == 8);
+        DynamicLiChaoTree<long long, false> upper(0, 4);
+        upper.add_line(1, 0);
+        upper.add_line(-1, 3);
+        assert(upper.get(0) == 3 && upper.get(3) == 3);
     }
     {
         dynamic_segtree<long long, op_sum, e_sum> seg(8);
