@@ -1,14 +1,14 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
-  _extendedVerifiedWith: []
+  _extendedRequiredBy: []
+  _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/random_persistent_segtree.test.cpp
+    title: verify/random_persistent_segtree.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
     links: []
   bundledCode: "#line 2 \"ds/persistent_segtree.hpp\"\n\n#include <algorithm>\n#include\
@@ -130,11 +130,11 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: ds/persistent_segtree.hpp
-  requiredBy:
-  - tests/test.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
-  verifiedWith: []
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
+  verificationStatus: LIBRARY_ALL_AC
+  verifiedWith:
+  - verify/random_persistent_segtree.test.cpp
 documentation_of: ds/persistent_segtree.hpp
 layout: document
 title: "\u6C38\u7D9A\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"

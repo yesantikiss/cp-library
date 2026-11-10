@@ -1,14 +1,14 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
-  _extendedVerifiedWith: []
+  _extendedRequiredBy: []
+  _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/random_fraction.test.cpp
+    title: verify/random_fraction.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
     links: []
   bundledCode: "#line 2 \"utils/fraction.hpp\"\n\n#include <cstddef>\n#include <ios>\n\
@@ -602,11 +602,11 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: utils/fraction.hpp
-  requiredBy:
-  - tests/test.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
-  verifiedWith: []
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
+  verificationStatus: LIBRARY_ALL_AC
+  verifiedWith:
+  - verify/random_fraction.test.cpp
 documentation_of: utils/fraction.hpp
 layout: document
 title: "\u6709\u7406\u6570"

@@ -3,7 +3,7 @@ data:
   libraryCategories:
   - name: algo
     pages:
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: algo/binary_search.hpp
       title: "\u4E8C\u5206\u63A2\u7D22"
     - icon: ':heavy_check_mark:'
@@ -27,13 +27,13 @@ data:
     - icon: ':heavy_check_mark:'
       path: ds/dynamic_li_chao_tree.hpp
       title: "\u52D5\u7684 Li Chao Tree"
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: ds/dynamic_segtree.hpp
       title: "\u52D5\u7684\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
     - icon: ':heavy_check_mark:'
       path: ds/interval_map.hpp
       title: "\u533A\u9593 map"
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: ds/persistent_segtree.hpp
       title: "\u6C38\u7D9A\u30BB\u30B0\u30E1\u30F3\u30C8\u6728"
     - icon: ':heavy_check_mark:'
@@ -55,7 +55,7 @@ data:
       title: "\u4E8C\u6B21\u5143\u306E\u70B9\u30FB\u30D9\u30AF\u30C8\u30EB"
   - name: math
     pages:
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: math/factor.hpp
       title: "\u6700\u5C0F\u7D20\u56E0\u6570\u30C6\u30FC\u30D6\u30EB"
   - name: string
@@ -66,26 +66,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: string/rolling_hash.hpp
       title: Rolling Hash
-  - name: tests
-    pages:
-    - icon: ':warning:'
-      path: tests/li_chao_randomized.cpp
-      title: tests/li_chao_randomized.cpp
-    - icon: ':warning:'
-      path: tests/rolling_hash_tu.cpp
-      title: tests/rolling_hash_tu.cpp
-    - icon: ':warning:'
-      path: tests/test.cpp
-      title: tests/test.cpp
-    - icon: ':warning:'
-      path: tests/tree_center_randomized.cpp
-      title: tests/tree_center_randomized.cpp
-    - icon: ':warning:'
-      path: tests/tree_randomized.cpp
-      title: tests/tree_randomized.cpp
   - name: tree
     pages:
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: tree/centered_tree.hpp
       title: "\u6728\u306E\u4E2D\u5FC3\u3067\u6839\u4ED8\u3051"
     - icon: ':heavy_check_mark:'
@@ -97,15 +80,15 @@ data:
     - icon: ':heavy_check_mark:'
       path: tree/lca_euler_tour.hpp
       title: LCA (Euler Tour + Sparse Table)
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: tree/tree_diameter.hpp
       title: "\u6728\u306E\u76F4\u5F84"
   - name: utils
     pages:
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: utils/fraction.hpp
       title: "\u6709\u7406\u6570"
-    - icon: ':warning:'
+    - icon: ':heavy_check_mark:'
       path: utils/grid_rotate.hpp
       title: "\u4E8C\u6B21\u5143\u914D\u5217\u306E\u56DE\u8EE2"
     - icon: ':heavy_check_mark:'
@@ -153,6 +136,39 @@ data:
     - icon: ':heavy_check_mark:'
       path: verify/many_aplusb_128bit.test.cpp
       title: verify/many_aplusb_128bit.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_binary_search.test.cpp
+      title: verify/random_binary_search.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_binary_trie.test.cpp
+      title: verify/random_binary_trie.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_centered_tree.test.cpp
+      title: verify/random_centered_tree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_dynamic_li_chao_tree.test.cpp
+      title: verify/random_dynamic_li_chao_tree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_dynamic_segtree.test.cpp
+      title: verify/random_dynamic_segtree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_factor.test.cpp
+      title: verify/random_factor.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_fraction.test.cpp
+      title: verify/random_fraction.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_grid_rotate.test.cpp
+      title: verify/random_grid_rotate.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_interval_map.test.cpp
+      title: verify/random_interval_map.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_persistent_segtree.test.cpp
+      title: verify/random_persistent_segtree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_tree_lca_hld.test.cpp
+      title: verify/random_tree_lca_hld.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/restrictive_filesystem.test.cpp
       title: verify/restrictive_filesystem.test.cpp

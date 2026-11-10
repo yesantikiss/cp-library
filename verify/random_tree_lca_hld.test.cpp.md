@@ -14,19 +14,25 @@ data:
   _extendedVerifiedWith: []
   _isVerificationFailed: false
   _pathExtension: cpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
-    links: []
-  bundledCode: "#line 1 \"tests/tree_randomized.cpp\"\n#include <algorithm>\n#include\
-    \ <cassert>\n#include <random>\n#include <vector>\n\n#line 2 \"tree/heavy_light_decomposition.hpp\"\
-    \n\n#line 4 \"tree/heavy_light_decomposition.hpp\"\n#include <tuple>\n#include\
-    \ <utility>\n#line 7 \"tree/heavy_light_decomposition.hpp\"\n\nnamespace yesantikiss\
-    \ {\n    struct HeavyLightDecomposition {\n        int n = 0;\n        int root\
-    \ = -1;\n        std::vector<int> parent;\n        std::vector<int> depth;\n \
-    \       std::vector<int> size;\n        std::vector<int> in;\n        std::vector<int>\
-    \ out;\n        std::vector<int> head;\n        std::vector<int> heavy;\n    \
-    \    std::vector<int> vertex;\n\n        HeavyLightDecomposition() = default;\n\
-    \n        explicit HeavyLightDecomposition(\n            const std::vector<std::vector<int>>&\
+    '*NOT_SPECIAL_COMMENTS*': ''
+    PROBLEM: https://judge.yosupo.jp/problem/aplusb
+    links:
+    - https://judge.yosupo.jp/problem/aplusb
+  bundledCode: "#line 1 \"verify/random_tree_lca_hld.test.cpp\"\n// \u7D20\u6734\u306A\
+    \u5B9F\u88C5\u3068\u7A81\u304D\u5408\u308F\u305B\u308B\u30E9\u30F3\u30C0\u30E0\
+    \u30C6\u30B9\u30C8\u3092\u901A\u3057\u3066\u304B\u3089 A + B \u3092\u89E3\u304F\
+    \u3002\n#define PROBLEM \"https://judge.yosupo.jp/problem/aplusb\"\n\n#include\
+    \ <algorithm>\n#include <cassert>\n#include <iostream>\n#include <random>\n#include\
+    \ <vector>\n\n#line 2 \"tree/heavy_light_decomposition.hpp\"\n\n#line 4 \"tree/heavy_light_decomposition.hpp\"\
+    \n#include <tuple>\n#include <utility>\n#line 7 \"tree/heavy_light_decomposition.hpp\"\
+    \n\nnamespace yesantikiss {\n    struct HeavyLightDecomposition {\n        int\
+    \ n = 0;\n        int root = -1;\n        std::vector<int> parent;\n        std::vector<int>\
+    \ depth;\n        std::vector<int> size;\n        std::vector<int> in;\n     \
+    \   std::vector<int> out;\n        std::vector<int> head;\n        std::vector<int>\
+    \ heavy;\n        std::vector<int> vertex;\n\n        HeavyLightDecomposition()\
+    \ = default;\n\n        explicit HeavyLightDecomposition(\n            const std::vector<std::vector<int>>&\
     \ graph, int root_ = 0) {\n            build(graph, root_);\n        }\n\n   \
     \     void build(const std::vector<std::vector<int>>& graph, int root_ = 0) {\n\
     \            init(static_cast<int>(graph.size()));\n            if (n == 0) return;\n\
@@ -221,7 +227,7 @@ data:
     \ 2;\n                for (int i = 0; i + length <= euler_size; ++i) {\n     \
     \               st_at(level, i) =\n                        better(st_at(level\
     \ - 1, i),\n                               st_at(level - 1, i + half));\n    \
-    \            }\n            }\n        }\n    };\n}\n#line 9 \"tests/tree_randomized.cpp\"\
+    \            }\n            }\n        }\n    };\n}\n#line 13 \"verify/random_tree_lca_hld.test.cpp\"\
     \n\nint main() {\n    std::mt19937 random(123456789);\n\n    for (int trial =\
     \ 0; trial < 100; ++trial) {\n        int n = 1 + static_cast<int>(random() %\
     \ 100);\n        std::vector<std::vector<int>> graph(n);\n        std::vector<int>\
@@ -274,29 +280,34 @@ data:
     \ v) == ancestor;\n                assert(doubling.is_ancestor(ancestor, v) ==\
     \ expected);\n                assert(sparse.is_ancestor(ancestor, v) == expected);\n\
     \                assert(hld.is_ancestor(ancestor, v) == expected);\n         \
-    \   }\n        }\n    }\n}\n"
-  code: "#include <algorithm>\n#include <cassert>\n#include <random>\n#include <vector>\n\
-    \n#include \"tree/heavy_light_decomposition.hpp\"\n#include \"tree/lca_binary_lifting.hpp\"\
-    \n#include \"tree/lca_euler_tour.hpp\"\n\nint main() {\n    std::mt19937 random(123456789);\n\
-    \n    for (int trial = 0; trial < 100; ++trial) {\n        int n = 1 + static_cast<int>(random()\
-    \ % 100);\n        std::vector<std::vector<int>> graph(n);\n        std::vector<int>\
-    \ parent(n), depth(n);\n        for (int v = 1; v < n; ++v) {\n            parent[v]\
-    \ = static_cast<int>(random() % v);\n            depth[v] = depth[parent[v]] +\
-    \ 1;\n            graph[parent[v]].push_back(v);\n            graph[v].push_back(parent[v]);\n\
-    \        }\n\n        yesantikiss::BinaryLiftingLCA doubling(graph);\n       \
-    \ yesantikiss::EulerTourLCA sparse(graph);\n        yesantikiss::HeavyLightDecomposition\
-    \ hld(graph);\n\n        auto naive_lca = [&](int u, int v) {\n            while\
-    \ (depth[u] > depth[v]) u = parent[u];\n            while (depth[v] > depth[u])\
-    \ v = parent[v];\n            while (u != v) {\n                u = parent[u];\n\
-    \                v = parent[v];\n            }\n            return u;\n      \
-    \  };\n\n        for (int query = 0; query < 200; ++query) {\n            int\
-    \ u = static_cast<int>(random() % n);\n            int v = static_cast<int>(random()\
-    \ % n);\n            int ancestor = naive_lca(u, v);\n\n            assert(doubling.lca(u,\
-    \ v) == ancestor);\n            assert(sparse.lca(u, v) == ancestor);\n      \
-    \      assert(hld.lca(u, v) == ancestor);\n\n            std::vector<int> expected;\n\
-    \            for (int x = u; x != ancestor; x = parent[x]) expected.push_back(x);\n\
-    \            expected.push_back(ancestor);\n            std::vector<int> suffix;\n\
-    \            for (int x = v; x != ancestor; x = parent[x]) suffix.push_back(x);\n\
+    \   }\n        }\n    }\n\n    long long a, b;\n    std::cin >> a >> b;\n    std::cout\
+    \ << a + b << '\\n';\n}\n"
+  code: "// \u7D20\u6734\u306A\u5B9F\u88C5\u3068\u7A81\u304D\u5408\u308F\u305B\u308B\
+    \u30E9\u30F3\u30C0\u30E0\u30C6\u30B9\u30C8\u3092\u901A\u3057\u3066\u304B\u3089\
+    \ A + B \u3092\u89E3\u304F\u3002\n#define PROBLEM \"https://judge.yosupo.jp/problem/aplusb\"\
+    \n\n#include <algorithm>\n#include <cassert>\n#include <iostream>\n#include <random>\n\
+    #include <vector>\n\n#include \"tree/heavy_light_decomposition.hpp\"\n#include\
+    \ \"tree/lca_binary_lifting.hpp\"\n#include \"tree/lca_euler_tour.hpp\"\n\nint\
+    \ main() {\n    std::mt19937 random(123456789);\n\n    for (int trial = 0; trial\
+    \ < 100; ++trial) {\n        int n = 1 + static_cast<int>(random() % 100);\n \
+    \       std::vector<std::vector<int>> graph(n);\n        std::vector<int> parent(n),\
+    \ depth(n);\n        for (int v = 1; v < n; ++v) {\n            parent[v] = static_cast<int>(random()\
+    \ % v);\n            depth[v] = depth[parent[v]] + 1;\n            graph[parent[v]].push_back(v);\n\
+    \            graph[v].push_back(parent[v]);\n        }\n\n        yesantikiss::BinaryLiftingLCA\
+    \ doubling(graph);\n        yesantikiss::EulerTourLCA sparse(graph);\n       \
+    \ yesantikiss::HeavyLightDecomposition hld(graph);\n\n        auto naive_lca =\
+    \ [&](int u, int v) {\n            while (depth[u] > depth[v]) u = parent[u];\n\
+    \            while (depth[v] > depth[u]) v = parent[v];\n            while (u\
+    \ != v) {\n                u = parent[u];\n                v = parent[v];\n  \
+    \          }\n            return u;\n        };\n\n        for (int query = 0;\
+    \ query < 200; ++query) {\n            int u = static_cast<int>(random() % n);\n\
+    \            int v = static_cast<int>(random() % n);\n            int ancestor\
+    \ = naive_lca(u, v);\n\n            assert(doubling.lca(u, v) == ancestor);\n\
+    \            assert(sparse.lca(u, v) == ancestor);\n            assert(hld.lca(u,\
+    \ v) == ancestor);\n\n            std::vector<int> expected;\n            for\
+    \ (int x = u; x != ancestor; x = parent[x]) expected.push_back(x);\n         \
+    \   expected.push_back(ancestor);\n            std::vector<int> suffix;\n    \
+    \        for (int x = v; x != ancestor; x = parent[x]) suffix.push_back(x);\n\
     \            std::reverse(suffix.begin(), suffix.end());\n            expected.insert(expected.end(),\
     \ suffix.begin(), suffix.end());\n\n            assert(doubling.dist(u, v) ==\
     \ static_cast<int>(expected.size()) - 1);\n            assert(sparse.dist(u, v)\
@@ -329,21 +340,22 @@ data:
     \ v) == ancestor;\n                assert(doubling.is_ancestor(ancestor, v) ==\
     \ expected);\n                assert(sparse.is_ancestor(ancestor, v) == expected);\n\
     \                assert(hld.is_ancestor(ancestor, v) == expected);\n         \
-    \   }\n        }\n    }\n}\n"
+    \   }\n        }\n    }\n\n    long long a, b;\n    std::cin >> a >> b;\n    std::cout\
+    \ << a + b << '\\n';\n}\n"
   dependsOn:
   - tree/heavy_light_decomposition.hpp
   - tree/lca_binary_lifting.hpp
   - tree/lca_euler_tour.hpp
-  isVerificationFile: false
-  path: tests/tree_randomized.cpp
+  isVerificationFile: true
+  path: verify/random_tree_lca_hld.test.cpp
   requiredBy: []
-  timestamp: '2026-11-10 17:45:19+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
+  timestamp: '2026-11-10 19:55:36+09:00'
+  verificationStatus: TEST_ACCEPTED
   verifiedWith: []
-documentation_of: tests/tree_randomized.cpp
+documentation_of: verify/random_tree_lca_hld.test.cpp
 layout: document
 redirect_from:
-- /library/tests/tree_randomized.cpp
-- /library/tests/tree_randomized.cpp.html
-title: tests/tree_randomized.cpp
+- /verify/verify/random_tree_lca_hld.test.cpp
+- /verify/verify/random_tree_lca_hld.test.cpp.html
+title: verify/random_tree_lca_hld.test.cpp
 ---

@@ -2,34 +2,49 @@
 data:
   _extendedDependsOn: []
   _extendedRequiredBy: []
-  _extendedVerifiedWith: []
+  _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/random_binary_search.test.cpp
+    title: verify/random_binary_search.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
     links: []
   bundledCode: "#line 2 \"algo/binary_search.hpp\"\n\nnamespace yesantikiss {\n  \
-    \  // [left, right) \u306E\u7BC4\u56F2\u3067 f(mid) \u304C true \u306B\u306A\u308B\
-    \u6700\u5C0F\u306E left \u3092\u8FD4\u3059\n    // \u5358\u8ABF\u6027: false...false,true...true\n\
-    \    template<class F, class T>\n    T binary_search_min_left(T left, T right,\
+    \  // (left, right] \u306E\u7BC4\u56F2\u3067 f(x) \u304C true \u306B\u306A\u308B\
+    \u6700\u5C0F\u306E x \u3092\u8FD4\u3059\n    // \u5358\u8ABF\u6027: false...false,true...true\n\
+    \    // left \u3068 right \u306F\u756A\u5175\u3067\u3001f(left) == false, f(right)\
+    \ == true \u3068\u307F\u306A\u3059\n    // (f(left), f(right) \u306F\u8A55\u4FA1\
+    \u3057\u306A\u3044\u3002true \u304C\u306A\u3051\u308C\u3070 right \u3092\u8FD4\
+    \u3059)\n    template<class F, class T>\n    T binary_search_min_left(T left,\
+    \ T right, F f){\n        while (right - left > 1){\n            T mid = left\
+    \ + (right - left) / 2;\n            if(f(mid)) right = mid;\n            else\
+    \ left = mid;\n        }\n        return right;\n    }\n\n    // [left, right)\
+    \ \u306E\u7BC4\u56F2\u3067 f(x) \u304C true \u306B\u306A\u308B\u6700\u5927\u306E\
+    \ x \u3092\u8FD4\u3059\n    // \u5358\u8ABF\u6027: true...true,false...false\n\
+    \    // left \u3068 right \u306F\u756A\u5175\u3067\u3001f(left) == true, f(right)\
+    \ == false \u3068\u307F\u306A\u3059\n    // (f(left), f(right) \u306F\u8A55\u4FA1\
+    \u3057\u306A\u3044\u3002true \u304C\u306A\u3051\u308C\u3070 left \u3092\u8FD4\u3059\
+    )\n    template<class F, class T>\n    T binary_search_max_right(T left, T right,\
     \ F f){\n        while (right - left > 1){\n            T mid = left + (right\
-    \ - left) / 2;\n            if(f(mid)) right = mid;\n            else left = mid;\n\
-    \        }\n        return right;\n    }\n\n    // [left, right) \u306E\u7BC4\u56F2\
-    \u3067 f(mid) \u304C true \u306B\u306A\u308B\u6700\u5927\u306E right-1 \u3092\u8FD4\
-    \u3059\n    // \u5358\u8ABF\u6027: true...true,false...false\n    template<class\
-    \ F, class T>\n    T binary_search_max_right(T left, T right, F f){\n        while\
-    \ (right - left > 1){\n            T mid = left + (right - left) / 2;\n      \
-    \      if(f(mid)) left = mid;\n            else right = mid;\n        }\n    \
-    \    return left;\n    }\n}\n"
-  code: "#pragma once\n\nnamespace yesantikiss {\n    // [left, right) \u306E\u7BC4\
-    \u56F2\u3067 f(mid) \u304C true \u306B\u306A\u308B\u6700\u5C0F\u306E left \u3092\
-    \u8FD4\u3059\n    // \u5358\u8ABF\u6027: false...false,true...true\n    template<class\
+    \ - left) / 2;\n            if(f(mid)) left = mid;\n            else right = mid;\n\
+    \        }\n        return left;\n    }\n}\n"
+  code: "#pragma once\n\nnamespace yesantikiss {\n    // (left, right] \u306E\u7BC4\
+    \u56F2\u3067 f(x) \u304C true \u306B\u306A\u308B\u6700\u5C0F\u306E x \u3092\u8FD4\
+    \u3059\n    // \u5358\u8ABF\u6027: false...false,true...true\n    // left \u3068\
+    \ right \u306F\u756A\u5175\u3067\u3001f(left) == false, f(right) == true \u3068\
+    \u307F\u306A\u3059\n    // (f(left), f(right) \u306F\u8A55\u4FA1\u3057\u306A\u3044\
+    \u3002true \u304C\u306A\u3051\u308C\u3070 right \u3092\u8FD4\u3059)\n    template<class\
     \ F, class T>\n    T binary_search_min_left(T left, T right, F f){\n        while\
     \ (right - left > 1){\n            T mid = left + (right - left) / 2;\n      \
     \      if(f(mid)) right = mid;\n            else left = mid;\n        }\n    \
-    \    return right;\n    }\n\n    // [left, right) \u306E\u7BC4\u56F2\u3067 f(mid)\
-    \ \u304C true \u306B\u306A\u308B\u6700\u5927\u306E right-1 \u3092\u8FD4\u3059\n\
-    \    // \u5358\u8ABF\u6027: true...true,false...false\n    template<class F, class\
+    \    return right;\n    }\n\n    // [left, right) \u306E\u7BC4\u56F2\u3067 f(x)\
+    \ \u304C true \u306B\u306A\u308B\u6700\u5927\u306E x \u3092\u8FD4\u3059\n    //\
+    \ \u5358\u8ABF\u6027: true...true,false...false\n    // left \u3068 right \u306F\
+    \u756A\u5175\u3067\u3001f(left) == true, f(right) == false \u3068\u307F\u306A\u3059\
+    \n    // (f(left), f(right) \u306F\u8A55\u4FA1\u3057\u306A\u3044\u3002true \u304C\
+    \u306A\u3051\u308C\u3070 left \u3092\u8FD4\u3059)\n    template<class F, class\
     \ T>\n    T binary_search_max_right(T left, T right, F f){\n        while (right\
     \ - left > 1){\n            T mid = left + (right - left) / 2;\n            if(f(mid))\
     \ left = mid;\n            else right = mid;\n        }\n        return left;\n\
@@ -38,9 +53,10 @@ data:
   isVerificationFile: false
   path: algo/binary_search.hpp
   requiredBy: []
-  timestamp: '2026-11-10 17:45:19+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
-  verifiedWith: []
+  timestamp: '2026-11-10 19:55:36+09:00'
+  verificationStatus: LIBRARY_ALL_AC
+  verifiedWith:
+  - verify/random_binary_search.test.cpp
 documentation_of: algo/binary_search.hpp
 layout: document
 title: "\u4E8C\u5206\u63A2\u7D22"

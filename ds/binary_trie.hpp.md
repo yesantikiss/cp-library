@@ -1,11 +1,11 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
+  _extendedRequiredBy: []
   _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/random_binary_trie.test.cpp
+    title: verify/random_binary_trie.test.cpp
   - icon: ':heavy_check_mark:'
     path: verify/set_xor_min.test.cpp
     title: verify/set_xor_min.test.cpp
@@ -99,11 +99,11 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: ds/binary_trie.hpp
-  requiredBy:
-  - tests/test.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
+  - verify/random_binary_trie.test.cpp
   - verify/set_xor_min.test.cpp
 documentation_of: ds/binary_trie.hpp
 layout: document

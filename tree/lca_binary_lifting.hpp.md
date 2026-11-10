@@ -1,13 +1,7 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
-  - icon: ':warning:'
-    path: tests/tree_randomized.cpp
-    title: tests/tree_randomized.cpp
+  _extendedRequiredBy: []
   _extendedVerifiedWith:
   - icon: ':heavy_check_mark:'
     path: verify/jump_on_tree.test.cpp
@@ -15,6 +9,9 @@ data:
   - icon: ':heavy_check_mark:'
     path: verify/lca_binary_lifting.test.cpp
     title: verify/lca_binary_lifting.test.cpp
+  - icon: ':heavy_check_mark:'
+    path: verify/random_tree_lca_hld.test.cpp
+    title: verify/random_tree_lca_hld.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
   _verificationStatusIcon: ':heavy_check_mark:'
@@ -144,13 +141,12 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: tree/lca_binary_lifting.hpp
-  requiredBy:
-  - tests/tree_randomized.cpp
-  - tests/test.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/lca_binary_lifting.test.cpp
+  - verify/random_tree_lca_hld.test.cpp
   - verify/jump_on_tree.test.cpp
 documentation_of: tree/lca_binary_lifting.hpp
 layout: document

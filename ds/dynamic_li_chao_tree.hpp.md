@@ -1,17 +1,14 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/li_chao_randomized.cpp
-    title: tests/li_chao_randomized.cpp
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
+  _extendedRequiredBy: []
   _extendedVerifiedWith:
   - icon: ':heavy_check_mark:'
     path: verify/line_add_get_min.test.cpp
     title: verify/line_add_get_min.test.cpp
+  - icon: ':heavy_check_mark:'
+    path: verify/random_dynamic_li_chao_tree.test.cpp
+    title: verify/random_dynamic_li_chao_tree.test.cpp
   - icon: ':heavy_check_mark:'
     path: verify/segment_add_get_min.test.cpp
     title: verify/segment_add_get_min.test.cpp
@@ -188,13 +185,12 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: ds/dynamic_li_chao_tree.hpp
-  requiredBy:
-  - tests/test.cpp
-  - tests/li_chao_randomized.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/segment_add_get_min.test.cpp
+  - verify/random_dynamic_li_chao_tree.test.cpp
   - verify/line_add_get_min.test.cpp
 documentation_of: ds/dynamic_li_chao_tree.hpp
 layout: document

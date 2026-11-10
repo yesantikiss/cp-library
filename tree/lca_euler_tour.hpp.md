@@ -1,17 +1,14 @@
 ---
 data:
   _extendedDependsOn: []
-  _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/test.cpp
-    title: tests/test.cpp
-  - icon: ':warning:'
-    path: tests/tree_randomized.cpp
-    title: tests/tree_randomized.cpp
+  _extendedRequiredBy: []
   _extendedVerifiedWith:
   - icon: ':heavy_check_mark:'
     path: verify/lca_euler_tour.test.cpp
     title: verify/lca_euler_tour.test.cpp
+  - icon: ':heavy_check_mark:'
+    path: verify/random_tree_lca_hld.test.cpp
+    title: verify/random_tree_lca_hld.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
   _verificationStatusIcon: ':heavy_check_mark:'
@@ -158,12 +155,11 @@ data:
   dependsOn: []
   isVerificationFile: false
   path: tree/lca_euler_tour.hpp
-  requiredBy:
-  - tests/tree_randomized.cpp
-  - tests/test.cpp
-  timestamp: '2026-11-10 17:45:19+09:00'
+  requiredBy: []
+  timestamp: '2026-11-10 19:55:36+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
+  - verify/random_tree_lca_hld.test.cpp
   - verify/lca_euler_tour.test.cpp
 documentation_of: tree/lca_euler_tour.hpp
 layout: document

@@ -2,16 +2,16 @@
 data:
   _extendedDependsOn: []
   _extendedRequiredBy:
-  - icon: ':warning:'
-    path: tests/tree_center_randomized.cpp
-    title: tests/tree_center_randomized.cpp
-  - icon: ':warning:'
+  - icon: ':heavy_check_mark:'
     path: tree/centered_tree.hpp
     title: "\u6728\u306E\u4E2D\u5FC3\u3067\u6839\u4ED8\u3051"
-  _extendedVerifiedWith: []
+  _extendedVerifiedWith:
+  - icon: ':heavy_check_mark:'
+    path: verify/random_centered_tree.test.cpp
+    title: verify/random_centered_tree.test.cpp
   _isVerificationFailed: false
   _pathExtension: hpp
-  _verificationStatusIcon: ':warning:'
+  _verificationStatusIcon: ':heavy_check_mark:'
   attributes:
     links: []
   bundledCode: "#line 2 \"tree/tree_diameter.hpp\"\n\n#include <algorithm>\n#include\
@@ -61,11 +61,11 @@ data:
   isVerificationFile: false
   path: tree/tree_diameter.hpp
   requiredBy:
-  - tests/tree_center_randomized.cpp
   - tree/centered_tree.hpp
-  timestamp: '2026-11-10 17:45:19+09:00'
-  verificationStatus: LIBRARY_NO_TESTS
-  verifiedWith: []
+  timestamp: '2026-11-10 19:55:36+09:00'
+  verificationStatus: LIBRARY_ALL_AC
+  verifiedWith:
+  - verify/random_centered_tree.test.cpp
 documentation_of: tree/tree_diameter.hpp
 layout: document
 title: "\u6728\u306E\u76F4\u5F84"
