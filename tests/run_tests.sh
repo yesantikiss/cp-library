@@ -27,6 +27,10 @@ done
 
 "$cxx" "${flags[@]}" "$root/tests/tree_randomized.cpp" \
     -o "$build_dir/tree-randomized"
+
+"$cxx" "${flags[@]}" "$root/tests/tree_center_randomized.cpp" \
+    -o "$build_dir/tree-center-randomized"
+"$build_dir/tree-center-randomized"
 "$build_dir/tree-randomized"
 
 "$cxx" "${flags[@]}" "$root/tests/li_chao_randomized.cpp" \
