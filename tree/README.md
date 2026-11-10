@@ -30,3 +30,21 @@ Heavy-Light Decompositionを行う
 - `subtree_vertex(v)`, `subtree_edge(v)`: 部分木に対応する区間
 - `lca(u, v)`, `dist(u, v)`, `is_ancestor(u, v)`
 - 構築: `O(N)`、パス分解・LCA: `O(log N)`
+
+## `tree_diameter.hpp`
+
+重みなしの木の直径を求める `yesantikiss::TreeDiameter` です。
+
+- `length`: 直径の辺数
+- `path`: 直径パス
+- 構築: `O(N)`
+
+## `centered_tree.hpp`
+
+木を中心で根付けする `yesantikiss::CenteredTree` です。中心が2点なら
+間に仮想頂点を置いて根にします。
+
+- `root`, `parent`, `order`: 中心を根とした根付き木
+- `dist2[v]`: 中心点からの距離の2倍 (頂点倍した木での深さ)
+- `is_diameter_endpoint(v)`, `eccentricity(v)`, `radius()`
+- 構築: `O(N)`
