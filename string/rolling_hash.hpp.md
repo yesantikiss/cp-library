@@ -210,11 +210,11 @@ data:
   requiredBy:
   - tests/test.cpp
   - tests/rolling_hash_tu.cpp
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
-  - verify/suffixarray.test.cpp
   - verify/zalgorithm.test.cpp
+  - verify/suffixarray.test.cpp
 documentation_of: string/rolling_hash.hpp
 layout: document
 title: Rolling Hash

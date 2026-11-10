@@ -145,13 +145,13 @@ data:
   isVerificationFile: false
   path: tree/lca_binary_lifting.hpp
   requiredBy:
-  - tests/test.cpp
   - tests/tree_randomized.cpp
-  timestamp: '2026-10-29 20:48:18+09:00'
+  - tests/test.cpp
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
-  - verify/jump_on_tree.test.cpp
   - verify/lca_binary_lifting.test.cpp
+  - verify/jump_on_tree.test.cpp
 documentation_of: tree/lca_binary_lifting.hpp
 layout: document
 title: LCA (Binary Lifting)

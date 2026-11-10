@@ -191,11 +191,11 @@ data:
   requiredBy:
   - tests/test.cpp
   - tests/li_chao_randomized.cpp
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
-  - verify/line_add_get_min.test.cpp
   - verify/segment_add_get_min.test.cpp
+  - verify/line_add_get_min.test.cpp
 documentation_of: ds/dynamic_li_chao_tree.hpp
 layout: document
 title: "\u52D5\u7684 Li Chao Tree"

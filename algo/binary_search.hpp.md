@@ -38,7 +38,7 @@ data:
   isVerificationFile: false
   path: algo/binary_search.hpp
   requiredBy: []
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: algo/binary_search.hpp

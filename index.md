@@ -78,10 +78,16 @@ data:
       path: tests/test.cpp
       title: tests/test.cpp
     - icon: ':warning:'
+      path: tests/tree_center_randomized.cpp
+      title: tests/tree_center_randomized.cpp
+    - icon: ':warning:'
       path: tests/tree_randomized.cpp
       title: tests/tree_randomized.cpp
   - name: tree
     pages:
+    - icon: ':warning:'
+      path: tree/centered_tree.hpp
+      title: "\u6728\u306E\u4E2D\u5FC3\u3067\u6839\u4ED8\u3051"
     - icon: ':heavy_check_mark:'
       path: tree/heavy_light_decomposition.hpp
       title: Heavy-Light Decomposition
@@ -91,6 +97,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: tree/lca_euler_tour.hpp
       title: LCA (Euler Tour + Sparse Table)
+    - icon: ':warning:'
+      path: tree/tree_diameter.hpp
+      title: "\u6728\u306E\u76F4\u5F84"
   - name: utils
     pages:
     - icon: ':warning:'

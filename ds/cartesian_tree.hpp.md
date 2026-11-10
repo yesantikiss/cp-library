@@ -64,7 +64,7 @@ data:
   path: ds/cartesian_tree.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/cartesian_tree.test.cpp

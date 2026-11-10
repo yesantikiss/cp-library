@@ -182,7 +182,7 @@ data:
   isVerificationFile: true
   path: verify/vertex_set_path_composite.test.cpp
   requiredBy: []
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/vertex_set_path_composite.test.cpp

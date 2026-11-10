@@ -604,7 +604,7 @@ data:
   path: utils/fraction.hpp
   requiredBy:
   - tests/test.cpp
-  timestamp: '2026-10-29 20:48:18+09:00'
+  timestamp: '2026-11-10 17:45:19+09:00'
   verificationStatus: LIBRARY_NO_TESTS
   verifiedWith: []
 documentation_of: utils/fraction.hpp
