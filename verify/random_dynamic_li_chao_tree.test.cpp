@@ -1,5 +1,9 @@
+// 素朴な実装と突き合わせるランダムテストを通してから A + B を解く。
+#define PROBLEM "https://judge.yosupo.jp/problem/aplusb"
+
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -72,4 +76,8 @@ int main() {
                                1000000000000000000);
     run<std::greater<>, __int128>(random, 1000000000, 1000000000,
                                   1000000000000000000);
+
+    long long a, b;
+    std::cin >> a >> b;
+    std::cout << a + b << '\n';
 }

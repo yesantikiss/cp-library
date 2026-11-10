@@ -44,7 +44,7 @@ Heavy-Light Decompositionを行う
 木を中心で根付けする `yesantikiss::CenteredTree` です。中心が2点なら
 間に仮想頂点を置いて根にします。
 
-- `root`, `parent`, `order`: 中心を根とした根付き木
+- `root`, `parent`, `children`, `order`: 中心を根とした根付き木
 - `dist2[v]`: 中心点からの距離の2倍 (頂点倍した木での深さ)
 - `is_diameter_endpoint(v)`, `eccentricity(v)`, `radius()`
 - 構築: `O(N)`

@@ -1,5 +1,9 @@
+// 素朴な実装と突き合わせるランダムテストを通してから A + B を解く。
+#define PROBLEM "https://judge.yosupo.jp/problem/aplusb"
+
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -81,8 +85,9 @@ int main() {
         assert(centered.root == -1 && centered.order.empty());
     }
 
-    for (int trial = 0; trial < 300; ++trial) {
-        int n = 1 + static_cast<int>(random() % 60);
+    for (int trial = 0; trial < 500; ++trial) {
+        int n = trial < 100 ? 1 + trial % 8
+                            : 1 + static_cast<int>(random() % 60);
         std::vector<std::vector<int>> graph = random_tree(n, random);
 
         std::vector<std::vector<int>> dist(n);
@@ -119,6 +124,30 @@ int main() {
                    (ecc == expected_diameter));
         }
 
+        // children だけを使う木DPで直径の本数を数え、全頂点対の距離と比べる。
+        {
+            long long expected_count = 0;
+            for (int u = 0; u < n; ++u) {
+                for (int v = u + 1; v < n; ++v) {
+                    if (dist[u][v] == expected_diameter) ++expected_count;
+                }
+            }
+            std::vector<long long> endpoints(n + 1);
+            long long count = 0;
+            for (int i = static_cast<int>(centered.order.size()) - 1; i >= 0;
+                 --i) {
+                int v = centered.order[i];
+                if (centered.is_diameter_endpoint(v)) endpoints[v] = 1;
+                for (int to : centered.children[v]) {
+                    if (v == centered.root) {
+                        count += endpoints[v] * endpoints[to];
+                    }
+                    endpoints[v] += endpoints[to];
+                }
+            }
+            assert(count == expected_count);
+        }
+
         int vertices = n + (centered.has_virtual_root() ? 1 : 0);
         assert(static_cast<int>(centered.order.size()) == vertices);
         assert(centered.order[0] == centered.root);
@@ -128,6 +157,20 @@ int main() {
             int v = centered.order[i];
             assert(position[v] == -1);
             position[v] = i;
+        }
+        assert(static_cast<int>(centered.children.size()) == n + 1);
+        int child_count = 0;
+        for (int v = 0; v <= n; ++v) {
+            for (int to : centered.children[v]) {
+                assert(centered.parent[to] == v);
+                ++child_count;
+            }
+        }
+        assert(child_count == vertices - 1);
+        if (centered.has_virtual_root()) {
+            assert(centered.children[n].size() == 2);
+        } else {
+            assert(centered.children[n].empty());
         }
         for (int v = 0; v < n; ++v) {
             if (v == centered.root) continue;
@@ -141,4 +184,8 @@ int main() {
             }
         }
     }
+
+    long long a, b;
+    std::cin >> a >> b;
+    std::cout << a + b << '\n';
 }
