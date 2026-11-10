@@ -8,6 +8,8 @@
 namespace yesantikiss {
     // 木を中心で根付けする。中心が2点なら、その間に仮想頂点 n を置いて根にする。
     // dist2[x] は中心点からの距離の2倍で、頂点倍した木での深さと一致する。
+    // 中心の2点は元のグラフで隣り合うが、根付き木では親子ではない。
+    // 子は graph[v] ではなく children[v] でたどること。
     struct CenteredTree {
         int n = 0;
         int root = -1;
@@ -15,6 +17,7 @@ namespace yesantikiss {
         std::vector<int> parent;
         std::vector<int> order;
         std::vector<int> dist2;
+        std::vector<std::vector<int>> children;
 
         CenteredTree() = default;
 
@@ -28,6 +31,7 @@ namespace yesantikiss {
             diameter = 0;
             parent.assign(n + 1, -1);
             dist2.assign(n + 1, -1);
+            children.assign(n + 1, std::vector<int>());
             order.clear();
             if (n == 0) return;
 
@@ -46,6 +50,7 @@ namespace yesantikiss {
                 for (int v : {path[diameter / 2], path[diameter / 2 + 1]}) {
                     parent[v] = root;
                     dist2[v] = 1;
+                    children[root].push_back(v);
                     order.push_back(v);
                 }
             }
@@ -57,6 +62,7 @@ namespace yesantikiss {
                     if (dist2[to] != -1) continue;
                     parent[to] = v;
                     dist2[to] = dist2[v] + 2;
+                    children[v].push_back(to);
                     order.push_back(to);
                 }
             }

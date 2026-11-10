@@ -1,0 +1,3 @@
+# tests/ は verify を通さない動作確認用なので、ドキュメントには載せない。
+exclude:
+  - tests

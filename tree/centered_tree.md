@@ -11,18 +11,26 @@ documentation_of: ./centered_tree.hpp
 中心が1点か2点かで場合分けせずに木DPが書けます。
 
 ```cpp
+// 直径の本数 (距離が直径に等しい頂点対の数) を数える例
 yesantikiss::CenteredTree tree(graph);
+std::vector<long long> endpoints(tree.n + 1);
+long long answer = 0;
 // 葉から根へ
 for (int i = static_cast<int>(tree.order.size()) - 1; i >= 0; --i) {
     int v = tree.order[i];
-    if (tree.is_virtual(v)) {
-        // 値を持たない頂点として扱う
-    }
-    if (tree.is_diameter_endpoint(v)) {
-        // v はある直径の端点
+    if (tree.is_diameter_endpoint(v)) endpoints[v] = 1;
+    for (int to : tree.children[v]) {
+        // 根では、別々の子の部分木にある端点どうしが直径になる
+        if (v == tree.root) answer += endpoints[v] * endpoints[to];
+        endpoints[v] += endpoints[to];
     }
 }
 ```
+
+中心が2点 `u, v` のとき、`u` と `v` は元の `graph` では隣り合っていますが、
+根付き木ではどちらも仮想頂点 `N` の子です。`graph[v]` を
+`to != parent[v]` で絞ると `u` の子に `v` が入ってしまうので、子は必ず
+`children[v]` でたどってください。
 
 ## API
 
@@ -33,6 +41,8 @@ for (int i = static_cast<int>(tree.order.size()) - 1; i >= 0; --i) {
 - `diameter`: 直径の辺数です。
 - `parent[v]`: 根付き木での親です。`parent[root] = -1` です。
 - `order`: 根からの BFS 順です。中心が1点のときは `n` を含みません。
+- `children[v]`: 根付き木での子です。仮想頂点が根のとき、
+  `children[n]` は中心の2点です。
 - `dist2[v]`: 中心点からの距離の2倍です。根では `0`、使わない仮想頂点では
   `-1` です。
 - `is_virtual(v)`: `v` が仮想頂点か判定します。
@@ -43,7 +53,7 @@ for (int i = static_cast<int>(tree.order.size()) - 1; i >= 0; --i) {
 - `eccentricity(v)`: 元の木で `v` から最も遠い頂点までの距離
   `(dist2[v] + diameter) / 2` を返します。
 
-`parent`, `dist2` のサイズは常に `n + 1` です。
+`parent`, `dist2`, `children` のサイズは常に `n + 1` です。
 
 ## 要件・計算量
 

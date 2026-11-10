@@ -11,6 +11,7 @@ mkdir -p "$build_dir"
 for header in \
     "$root"/algo/*.hpp \
     "$root"/ds/*.hpp \
+    "$root"/geometry/*.hpp \
     "$root"/math/*.hpp \
     "$root"/string/*.hpp \
     "$root"/tree/*.hpp \
@@ -25,16 +26,15 @@ done
     -o "$build_dir/tests"
 "$build_dir/tests"
 
-"$cxx" "${flags[@]}" "$root/tests/tree_randomized.cpp" \
-    -o "$build_dir/tree-randomized"
-
-"$cxx" "${flags[@]}" "$root/tests/tree_center_randomized.cpp" \
-    -o "$build_dir/tree-center-randomized"
-"$build_dir/tree-center-randomized"
-"$build_dir/tree-randomized"
-
-"$cxx" "${flags[@]}" "$root/tests/li_chao_randomized.cpp" \
-    -o "$build_dir/li-chao-randomized"
-"$build_dir/li-chao-randomized"
+# ランダムテストは verify/random_*.test.cpp にあり、A + B を解いて終わる。
+for source in "$root"/verify/random_*.test.cpp; do
+    binary="$build_dir/$(basename "${source%.test.cpp}")"
+    "$cxx" "${flags[@]}" "$source" -o "$binary"
+    output="$(echo "1 2" | "$binary")"
+    if [ "$output" != "3" ]; then
+        echo "unexpected output from $source: $output" >&2
+        exit 1
+    fi
+done
 
 echo "All tests passed with $cxx"
