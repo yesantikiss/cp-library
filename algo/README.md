@@ -2,6 +2,15 @@
 
 [トップへ戻る](../README.md)
 
+## `binary_search.hpp`
+
+整数区間上の単調な述語の境界を求める二分探索です。
+
+- `binary_search_min_left(left, right, f)`: `false ... true` で `f(x)` が真となる最小の `x`。見つからなければ `right`
+- `binary_search_max_right(left, right, f)`: `true ... false` で `f(x)` が真となる最大の `x`。見つからなければ `left`
+- `left`, `right` は番兵で、`f(left)`, `f(right)` は評価しない
+- 計算量: `O(F log(right - left))`
+
 ## `mo.hpp`
 
 複数の静的な区間クエリを、クエリの処理順を並べ替えて処理する Mo's algorithm です。

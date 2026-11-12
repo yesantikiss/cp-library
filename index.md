@@ -167,6 +167,9 @@ data:
       path: verify/random_persistent_segtree.test.cpp
       title: verify/random_persistent_segtree.test.cpp
     - icon: ':heavy_check_mark:'
+      path: verify/random_rolling_hash.test.cpp
+      title: verify/random_rolling_hash.test.cpp
+    - icon: ':heavy_check_mark:'
       path: verify/random_tree_lca_hld.test.cpp
       title: verify/random_tree_lca_hld.test.cpp
     - icon: ':heavy_check_mark:'

@@ -46,7 +46,7 @@ data:
   - geometry/line.hpp
   - geometry/argument_sort.hpp
   - geometry/point.hpp
-  timestamp: '2026-11-12 13:12:40+09:00'
+  timestamp: '2026-11-12 13:24:34+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/cgl_1_a.test.cpp

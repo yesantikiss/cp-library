@@ -36,25 +36,38 @@ data:
     \ len) {\n            if ((int)pow_base.size() >= len + 1) return;\n         \
     \   int cur = (int)pow_base.size();\n            pow_base.resize(len + 1);\n \
     \           for (int i = cur; i <= len; ++i) {\n                pow_base[i] =\
-    \ mul(pow_base[i - 1], base);\n            }\n        }\n    \n        // hash(A\
-    \ + B) \u3092 hash(A), hash(B), |B| \u304B\u3089\u6C42\u3081\u308B\n        static\
-    \ ull concat(ull h1, ull h2, int len2) {\n            assert(len2 >= 0);\n   \
-    \         init_base();\n            ensure_pow(len2);\n            return add(mul(h1,\
-    \ pow_base[len2]), h2);\n        }\n\n        // \u9577\u3055\u4ED8\u304D\u306E\
-    \u30CF\u30C3\u30B7\u30E5\u5024\u3002+ \u3067\u6587\u5B57\u5217\u306E\u9023\u7D50\
-    \u306B\u5BFE\u5FDC\u3059\u308B\u30CF\u30C3\u30B7\u30E5\u304C\u5F97\u3089\u308C\
-    \u308B\n        // \u65E2\u5B9A\u5024\u306F\u7A7A\u6587\u5B57\u5217\uFF08+ \u306E\
-    \u5358\u4F4D\u5143\uFF09\n        struct Hash {\n            ull val = 0;\n  \
-    \          int len = 0;\n\n            Hash() = default;\n            Hash(ull\
-    \ val, int len) : val(val), len(len) {}\n            // 1 \u6587\u5B57 / \u6587\
-    \u5B57\u5217\u5168\u4F53\u306E\u30CF\u30C3\u30B7\u30E5\uFF08prefix hash \u3092\
-    \u6301\u305F\u305A\u306B\u6C42\u3081\u308B\uFF09\n            explicit Hash(char\
-    \ c) : val((ull)(unsigned char)c + 1), len(1) { init_base(); }\n            explicit\
-    \ Hash(const std::string &s) : len((int)s.size()) {\n                init_base();\n\
-    \                for (char c : s) val = add(mul(val, base), (ull)(unsigned char)c\
-    \ + 1);\n            }\n\n            friend Hash operator+(const Hash &a, const\
-    \ Hash &b) {\n                return {concat(a.val, b.val, b.len), a.len + b.len};\n\
-    \            }\n            Hash &operator+=(const Hash &o) { return *this = *this\
+    \ mul(pow_base[i - 1], base);\n            }\n        }\n    \n        // base^len\u3002\
+    \u30C6\u30FC\u30D6\u30EB\u306B\u3042\u308C\u3070\u5F15\u304D\u3001\u306A\u3051\
+    \u308C\u3070\u7E70\u308A\u8FD4\u3057\u4E8C\u4E57\u6CD5\u3067\u6C42\u3081\u308B\
+    \uFF08\u30C6\u30FC\u30D6\u30EB\u306F\u4F38\u3070\u3055\u306A\u3044\uFF09\n   \
+    \     static ull pow_of(long long len) {\n            assert(len >= 0);\n    \
+    \        if (len < (long long)pow_base.size()) return pow_base[len];\n       \
+    \     ull res = 1, x = base;\n            for (ull e = (ull)len; e > 0; e >>=\
+    \ 1) {\n                if (e & 1) res = mul(res, x);\n                x = mul(x,\
+    \ x);\n            }\n            return res;\n        }\n\n        // hash(A\
+    \ + B) \u3092 hash(A), hash(B), |B| \u304B\u3089\u6C42\u3081\u308B\n        //\
+    \ \u30C6\u30FC\u30D6\u30EB\u3092\u4F38\u3070\u3059\u306E\u306F build \u3060\u3051\
+    \u306A\u306E\u3067\u3001\u9577\u3044\u30CF\u30C3\u30B7\u30E5\u3092\u7D44\u307F\
+    \u7ACB\u3066\u3066\u3082\u30E1\u30E2\u30EA\u306F\u5897\u3048\u306A\u3044\n   \
+    \     static ull concat(ull h1, ull h2, long long len2) {\n            assert(len2\
+    \ >= 0);\n            init_base();\n            return add(mul(h1, pow_of(len2)),\
+    \ h2);\n        }\n\n        // \u9577\u3055\u4ED8\u304D\u306E\u30CF\u30C3\u30B7\
+    \u30E5\u5024\u3002+ \u3067\u6587\u5B57\u5217\u306E\u9023\u7D50\u306B\u5BFE\u5FDC\
+    \u3059\u308B\u30CF\u30C3\u30B7\u30E5\u304C\u5F97\u3089\u308C\u308B\n        //\
+    \ \u65E2\u5B9A\u5024\u306F\u7A7A\u6587\u5B57\u5217\uFF08+ \u306E\u5358\u4F4D\u5143\
+    \uFF09\n        struct Hash {\n            ull val = 0;\n            long long\
+    \ len = 0;  // \u7E70\u308A\u8FD4\u3057\u4E8C\u4E57\u6CD5\u3067\u9023\u7D50\u3059\
+    \u308C\u3070 10^18 \u7A0B\u5EA6\u306E\u9577\u3055\u3082\u6271\u3048\u308B\n\n\
+    \            Hash() = default;\n            Hash(ull val, long long len) : val(val),\
+    \ len(len) {}\n            // 1 \u6587\u5B57 / \u6587\u5B57\u5217\u5168\u4F53\u306E\
+    \u30CF\u30C3\u30B7\u30E5\uFF08prefix hash \u3092\u6301\u305F\u305A\u306B\u6C42\
+    \u3081\u308B\uFF09\n            explicit Hash(char c) : val((ull)(unsigned char)c\
+    \ + 1), len(1) { init_base(); }\n            explicit Hash(const std::string &s)\
+    \ : len((long long)s.size()) {\n                init_base();\n               \
+    \ for (char c : s) val = add(mul(val, base), (ull)(unsigned char)c + 1);\n   \
+    \         }\n\n            friend Hash operator+(const Hash &a, const Hash &b)\
+    \ {\n                return {concat(a.val, b.val, b.len), a.len + b.len};\n  \
+    \          }\n            Hash &operator+=(const Hash &o) { return *this = *this\
     \ + o; }\n            friend bool operator==(const Hash &a, const Hash &b) {\n\
     \                return a.val == b.val && a.len == b.len;\n            }\n   \
     \         friend bool operator!=(const Hash &a, const Hash &b) { return !(a ==\
@@ -125,7 +138,7 @@ data:
   isVerificationFile: true
   path: verify/zalgorithm.test.cpp
   requiredBy: []
-  timestamp: '2026-11-12 13:12:40+09:00'
+  timestamp: '2026-11-12 13:24:34+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/zalgorithm.test.cpp

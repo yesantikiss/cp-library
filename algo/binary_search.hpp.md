@@ -53,7 +53,7 @@ data:
   isVerificationFile: false
   path: algo/binary_search.hpp
   requiredBy: []
-  timestamp: '2026-11-12 13:12:40+09:00'
+  timestamp: '2026-11-12 13:24:34+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/random_binary_search.test.cpp
@@ -75,10 +75,14 @@ title: "\u4E8C\u5206\u63A2\u7D22"
 
 ## 要件・注意
 
-- `binary_search_min_left` では `f(left) == false`、`f(right) == true` を満たす
-  番兵を渡してください。
-- `binary_search_max_right` では `f(left) == true`、`f(right) == false` を満たす
-  番兵を渡してください。
+- `binary_search_min_left` では `left`, `right` を `f(left) == false`、
+  `f(right) == true` とみなす番兵として扱い、`(left, right]` から探します。
+  `f(left)`, `f(right)` は評価しません。`f(x)` が真となる `x` がなければ
+  `right` を返します。
+- `binary_search_max_right` では `left`, `right` を `f(left) == true`、
+  `f(right) == false` とみなす番兵として扱い、`[left, right)` から探します。
+  `f(left)`, `f(right)` は評価しません。`f(x)` が真となる `x` がなければ
+  `left` を返します。
 - `T` は差・加算・`2` による除算と比較ができる整数型を想定しています。
 
 ## 計算量
