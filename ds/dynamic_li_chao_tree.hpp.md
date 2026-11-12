@@ -186,7 +186,7 @@ data:
   isVerificationFile: false
   path: ds/dynamic_li_chao_tree.hpp
   requiredBy: []
-  timestamp: '2026-11-10 19:55:36+09:00'
+  timestamp: '2026-11-12 13:13:02+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/segment_add_get_min.test.cpp

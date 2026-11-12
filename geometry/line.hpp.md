@@ -110,7 +110,7 @@ data:
   isVerificationFile: false
   path: geometry/line.hpp
   requiredBy: []
-  timestamp: '2026-11-10 19:55:36+09:00'
+  timestamp: '2026-11-12 13:13:02+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/cgl_1_a.test.cpp

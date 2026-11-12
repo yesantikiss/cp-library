@@ -77,7 +77,7 @@ data:
   isVerificationFile: true
   path: verify/set_xor_min.test.cpp
   requiredBy: []
-  timestamp: '2026-11-10 19:55:36+09:00'
+  timestamp: '2026-11-12 13:13:02+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/set_xor_min.test.cpp

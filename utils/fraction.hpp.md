@@ -45,31 +45,74 @@ data:
     \ value, u128 divisor) {\n            if (divisor == 0) {\n                throw\
     \ std::domain_error(\"fraction: division by zero\");\n            }\n        \
     \    if (value.hi == 0) {\n                return {{0, value.lo / divisor}, value.lo\
-    \ % divisor};\n            }\n\n            u256 quotient;\n            u128 remainder\
-    \ = 0;\n            for (int bit_index = 255; bit_index >= 0; --bit_index) {\n\
-    \                u128 bit;\n                if (bit_index >= 128) {\n        \
-    \            bit = (value.hi >> (bit_index - 128)) & 1;\n                } else\
-    \ {\n                    bit = (value.lo >> bit_index) & 1;\n                }\n\
-    \n                bool carry = (remainder >> 127) != 0;\n                remainder\
-    \ = (remainder << 1) | bit;\n                if (carry || remainder >= divisor)\
-    \ {\n                    remainder -= divisor;\n                    if (bit_index\
-    \ >= 128) {\n                        quotient.hi |= u128(1) << (bit_index - 128);\n\
-    \                    } else {\n                        quotient.lo |= u128(1)\
-    \ << bit_index;\n                    }\n                }\n            }\n   \
-    \         return {quotient, remainder};\n        }\n\n        inline u128 modulo(const\
-    \ u256& value, u128 divisor) {\n            return divide(value, divisor).remainder;\n\
-    \        }\n\n        inline u256 divide_exact(const u256& value, u128 divisor)\
-    \ {\n            if (divisor == 1) return value;\n            div_result result\
-    \ = divide(value, divisor);\n            if (result.remainder != 0) {\n      \
-    \          throw std::logic_error(\"fraction: internal non-exact division\");\n\
-    \            }\n            return result.quotient;\n        }\n\n        inline\
-    \ u128 gcd(u128 a, u128 b) {\n            while (b != 0) {\n                u128\
-    \ r = a % b;\n                a = b;\n                b = r;\n            }\n\
-    \            return a;\n        }\n\n        struct signed_u256 {\n          \
-    \  bool negative = false;\n            u256 magnitude;\n        };\n\n       \
-    \ inline signed_u256 add(const signed_u256& a, const signed_u256& b) {\n     \
-    \       if (a.negative == b.negative) {\n                signed_u256 res{a.negative,\
-    \ add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
+    \ % divisor};\n            }\n\n            // \u5272\u308B\u6570\u304C64\u30D3\
+    \u30C3\u30C8\u306B\u53CE\u307E\u308B\u306A\u3089\u300164\u30D3\u30C3\u30C8\u305A\
+    \u30644\u56DE\u306E\u5272\u308A\u7B97\u3067\u6E08\u3080\u3002\n            if\
+    \ ((divisor >> 64) == 0) {\n                constexpr u128 mask64 = (u128(1) <<\
+    \ 64) - 1;\n                const u128 limbs[4] = {\n                    value.hi\
+    \ >> 64, value.hi & mask64,\n                    value.lo >> 64, value.lo & mask64};\n\
+    \                u128 digits[4];\n                u128 carry = 0;\n          \
+    \      for (int i = 0; i < 4; ++i) {\n                    u128 current = (carry\
+    \ << 64) | limbs[i];\n                    digits[i] = current / divisor;\n   \
+    \                 carry = current % divisor;\n                }\n            \
+    \    return {{(digits[0] << 64) | digits[1],\n                         (digits[2]\
+    \ << 64) | digits[3]},\n                        carry};\n            }\n\n   \
+    \         u256 quotient;\n            u128 remainder = 0;\n            for (int\
+    \ bit_index = 255; bit_index >= 0; --bit_index) {\n                u128 bit;\n\
+    \                if (bit_index >= 128) {\n                    bit = (value.hi\
+    \ >> (bit_index - 128)) & 1;\n                } else {\n                    bit\
+    \ = (value.lo >> bit_index) & 1;\n                }\n\n                bool carry\
+    \ = (remainder >> 127) != 0;\n                remainder = (remainder << 1) | bit;\n\
+    \                if (carry || remainder >= divisor) {\n                    remainder\
+    \ -= divisor;\n                    if (bit_index >= 128) {\n                 \
+    \       quotient.hi |= u128(1) << (bit_index - 128);\n                    } else\
+    \ {\n                        quotient.lo |= u128(1) << bit_index;\n          \
+    \          }\n                }\n            }\n            return {quotient,\
+    \ remainder};\n        }\n\n        inline u128 modulo(const u256& value, u128\
+    \ divisor) {\n            return divide(value, divisor).remainder;\n        }\n\
+    \n        inline u256 divide_exact(const u256& value, u128 divisor) {\n      \
+    \      if (divisor == 1) return value;\n            div_result result = divide(value,\
+    \ divisor);\n            if (result.remainder != 0) {\n                throw std::logic_error(\"\
+    fraction: internal non-exact division\");\n            }\n            return result.quotient;\n\
+    \        }\n\n        // \u5272\u308A\u7B97\u3092\u4F7F\u308F\u306A\u3044 binary\
+    \ gcd\u3002\u5927\u5C0F\u306E\u5165\u308C\u66FF\u3048\u3092\u5206\u5C90\u306A\u3057\
+    \u3067\u66F8\u304F\u3002\n        inline unsigned long long gcd64(\n         \
+    \   unsigned long long a, unsigned long long b) {\n            if (a == 0 || b\
+    \ == 0) return a | b;\n            int a_zeros = __builtin_ctzll(a);\n       \
+    \     int b_zeros = __builtin_ctzll(b);\n            int shift = a_zeros < b_zeros\
+    \ ? a_zeros : b_zeros;\n            a >>= a_zeros;\n            b >>= b_zeros;\n\
+    \            // \u3053\u3053\u304B\u3089 a, b \u306F\u3069\u3061\u3089\u3082\u5947\
+    \u6570\n            while (a != b) {\n                unsigned long long difference\
+    \ = a > b ? a - b : b - a;\n                b = a < b ? a : b;\n             \
+    \   a = difference >> __builtin_ctzll(difference);\n            }\n          \
+    \  return a << shift;\n        }\n\n        inline int count_trailing_zeros(u128\
+    \ x) {\n            unsigned long long lo = static_cast<unsigned long long>(x);\n\
+    \            if (lo != 0) return __builtin_ctzll(lo);\n            return 64 +\
+    \ __builtin_ctzll(\n                static_cast<unsigned long long>(x >> 64));\n\
+    \        }\n\n        // 128\u30D3\u30C3\u30C8\u306E\u5270\u4F59\u306F\u9045\u3044\
+    \u306E\u3067\u300164\u30D3\u30C3\u30C8\u306B\u53CE\u307E\u308A\u6B21\u7B2C gcd64\
+    \ \u306B\u5207\u308A\u66FF\u3048\u308B\u3002\n        inline u128 gcd(u128 a,\
+    \ u128 b) {\n            if ((a >> 64) == 0 && (b >> 64) == 0) {\n           \
+    \     return gcd64(\n                    static_cast<unsigned long long>(a),\n\
+    \                    static_cast<unsigned long long>(b));\n            }\n   \
+    \         if (a < b) {\n                u128 t = a;\n                a = b;\n\
+    \                b = t;\n            }\n            if (b == 0) return a;\n  \
+    \          // \u6841\u6570\u306E\u5DEE\u304C\u5927\u304D\u3044\u3068\u304D\u306B\
+    \u5099\u3048\u3066\u3001\u6700\u521D\u306B1\u56DE\u3060\u3051\u5270\u4F59\u3092\
+    \u53D6\u308B\u3002\n            a %= b;\n            if (a == 0) return b;\n\n\
+    \            int shift = count_trailing_zeros(a | b);\n            a >>= count_trailing_zeros(a);\n\
+    \            do {\n                b >>= count_trailing_zeros(b);\n          \
+    \      if (a > b) {\n                    u128 t = a;\n                    a =\
+    \ b;\n                    b = t;\n                }\n                if ((b >>\
+    \ 64) == 0) {\n                    return static_cast<u128>(gcd64(\n         \
+    \                      static_cast<unsigned long long>(a),\n                 \
+    \              static_cast<unsigned long long>(b)))\n                        \
+    \   << shift;\n                }\n                b -= a;\n            } while\
+    \ (b != 0);\n            return a << shift;\n        }\n\n        struct signed_u256\
+    \ {\n            bool negative = false;\n            u256 magnitude;\n       \
+    \ };\n\n        inline signed_u256 add(const signed_u256& a, const signed_u256&\
+    \ b) {\n            if (a.negative == b.negative) {\n                signed_u256\
+    \ res{a.negative, add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
     \ res.negative = false;\n                return res;\n            }\n\n      \
     \      int cmp = compare(a.magnitude, b.magnitude);\n            if (cmp == 0)\
     \ return {};\n            if (cmp > 0) {\n                return {a.negative,\
@@ -138,8 +181,47 @@ data:
     \   }\n\n        static signed_u256 signed_product(T value, u128 multiplier) {\n\
     \            u256 product =\n                fraction_detail::multiply(magnitude(value),\
     \ multiplier);\n            return {\n                value < 0 && !fraction_detail::is_zero(product),\n\
-    \                product\n            };\n        }\n\n        fraction& add_or_subtract(const\
-    \ fraction& other, bool subtract) {\n            u128 b = static_cast<u128>(den);\n\
+    \                product\n            };\n        }\n\n        using u64 = unsigned\
+    \ long long;\n\n        // \u5206\u5B50\u306E\u7D76\u5BFE\u5024\u304C 2^63 \u4EE5\
+    \u4E0B\u3001\u5206\u6BCD\u304C 2^63 \u672A\u6E80\u306A\u3089\u3001\u9014\u4E2D\
+    \u306E\u7A4D\u3068\u548C\u304C\n        // u128 \u306B\u53CE\u307E\u308B\u306E\
+    \u3067\u3001256\u30D3\u30C3\u30C8\u306E\u8A08\u7B97\u3092\u4F7F\u308F\u305A\u306B\
+    \u6E08\u3080\u3002\n        static bool is_small(const fraction& x) {\n      \
+    \      if constexpr (sizeof(T) <= sizeof(u64)) {\n                return true;\n\
+    \            } else {\n                constexpr u128 limit = u128(1) << 63;\n\
+    \                return magnitude(x.num) <= limit &&\n                       static_cast<u128>(x.den)\
+    \ < limit;\n            }\n        }\n\n        fraction& add_or_subtract_small(const\
+    \ fraction& other, bool subtract) {\n            u64 b = static_cast<u64>(den);\n\
+    \            u64 d = static_cast<u64>(other.den);\n            u64 common = fraction_detail::gcd64(b,\
+    \ d);\n            u64 b_reduced = b / common;\n\n            u128 left = magnitude(num)\
+    \ * (d / common);\n            u128 right = magnitude(other.num) * b_reduced;\n\
+    \            bool left_negative = num < 0;\n            bool right_negative =\
+    \ (other.num < 0) != subtract;\n\n            bool negative;\n            u128\
+    \ numerator;\n            if (left_negative == right_negative) {\n           \
+    \     negative = left_negative;\n                numerator = left + right;\n \
+    \           } else if (left >= right) {\n                negative = left_negative;\n\
+    \                numerator = left - right;\n            } else {\n           \
+    \     negative = right_negative;\n                numerator = right - left;\n\
+    \            }\n            if (numerator == 0) {\n                num = 0;\n\
+    \                den = 1;\n                return *this;\n            }\n\n  \
+    \          u64 reduction = common;\n            if (common != 1) {\n         \
+    \       reduction = fraction_detail::gcd64(\n                    static_cast<u64>(numerator\
+    \ % common), common);\n                numerator /= reduction;\n            }\n\
+    \            assign_reduced(\n                negative,\n                fraction_detail::from_u128(numerator),\n\
+    \                fraction_detail::from_u128(\n                    static_cast<u128>(b_reduced)\
+    \ * (d / reduction)));\n            return *this;\n        }\n\n        // (a\
+    \ / b) * (c / d) \u3092\u3001a, b, c, d \u304C 2^63 \u4EE5\u4E0B\u306E\u3068\u304D\
+    \u306B\u8A08\u7B97\u3059\u308B\u3002\n        fraction& multiply_small(bool negative,\
+    \ u64 a, u64 b, u64 c, u64 d) {\n            u64 left_reduction = fraction_detail::gcd64(a,\
+    \ d);\n            u64 right_reduction = fraction_detail::gcd64(c, b);\n     \
+    \       assign_reduced(\n                negative,\n                fraction_detail::from_u128(\n\
+    \                    static_cast<u128>(a / left_reduction) *\n               \
+    \     (c / right_reduction)),\n                fraction_detail::from_u128(\n \
+    \                   static_cast<u128>(b / right_reduction) *\n               \
+    \     (d / left_reduction)));\n            return *this;\n        }\n\n      \
+    \  fraction& add_or_subtract(const fraction& other, bool subtract) {\n       \
+    \     if (is_small(*this) && is_small(other)) {\n                return add_or_subtract_small(other,\
+    \ subtract);\n            }\n\n            u128 b = static_cast<u128>(den);\n\
     \            u128 d = static_cast<u128>(other.den);\n            u128 common =\
     \ fraction_detail::gcd(b, d);\n            u128 b_reduced = b / common;\n    \
     \        u128 d_reduced = d / common;\n\n            signed_u256 left = signed_product(num,\
@@ -203,7 +285,12 @@ data:
     \ add_or_subtract(other, true);\n        }\n\n        fraction& operator*=(const\
     \ fraction& other) {\n            if (num == 0 || other.num == 0) {\n        \
     \        num = 0;\n                den = 1;\n                return *this;\n \
-    \           }\n\n            u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
+    \           }\n\n            if (is_small(*this) && is_small(other)) {\n     \
+    \           return multiply_small(\n                    (num < 0) != (other.num\
+    \ < 0),\n                    static_cast<u64>(magnitude(num)),\n             \
+    \       static_cast<u64>(den),\n                    static_cast<u64>(magnitude(other.num)),\n\
+    \                    static_cast<u64>(other.den));\n            }\n\n        \
+    \    u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
     \            u128 c = magnitude(other.num);\n            u128 d = static_cast<u128>(other.den);\n\
     \            u128 left_reduction = fraction_detail::gcd(a, d);\n            u128\
     \ right_reduction = fraction_detail::gcd(c, b);\n\n            u256 numerator\
@@ -215,55 +302,63 @@ data:
     \ operator/=(const fraction& other) {\n            if (other.num == 0) {\n   \
     \             throw std::domain_error(\n                    \"fraction: division\
     \ by zero\");\n            }\n            if (num == 0) {\n                den\
-    \ = 1;\n                return *this;\n            }\n\n            u128 a = magnitude(num);\n\
-    \            u128 b = static_cast<u128>(den);\n            u128 c = magnitude(other.num);\n\
-    \            u128 d = static_cast<u128>(other.den);\n            u128 numerator_reduction\
-    \ = fraction_detail::gcd(a, c);\n            u128 denominator_reduction = fraction_detail::gcd(d,\
-    \ b);\n\n            u256 numerator = fraction_detail::multiply(\n           \
-    \     a / numerator_reduction,\n                d / denominator_reduction);\n\
-    \            u256 denominator = fraction_detail::multiply(\n                b\
-    \ / denominator_reduction,\n                c / numerator_reduction);\n      \
-    \      assign_reduced(\n                (num < 0) != (other.num < 0),\n      \
-    \          numerator,\n                denominator);\n            return *this;\n\
-    \        }\n\n        friend fraction operator+(fraction a, const fraction& b)\
-    \ {\n            a += b;\n            return a;\n        }\n\n        friend fraction\
-    \ operator-(fraction a, const fraction& b) {\n            a -= b;\n          \
-    \  return a;\n        }\n\n        friend fraction operator*(fraction a, const\
-    \ fraction& b) {\n            a *= b;\n            return a;\n        }\n\n  \
-    \      friend fraction operator/(fraction a, const fraction& b) {\n          \
-    \  a /= b;\n            return a;\n        }\n\n        friend bool operator==(const\
+    \ = 1;\n                return *this;\n            }\n\n            if (is_small(*this)\
+    \ && is_small(other)) {\n                // (a / b) / (c / d) = (a / b) * (d /\
+    \ c)\n                return multiply_small(\n                    (num < 0) !=\
+    \ (other.num < 0),\n                    static_cast<u64>(magnitude(num)),\n  \
+    \                  static_cast<u64>(den),\n                    static_cast<u64>(other.den),\n\
+    \                    static_cast<u64>(magnitude(other.num)));\n            }\n\
+    \n            u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
+    \            u128 c = magnitude(other.num);\n            u128 d = static_cast<u128>(other.den);\n\
+    \            u128 numerator_reduction = fraction_detail::gcd(a, c);\n        \
+    \    u128 denominator_reduction = fraction_detail::gcd(d, b);\n\n            u256\
+    \ numerator = fraction_detail::multiply(\n                a / numerator_reduction,\n\
+    \                d / denominator_reduction);\n            u256 denominator = fraction_detail::multiply(\n\
+    \                b / denominator_reduction,\n                c / numerator_reduction);\n\
+    \            assign_reduced(\n                (num < 0) != (other.num < 0),\n\
+    \                numerator,\n                denominator);\n            return\
+    \ *this;\n        }\n\n        friend fraction operator+(fraction a, const fraction&\
+    \ b) {\n            a += b;\n            return a;\n        }\n\n        friend\
+    \ fraction operator-(fraction a, const fraction& b) {\n            a -= b;\n \
+    \           return a;\n        }\n\n        friend fraction operator*(fraction\
+    \ a, const fraction& b) {\n            a *= b;\n            return a;\n      \
+    \  }\n\n        friend fraction operator/(fraction a, const fraction& b) {\n \
+    \           a /= b;\n            return a;\n        }\n\n        friend bool operator==(const\
     \ fraction& a, const fraction& b) {\n            return a.num == b.num && a.den\
     \ == b.den;\n        }\n\n        friend bool operator!=(const fraction& a, const\
     \ fraction& b) {\n            return !(a == b);\n        }\n\n        friend bool\
     \ operator<(const fraction& a, const fraction& b) {\n            if ((a.num <\
-    \ 0) != (b.num < 0)) return a.num < 0;\n\n            u256 left = fraction_detail::multiply(\n\
-    \                magnitude(a.num), static_cast<u128>(b.den));\n            u256\
-    \ right = fraction_detail::multiply(\n                magnitude(b.num), static_cast<u128>(a.den));\n\
-    \            int cmp = fraction_detail::compare(left, right);\n            return\
-    \ a.num < 0 ? cmp > 0 : cmp < 0;\n        }\n\n        friend bool operator>(const\
-    \ fraction& a, const fraction& b) {\n            return b < a;\n        }\n\n\
-    \        friend bool operator<=(const fraction& a, const fraction& b) {\n    \
-    \        return !(b < a);\n        }\n\n        friend bool operator>=(const fraction&\
-    \ a, const fraction& b) {\n            return !(a < b);\n        }\n\n       \
-    \ // \u5BFE\u5FDC\u5F62\u5F0F: 12, -7, 1.5, .5, 1., 3/4, -10/6\n        static\
-    \ bool parse(const std::string& s, fraction& out) {\n            if (s.empty())\
-    \ return false;\n\n            bool negative = false;\n            std::size_t\
-    \ first = 0;\n            if (s[first] == '+') {\n                ++first;\n \
-    \           } else if (s[first] == '-') {\n                negative = true;\n\
-    \                ++first;\n            }\n            if (first == s.size()) return\
-    \ false;\n\n            std::size_t slash = s.find('/', first);\n            if\
-    \ (slash != std::string::npos) {\n                if (s.find('/', slash + 1) !=\
-    \ std::string::npos) return false;\n\n                u128 numerator;\n      \
-    \          u128 denominator;\n                if (!parse_unsigned(\n         \
-    \               s, first, slash, max_u128(), numerator) ||\n                 \
-    \   !parse_unsigned(\n                        s, slash + 1, s.size(),\n      \
-    \                  max_u128(), denominator) ||\n                    denominator\
-    \ == 0) {\n                    return false;\n                }\n\n          \
-    \      fraction tmp;\n                if (!tmp.try_assign_normalized(\n      \
-    \                  negative, numerator, denominator)) {\n                    return\
-    \ false;\n                }\n                out = tmp;\n                return\
-    \ true;\n            }\n\n            std::size_t dot = s.find('.', first);\n\
-    \            if (dot == std::string::npos) {\n                u128 numerator;\n\
+    \ 0) != (b.num < 0)) return a.num < 0;\n\n            if (is_small(a) && is_small(b))\
+    \ {\n                u128 left = magnitude(a.num) * static_cast<u128>(b.den);\n\
+    \                u128 right = magnitude(b.num) * static_cast<u128>(a.den);\n \
+    \               return a.num < 0 ? left > right : left < right;\n            }\n\
+    \n            u256 left = fraction_detail::multiply(\n                magnitude(a.num),\
+    \ static_cast<u128>(b.den));\n            u256 right = fraction_detail::multiply(\n\
+    \                magnitude(b.num), static_cast<u128>(a.den));\n            int\
+    \ cmp = fraction_detail::compare(left, right);\n            return a.num < 0 ?\
+    \ cmp > 0 : cmp < 0;\n        }\n\n        friend bool operator>(const fraction&\
+    \ a, const fraction& b) {\n            return b < a;\n        }\n\n        friend\
+    \ bool operator<=(const fraction& a, const fraction& b) {\n            return\
+    \ !(b < a);\n        }\n\n        friend bool operator>=(const fraction& a, const\
+    \ fraction& b) {\n            return !(a < b);\n        }\n\n        // \u5BFE\
+    \u5FDC\u5F62\u5F0F: 12, -7, 1.5, .5, 1., 3/4, -10/6\n        static bool parse(const\
+    \ std::string& s, fraction& out) {\n            if (s.empty()) return false;\n\
+    \n            bool negative = false;\n            std::size_t first = 0;\n   \
+    \         if (s[first] == '+') {\n                ++first;\n            } else\
+    \ if (s[first] == '-') {\n                negative = true;\n                ++first;\n\
+    \            }\n            if (first == s.size()) return false;\n\n         \
+    \   std::size_t slash = s.find('/', first);\n            if (slash != std::string::npos)\
+    \ {\n                if (s.find('/', slash + 1) != std::string::npos) return false;\n\
+    \n                u128 numerator;\n                u128 denominator;\n       \
+    \         if (!parse_unsigned(\n                        s, first, slash, max_u128(),\
+    \ numerator) ||\n                    !parse_unsigned(\n                      \
+    \  s, slash + 1, s.size(),\n                        max_u128(), denominator) ||\n\
+    \                    denominator == 0) {\n                    return false;\n\
+    \                }\n\n                fraction tmp;\n                if (!tmp.try_assign_normalized(\n\
+    \                        negative, numerator, denominator)) {\n              \
+    \      return false;\n                }\n                out = tmp;\n        \
+    \        return true;\n            }\n\n            std::size_t dot = s.find('.',\
+    \ first);\n            if (dot == std::string::npos) {\n                u128 numerator;\n\
     \                if (!parse_unsigned(\n                        s, first, s.size(),\
     \ max_u128(), numerator)) {\n                    return false;\n             \
     \   }\n                fraction tmp;\n                if (!tmp.try_assign_normalized(\n\
@@ -339,31 +434,74 @@ data:
     \ value, u128 divisor) {\n            if (divisor == 0) {\n                throw\
     \ std::domain_error(\"fraction: division by zero\");\n            }\n        \
     \    if (value.hi == 0) {\n                return {{0, value.lo / divisor}, value.lo\
-    \ % divisor};\n            }\n\n            u256 quotient;\n            u128 remainder\
-    \ = 0;\n            for (int bit_index = 255; bit_index >= 0; --bit_index) {\n\
-    \                u128 bit;\n                if (bit_index >= 128) {\n        \
-    \            bit = (value.hi >> (bit_index - 128)) & 1;\n                } else\
-    \ {\n                    bit = (value.lo >> bit_index) & 1;\n                }\n\
-    \n                bool carry = (remainder >> 127) != 0;\n                remainder\
-    \ = (remainder << 1) | bit;\n                if (carry || remainder >= divisor)\
-    \ {\n                    remainder -= divisor;\n                    if (bit_index\
-    \ >= 128) {\n                        quotient.hi |= u128(1) << (bit_index - 128);\n\
-    \                    } else {\n                        quotient.lo |= u128(1)\
-    \ << bit_index;\n                    }\n                }\n            }\n   \
-    \         return {quotient, remainder};\n        }\n\n        inline u128 modulo(const\
-    \ u256& value, u128 divisor) {\n            return divide(value, divisor).remainder;\n\
-    \        }\n\n        inline u256 divide_exact(const u256& value, u128 divisor)\
-    \ {\n            if (divisor == 1) return value;\n            div_result result\
-    \ = divide(value, divisor);\n            if (result.remainder != 0) {\n      \
-    \          throw std::logic_error(\"fraction: internal non-exact division\");\n\
-    \            }\n            return result.quotient;\n        }\n\n        inline\
-    \ u128 gcd(u128 a, u128 b) {\n            while (b != 0) {\n                u128\
-    \ r = a % b;\n                a = b;\n                b = r;\n            }\n\
-    \            return a;\n        }\n\n        struct signed_u256 {\n          \
-    \  bool negative = false;\n            u256 magnitude;\n        };\n\n       \
-    \ inline signed_u256 add(const signed_u256& a, const signed_u256& b) {\n     \
-    \       if (a.negative == b.negative) {\n                signed_u256 res{a.negative,\
-    \ add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
+    \ % divisor};\n            }\n\n            // \u5272\u308B\u6570\u304C64\u30D3\
+    \u30C3\u30C8\u306B\u53CE\u307E\u308B\u306A\u3089\u300164\u30D3\u30C3\u30C8\u305A\
+    \u30644\u56DE\u306E\u5272\u308A\u7B97\u3067\u6E08\u3080\u3002\n            if\
+    \ ((divisor >> 64) == 0) {\n                constexpr u128 mask64 = (u128(1) <<\
+    \ 64) - 1;\n                const u128 limbs[4] = {\n                    value.hi\
+    \ >> 64, value.hi & mask64,\n                    value.lo >> 64, value.lo & mask64};\n\
+    \                u128 digits[4];\n                u128 carry = 0;\n          \
+    \      for (int i = 0; i < 4; ++i) {\n                    u128 current = (carry\
+    \ << 64) | limbs[i];\n                    digits[i] = current / divisor;\n   \
+    \                 carry = current % divisor;\n                }\n            \
+    \    return {{(digits[0] << 64) | digits[1],\n                         (digits[2]\
+    \ << 64) | digits[3]},\n                        carry};\n            }\n\n   \
+    \         u256 quotient;\n            u128 remainder = 0;\n            for (int\
+    \ bit_index = 255; bit_index >= 0; --bit_index) {\n                u128 bit;\n\
+    \                if (bit_index >= 128) {\n                    bit = (value.hi\
+    \ >> (bit_index - 128)) & 1;\n                } else {\n                    bit\
+    \ = (value.lo >> bit_index) & 1;\n                }\n\n                bool carry\
+    \ = (remainder >> 127) != 0;\n                remainder = (remainder << 1) | bit;\n\
+    \                if (carry || remainder >= divisor) {\n                    remainder\
+    \ -= divisor;\n                    if (bit_index >= 128) {\n                 \
+    \       quotient.hi |= u128(1) << (bit_index - 128);\n                    } else\
+    \ {\n                        quotient.lo |= u128(1) << bit_index;\n          \
+    \          }\n                }\n            }\n            return {quotient,\
+    \ remainder};\n        }\n\n        inline u128 modulo(const u256& value, u128\
+    \ divisor) {\n            return divide(value, divisor).remainder;\n        }\n\
+    \n        inline u256 divide_exact(const u256& value, u128 divisor) {\n      \
+    \      if (divisor == 1) return value;\n            div_result result = divide(value,\
+    \ divisor);\n            if (result.remainder != 0) {\n                throw std::logic_error(\"\
+    fraction: internal non-exact division\");\n            }\n            return result.quotient;\n\
+    \        }\n\n        // \u5272\u308A\u7B97\u3092\u4F7F\u308F\u306A\u3044 binary\
+    \ gcd\u3002\u5927\u5C0F\u306E\u5165\u308C\u66FF\u3048\u3092\u5206\u5C90\u306A\u3057\
+    \u3067\u66F8\u304F\u3002\n        inline unsigned long long gcd64(\n         \
+    \   unsigned long long a, unsigned long long b) {\n            if (a == 0 || b\
+    \ == 0) return a | b;\n            int a_zeros = __builtin_ctzll(a);\n       \
+    \     int b_zeros = __builtin_ctzll(b);\n            int shift = a_zeros < b_zeros\
+    \ ? a_zeros : b_zeros;\n            a >>= a_zeros;\n            b >>= b_zeros;\n\
+    \            // \u3053\u3053\u304B\u3089 a, b \u306F\u3069\u3061\u3089\u3082\u5947\
+    \u6570\n            while (a != b) {\n                unsigned long long difference\
+    \ = a > b ? a - b : b - a;\n                b = a < b ? a : b;\n             \
+    \   a = difference >> __builtin_ctzll(difference);\n            }\n          \
+    \  return a << shift;\n        }\n\n        inline int count_trailing_zeros(u128\
+    \ x) {\n            unsigned long long lo = static_cast<unsigned long long>(x);\n\
+    \            if (lo != 0) return __builtin_ctzll(lo);\n            return 64 +\
+    \ __builtin_ctzll(\n                static_cast<unsigned long long>(x >> 64));\n\
+    \        }\n\n        // 128\u30D3\u30C3\u30C8\u306E\u5270\u4F59\u306F\u9045\u3044\
+    \u306E\u3067\u300164\u30D3\u30C3\u30C8\u306B\u53CE\u307E\u308A\u6B21\u7B2C gcd64\
+    \ \u306B\u5207\u308A\u66FF\u3048\u308B\u3002\n        inline u128 gcd(u128 a,\
+    \ u128 b) {\n            if ((a >> 64) == 0 && (b >> 64) == 0) {\n           \
+    \     return gcd64(\n                    static_cast<unsigned long long>(a),\n\
+    \                    static_cast<unsigned long long>(b));\n            }\n   \
+    \         if (a < b) {\n                u128 t = a;\n                a = b;\n\
+    \                b = t;\n            }\n            if (b == 0) return a;\n  \
+    \          // \u6841\u6570\u306E\u5DEE\u304C\u5927\u304D\u3044\u3068\u304D\u306B\
+    \u5099\u3048\u3066\u3001\u6700\u521D\u306B1\u56DE\u3060\u3051\u5270\u4F59\u3092\
+    \u53D6\u308B\u3002\n            a %= b;\n            if (a == 0) return b;\n\n\
+    \            int shift = count_trailing_zeros(a | b);\n            a >>= count_trailing_zeros(a);\n\
+    \            do {\n                b >>= count_trailing_zeros(b);\n          \
+    \      if (a > b) {\n                    u128 t = a;\n                    a =\
+    \ b;\n                    b = t;\n                }\n                if ((b >>\
+    \ 64) == 0) {\n                    return static_cast<u128>(gcd64(\n         \
+    \                      static_cast<unsigned long long>(a),\n                 \
+    \              static_cast<unsigned long long>(b)))\n                        \
+    \   << shift;\n                }\n                b -= a;\n            } while\
+    \ (b != 0);\n            return a << shift;\n        }\n\n        struct signed_u256\
+    \ {\n            bool negative = false;\n            u256 magnitude;\n       \
+    \ };\n\n        inline signed_u256 add(const signed_u256& a, const signed_u256&\
+    \ b) {\n            if (a.negative == b.negative) {\n                signed_u256\
+    \ res{a.negative, add(a.magnitude, b.magnitude)};\n                if (is_zero(res.magnitude))\
     \ res.negative = false;\n                return res;\n            }\n\n      \
     \      int cmp = compare(a.magnitude, b.magnitude);\n            if (cmp == 0)\
     \ return {};\n            if (cmp > 0) {\n                return {a.negative,\
@@ -432,8 +570,47 @@ data:
     \   }\n\n        static signed_u256 signed_product(T value, u128 multiplier) {\n\
     \            u256 product =\n                fraction_detail::multiply(magnitude(value),\
     \ multiplier);\n            return {\n                value < 0 && !fraction_detail::is_zero(product),\n\
-    \                product\n            };\n        }\n\n        fraction& add_or_subtract(const\
-    \ fraction& other, bool subtract) {\n            u128 b = static_cast<u128>(den);\n\
+    \                product\n            };\n        }\n\n        using u64 = unsigned\
+    \ long long;\n\n        // \u5206\u5B50\u306E\u7D76\u5BFE\u5024\u304C 2^63 \u4EE5\
+    \u4E0B\u3001\u5206\u6BCD\u304C 2^63 \u672A\u6E80\u306A\u3089\u3001\u9014\u4E2D\
+    \u306E\u7A4D\u3068\u548C\u304C\n        // u128 \u306B\u53CE\u307E\u308B\u306E\
+    \u3067\u3001256\u30D3\u30C3\u30C8\u306E\u8A08\u7B97\u3092\u4F7F\u308F\u305A\u306B\
+    \u6E08\u3080\u3002\n        static bool is_small(const fraction& x) {\n      \
+    \      if constexpr (sizeof(T) <= sizeof(u64)) {\n                return true;\n\
+    \            } else {\n                constexpr u128 limit = u128(1) << 63;\n\
+    \                return magnitude(x.num) <= limit &&\n                       static_cast<u128>(x.den)\
+    \ < limit;\n            }\n        }\n\n        fraction& add_or_subtract_small(const\
+    \ fraction& other, bool subtract) {\n            u64 b = static_cast<u64>(den);\n\
+    \            u64 d = static_cast<u64>(other.den);\n            u64 common = fraction_detail::gcd64(b,\
+    \ d);\n            u64 b_reduced = b / common;\n\n            u128 left = magnitude(num)\
+    \ * (d / common);\n            u128 right = magnitude(other.num) * b_reduced;\n\
+    \            bool left_negative = num < 0;\n            bool right_negative =\
+    \ (other.num < 0) != subtract;\n\n            bool negative;\n            u128\
+    \ numerator;\n            if (left_negative == right_negative) {\n           \
+    \     negative = left_negative;\n                numerator = left + right;\n \
+    \           } else if (left >= right) {\n                negative = left_negative;\n\
+    \                numerator = left - right;\n            } else {\n           \
+    \     negative = right_negative;\n                numerator = right - left;\n\
+    \            }\n            if (numerator == 0) {\n                num = 0;\n\
+    \                den = 1;\n                return *this;\n            }\n\n  \
+    \          u64 reduction = common;\n            if (common != 1) {\n         \
+    \       reduction = fraction_detail::gcd64(\n                    static_cast<u64>(numerator\
+    \ % common), common);\n                numerator /= reduction;\n            }\n\
+    \            assign_reduced(\n                negative,\n                fraction_detail::from_u128(numerator),\n\
+    \                fraction_detail::from_u128(\n                    static_cast<u128>(b_reduced)\
+    \ * (d / reduction)));\n            return *this;\n        }\n\n        // (a\
+    \ / b) * (c / d) \u3092\u3001a, b, c, d \u304C 2^63 \u4EE5\u4E0B\u306E\u3068\u304D\
+    \u306B\u8A08\u7B97\u3059\u308B\u3002\n        fraction& multiply_small(bool negative,\
+    \ u64 a, u64 b, u64 c, u64 d) {\n            u64 left_reduction = fraction_detail::gcd64(a,\
+    \ d);\n            u64 right_reduction = fraction_detail::gcd64(c, b);\n     \
+    \       assign_reduced(\n                negative,\n                fraction_detail::from_u128(\n\
+    \                    static_cast<u128>(a / left_reduction) *\n               \
+    \     (c / right_reduction)),\n                fraction_detail::from_u128(\n \
+    \                   static_cast<u128>(b / right_reduction) *\n               \
+    \     (d / left_reduction)));\n            return *this;\n        }\n\n      \
+    \  fraction& add_or_subtract(const fraction& other, bool subtract) {\n       \
+    \     if (is_small(*this) && is_small(other)) {\n                return add_or_subtract_small(other,\
+    \ subtract);\n            }\n\n            u128 b = static_cast<u128>(den);\n\
     \            u128 d = static_cast<u128>(other.den);\n            u128 common =\
     \ fraction_detail::gcd(b, d);\n            u128 b_reduced = b / common;\n    \
     \        u128 d_reduced = d / common;\n\n            signed_u256 left = signed_product(num,\
@@ -497,7 +674,12 @@ data:
     \ add_or_subtract(other, true);\n        }\n\n        fraction& operator*=(const\
     \ fraction& other) {\n            if (num == 0 || other.num == 0) {\n        \
     \        num = 0;\n                den = 1;\n                return *this;\n \
-    \           }\n\n            u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
+    \           }\n\n            if (is_small(*this) && is_small(other)) {\n     \
+    \           return multiply_small(\n                    (num < 0) != (other.num\
+    \ < 0),\n                    static_cast<u64>(magnitude(num)),\n             \
+    \       static_cast<u64>(den),\n                    static_cast<u64>(magnitude(other.num)),\n\
+    \                    static_cast<u64>(other.den));\n            }\n\n        \
+    \    u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
     \            u128 c = magnitude(other.num);\n            u128 d = static_cast<u128>(other.den);\n\
     \            u128 left_reduction = fraction_detail::gcd(a, d);\n            u128\
     \ right_reduction = fraction_detail::gcd(c, b);\n\n            u256 numerator\
@@ -509,55 +691,63 @@ data:
     \ operator/=(const fraction& other) {\n            if (other.num == 0) {\n   \
     \             throw std::domain_error(\n                    \"fraction: division\
     \ by zero\");\n            }\n            if (num == 0) {\n                den\
-    \ = 1;\n                return *this;\n            }\n\n            u128 a = magnitude(num);\n\
-    \            u128 b = static_cast<u128>(den);\n            u128 c = magnitude(other.num);\n\
-    \            u128 d = static_cast<u128>(other.den);\n            u128 numerator_reduction\
-    \ = fraction_detail::gcd(a, c);\n            u128 denominator_reduction = fraction_detail::gcd(d,\
-    \ b);\n\n            u256 numerator = fraction_detail::multiply(\n           \
-    \     a / numerator_reduction,\n                d / denominator_reduction);\n\
-    \            u256 denominator = fraction_detail::multiply(\n                b\
-    \ / denominator_reduction,\n                c / numerator_reduction);\n      \
-    \      assign_reduced(\n                (num < 0) != (other.num < 0),\n      \
-    \          numerator,\n                denominator);\n            return *this;\n\
-    \        }\n\n        friend fraction operator+(fraction a, const fraction& b)\
-    \ {\n            a += b;\n            return a;\n        }\n\n        friend fraction\
-    \ operator-(fraction a, const fraction& b) {\n            a -= b;\n          \
-    \  return a;\n        }\n\n        friend fraction operator*(fraction a, const\
-    \ fraction& b) {\n            a *= b;\n            return a;\n        }\n\n  \
-    \      friend fraction operator/(fraction a, const fraction& b) {\n          \
-    \  a /= b;\n            return a;\n        }\n\n        friend bool operator==(const\
+    \ = 1;\n                return *this;\n            }\n\n            if (is_small(*this)\
+    \ && is_small(other)) {\n                // (a / b) / (c / d) = (a / b) * (d /\
+    \ c)\n                return multiply_small(\n                    (num < 0) !=\
+    \ (other.num < 0),\n                    static_cast<u64>(magnitude(num)),\n  \
+    \                  static_cast<u64>(den),\n                    static_cast<u64>(other.den),\n\
+    \                    static_cast<u64>(magnitude(other.num)));\n            }\n\
+    \n            u128 a = magnitude(num);\n            u128 b = static_cast<u128>(den);\n\
+    \            u128 c = magnitude(other.num);\n            u128 d = static_cast<u128>(other.den);\n\
+    \            u128 numerator_reduction = fraction_detail::gcd(a, c);\n        \
+    \    u128 denominator_reduction = fraction_detail::gcd(d, b);\n\n            u256\
+    \ numerator = fraction_detail::multiply(\n                a / numerator_reduction,\n\
+    \                d / denominator_reduction);\n            u256 denominator = fraction_detail::multiply(\n\
+    \                b / denominator_reduction,\n                c / numerator_reduction);\n\
+    \            assign_reduced(\n                (num < 0) != (other.num < 0),\n\
+    \                numerator,\n                denominator);\n            return\
+    \ *this;\n        }\n\n        friend fraction operator+(fraction a, const fraction&\
+    \ b) {\n            a += b;\n            return a;\n        }\n\n        friend\
+    \ fraction operator-(fraction a, const fraction& b) {\n            a -= b;\n \
+    \           return a;\n        }\n\n        friend fraction operator*(fraction\
+    \ a, const fraction& b) {\n            a *= b;\n            return a;\n      \
+    \  }\n\n        friend fraction operator/(fraction a, const fraction& b) {\n \
+    \           a /= b;\n            return a;\n        }\n\n        friend bool operator==(const\
     \ fraction& a, const fraction& b) {\n            return a.num == b.num && a.den\
     \ == b.den;\n        }\n\n        friend bool operator!=(const fraction& a, const\
     \ fraction& b) {\n            return !(a == b);\n        }\n\n        friend bool\
     \ operator<(const fraction& a, const fraction& b) {\n            if ((a.num <\
-    \ 0) != (b.num < 0)) return a.num < 0;\n\n            u256 left = fraction_detail::multiply(\n\
-    \                magnitude(a.num), static_cast<u128>(b.den));\n            u256\
-    \ right = fraction_detail::multiply(\n                magnitude(b.num), static_cast<u128>(a.den));\n\
-    \            int cmp = fraction_detail::compare(left, right);\n            return\
-    \ a.num < 0 ? cmp > 0 : cmp < 0;\n        }\n\n        friend bool operator>(const\
-    \ fraction& a, const fraction& b) {\n            return b < a;\n        }\n\n\
-    \        friend bool operator<=(const fraction& a, const fraction& b) {\n    \
-    \        return !(b < a);\n        }\n\n        friend bool operator>=(const fraction&\
-    \ a, const fraction& b) {\n            return !(a < b);\n        }\n\n       \
-    \ // \u5BFE\u5FDC\u5F62\u5F0F: 12, -7, 1.5, .5, 1., 3/4, -10/6\n        static\
-    \ bool parse(const std::string& s, fraction& out) {\n            if (s.empty())\
-    \ return false;\n\n            bool negative = false;\n            std::size_t\
-    \ first = 0;\n            if (s[first] == '+') {\n                ++first;\n \
-    \           } else if (s[first] == '-') {\n                negative = true;\n\
-    \                ++first;\n            }\n            if (first == s.size()) return\
-    \ false;\n\n            std::size_t slash = s.find('/', first);\n            if\
-    \ (slash != std::string::npos) {\n                if (s.find('/', slash + 1) !=\
-    \ std::string::npos) return false;\n\n                u128 numerator;\n      \
-    \          u128 denominator;\n                if (!parse_unsigned(\n         \
-    \               s, first, slash, max_u128(), numerator) ||\n                 \
-    \   !parse_unsigned(\n                        s, slash + 1, s.size(),\n      \
-    \                  max_u128(), denominator) ||\n                    denominator\
-    \ == 0) {\n                    return false;\n                }\n\n          \
-    \      fraction tmp;\n                if (!tmp.try_assign_normalized(\n      \
-    \                  negative, numerator, denominator)) {\n                    return\
-    \ false;\n                }\n                out = tmp;\n                return\
-    \ true;\n            }\n\n            std::size_t dot = s.find('.', first);\n\
-    \            if (dot == std::string::npos) {\n                u128 numerator;\n\
+    \ 0) != (b.num < 0)) return a.num < 0;\n\n            if (is_small(a) && is_small(b))\
+    \ {\n                u128 left = magnitude(a.num) * static_cast<u128>(b.den);\n\
+    \                u128 right = magnitude(b.num) * static_cast<u128>(a.den);\n \
+    \               return a.num < 0 ? left > right : left < right;\n            }\n\
+    \n            u256 left = fraction_detail::multiply(\n                magnitude(a.num),\
+    \ static_cast<u128>(b.den));\n            u256 right = fraction_detail::multiply(\n\
+    \                magnitude(b.num), static_cast<u128>(a.den));\n            int\
+    \ cmp = fraction_detail::compare(left, right);\n            return a.num < 0 ?\
+    \ cmp > 0 : cmp < 0;\n        }\n\n        friend bool operator>(const fraction&\
+    \ a, const fraction& b) {\n            return b < a;\n        }\n\n        friend\
+    \ bool operator<=(const fraction& a, const fraction& b) {\n            return\
+    \ !(b < a);\n        }\n\n        friend bool operator>=(const fraction& a, const\
+    \ fraction& b) {\n            return !(a < b);\n        }\n\n        // \u5BFE\
+    \u5FDC\u5F62\u5F0F: 12, -7, 1.5, .5, 1., 3/4, -10/6\n        static bool parse(const\
+    \ std::string& s, fraction& out) {\n            if (s.empty()) return false;\n\
+    \n            bool negative = false;\n            std::size_t first = 0;\n   \
+    \         if (s[first] == '+') {\n                ++first;\n            } else\
+    \ if (s[first] == '-') {\n                negative = true;\n                ++first;\n\
+    \            }\n            if (first == s.size()) return false;\n\n         \
+    \   std::size_t slash = s.find('/', first);\n            if (slash != std::string::npos)\
+    \ {\n                if (s.find('/', slash + 1) != std::string::npos) return false;\n\
+    \n                u128 numerator;\n                u128 denominator;\n       \
+    \         if (!parse_unsigned(\n                        s, first, slash, max_u128(),\
+    \ numerator) ||\n                    !parse_unsigned(\n                      \
+    \  s, slash + 1, s.size(),\n                        max_u128(), denominator) ||\n\
+    \                    denominator == 0) {\n                    return false;\n\
+    \                }\n\n                fraction tmp;\n                if (!tmp.try_assign_normalized(\n\
+    \                        negative, numerator, denominator)) {\n              \
+    \      return false;\n                }\n                out = tmp;\n        \
+    \        return true;\n            }\n\n            std::size_t dot = s.find('.',\
+    \ first);\n            if (dot == std::string::npos) {\n                u128 numerator;\n\
     \                if (!parse_unsigned(\n                        s, first, s.size(),\
     \ max_u128(), numerator)) {\n                    return false;\n             \
     \   }\n                fraction tmp;\n                if (!tmp.try_assign_normalized(\n\
@@ -603,7 +793,7 @@ data:
   isVerificationFile: false
   path: utils/fraction.hpp
   requiredBy: []
-  timestamp: '2026-11-10 19:55:36+09:00'
+  timestamp: '2026-11-12 13:13:02+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/random_fraction.test.cpp
@@ -646,3 +836,8 @@ title: "\u6709\u7406\u6570"
 
 通常の整数型では各演算は整数のビット幅に依存します。`__int128` の除算を含む
 一部のオーバーフロー安全な処理は、最大 256 bit の固定長演算を行います。
+
+各演算の時間はほぼ gcd で決まります。分子の絶対値が `2^63` 以下、分母が
+`2^63` 未満のとき (64 bit 以下の型では常に) は、256 bit の計算を使わず
+64 bit の binary gcd と 128 bit の積だけで計算します。`fr` でも値がこの
+範囲にあれば同じ速さです。
