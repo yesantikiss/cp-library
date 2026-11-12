@@ -48,25 +48,37 @@ namespace yesantikiss {
             }
         }
     
+        // base^len。テーブルにあれば引き、なければ繰り返し二乗法で求める（テーブルは伸ばさない）
+        static ull pow_of(long long len) {
+            assert(len >= 0);
+            if (len < (long long)pow_base.size()) return pow_base[len];
+            ull res = 1, x = base;
+            for (ull e = (ull)len; e > 0; e >>= 1) {
+                if (e & 1) res = mul(res, x);
+                x = mul(x, x);
+            }
+            return res;
+        }
+
         // hash(A + B) を hash(A), hash(B), |B| から求める
-        static ull concat(ull h1, ull h2, int len2) {
+        // テーブルを伸ばすのは build だけなので、長いハッシュを組み立ててもメモリは増えない
+        static ull concat(ull h1, ull h2, long long len2) {
             assert(len2 >= 0);
             init_base();
-            ensure_pow(len2);
-            return add(mul(h1, pow_base[len2]), h2);
+            return add(mul(h1, pow_of(len2)), h2);
         }
 
         // 長さ付きのハッシュ値。+ で文字列の連結に対応するハッシュが得られる
         // 既定値は空文字列（+ の単位元）
         struct Hash {
             ull val = 0;
-            int len = 0;
+            long long len = 0;  // 繰り返し二乗法で連結すれば 10^18 程度の長さも扱える
 
             Hash() = default;
-            Hash(ull val, int len) : val(val), len(len) {}
+            Hash(ull val, long long len) : val(val), len(len) {}
             // 1 文字 / 文字列全体のハッシュ（prefix hash を持たずに求める）
             explicit Hash(char c) : val((ull)(unsigned char)c + 1), len(1) { init_base(); }
-            explicit Hash(const std::string &s) : len((int)s.size()) {
+            explicit Hash(const std::string &s) : len((long long)s.size()) {
                 init_base();
                 for (char c : s) val = add(mul(val, base), (ull)(unsigned char)c + 1);
             }
