@@ -20,6 +20,19 @@ namespace {
         return std::uniform_int_distribution<int>(lo, hi)(random_engine);
     }
 
+    long long random_ll(long long lo, long long hi) {
+        return std::uniform_int_distribution<long long>(lo, hi)(random_engine);
+    }
+
+    // h を k 回繰り返したハッシュ（繰り返し二乗法で連結する）
+    Hash repeat(Hash h, long long k) {
+        Hash res;
+        for (; k > 0; k >>= 1, h = h + h) {
+            if (k & 1) res = res + h;
+        }
+        return res;
+    }
+
     std::string random_string(int n, int sigma) {
         std::string s(n, 'a');
         for (char &c : s) c = char('a' + random_int(0, sigma - 1));
@@ -37,7 +50,7 @@ namespace {
         RollingHash::init_base();
         for (int len = 0; len <= 3000; ++len) assert(RollingHash::pow_of(len) == naive_pow(len));
         for (int iter = 0; iter < 200; ++iter) {
-            int a = random_int(0, 1 << 29), b = random_int(0, 1 << 29);
+            long long a = random_ll(0, 1LL << 61), b = random_ll(0, 1LL << 61);
             assert(RollingHash::pow_of(a + b) ==
                    RollingHash::mul(RollingHash::pow_of(a), RollingHash::pow_of(b)));
         }
@@ -96,12 +109,41 @@ namespace {
         assert(x == Hash(std::string(1 << 20, 'a')));
         assert(RollingHash::pow_base.size() == table);
     }
+
+    // 10^18 近くの長さでも連結が整合し、テーブルは伸びない
+    void test_huge_repeat() {
+        const size_t table = RollingHash::pow_base.size();
+        for (int iter = 0; iter < 300; ++iter) {
+            std::string s = random_string(random_int(1, 5), random_int(1, 2));
+            Hash hs(s);
+            long long a = random_ll(0, 100000000000000000LL), b = random_ll(0, 100000000000000000LL);
+            Hash ra = repeat(hs, a), rb = repeat(hs, b);
+            assert(ra.len == a * (long long)s.size());
+            assert(ra + rb == repeat(hs, a + b));
+            assert(ra + rb == rb + ra);
+            // (s を 2 回並べたもの) を k 回 == s を 2k 回
+            long long k = random_ll(0, 100000000000000000LL);
+            assert(repeat(Hash(s + s), k) == repeat(hs, 2 * k));
+            // 短い場合は実際の文字列と一致する
+            int c = random_int(0, 300);
+            std::string rep;
+            for (int i = 0; i < c; ++i) rep += s;
+            assert(repeat(hs, c) == Hash(rep));
+            // 1 文字違いの文字列を繰り返すと一致しない
+            std::string t = s;
+            t[random_int(0, (int)t.size() - 1)] ^= 1;
+            long long m = random_ll(1, 100000000000000000LL);
+            assert(repeat(hs, m) != repeat(Hash(t), m));
+        }
+        assert(RollingHash::pow_base.size() == table);
+    }
 }  // namespace
 
 int main() {
     test_pow_of();
     test_concat_matches_string();
     test_long_concat_memory();
+    test_huge_repeat();
 
     long long a, b;
     std::cin >> a >> b;
