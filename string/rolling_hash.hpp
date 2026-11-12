@@ -48,12 +48,24 @@ namespace yesantikiss {
             }
         }
     
+        // base^len。テーブルにあれば引き、なければ繰り返し二乗法で求める（テーブルは伸ばさない）
+        static ull pow_of(int len) {
+            assert(len >= 0);
+            if (len < (int)pow_base.size()) return pow_base[len];
+            ull res = 1, x = base;
+            for (unsigned e = (unsigned)len; e > 0; e >>= 1) {
+                if (e & 1) res = mul(res, x);
+                x = mul(x, x);
+            }
+            return res;
+        }
+
         // hash(A + B) を hash(A), hash(B), |B| から求める
+        // テーブルを伸ばすのは build だけなので、長いハッシュを組み立ててもメモリは増えない
         static ull concat(ull h1, ull h2, int len2) {
             assert(len2 >= 0);
             init_base();
-            ensure_pow(len2);
-            return add(mul(h1, pow_base[len2]), h2);
+            return add(mul(h1, pow_of(len2)), h2);
         }
 
         // 長さ付きのハッシュ値。+ で文字列の連結に対応するハッシュが得られる
