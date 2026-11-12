@@ -295,6 +295,139 @@ namespace {
         assert(thrown);
     }
 
+    // 内部の gcd と 256ビット ÷ 128ビットの割り算を、素朴な計算と比べる。
+    void test_detail() {
+        namespace detail = yesantikiss::fraction_detail;
+        auto random_bits = [&](int bits) {
+            u128 raw =
+                (static_cast<u128>(random_engine()) << 64) | random_engine();
+            return bits == 128 ? raw : raw % (u128(1) << bits);
+        };
+        auto naive_gcd = [](u128 a, u128 b) {
+            while (b != 0) {
+                u128 r = a % b;
+                a = b;
+                b = r;
+            }
+            return a;
+        };
+        for (int trial = 0; trial < 20000; ++trial) {
+            // 桁数をばらばらに選び、共通因数も持たせる
+            u128 a = random_bits(static_cast<int>(random_engine() % 129));
+            u128 b = random_bits(static_cast<int>(random_engine() % 129));
+            if (trial % 3 == 0) {
+                u128 g = random_bits(static_cast<int>(random_engine() % 70));
+                a = (a >> 70) * g;
+                b = (b >> 70) * g;
+            }
+            if (trial % 11 == 0) b = a;
+            if (trial % 13 == 0) a <<= random_engine() % 40;
+            if (trial % 7 == 0) {
+                // 下位64ビットがすべて 0 の値
+                a = (a >> 100 | 1) << (64 + random_engine() % 36);
+                b = (b >> 100 | 1) << (64 + random_engine() % 36);
+            }
+            u128 expected = naive_gcd(a, b);
+            assert(detail::gcd(a, b) == expected);
+            assert(detail::gcd(b, a) == expected);
+            if ((a >> 64) == 0 && (b >> 64) == 0) {
+                assert(detail::gcd64(static_cast<unsigned long long>(a),
+                                     static_cast<unsigned long long>(b)) ==
+                       expected);
+            }
+        }
+        assert(detail::gcd(0, 0) == 0 && detail::gcd64(0, 0) == 0);
+        assert(detail::gcd(0, 7) == 7 && detail::gcd(~u128(0), 0) == ~u128(0));
+        assert(detail::gcd(~u128(0), ~u128(0)) == ~u128(0));
+        assert(detail::gcd(u128(1) << 127, u128(1) << 100) == u128(1) << 100);
+
+        for (int trial = 0; trial < 6000; ++trial) {
+            // value = quotient * divisor + remainder を作ってから割り直す。
+            // 割る数が64ビット以下の近道と、それより大きい場合の両方を通す。
+            u128 divisor =
+                random_bits(1 + static_cast<int>(random_engine() % 128)) + 1;
+            if (divisor == 0) divisor = 1;
+            u128 quotient =
+                random_bits(static_cast<int>(random_engine() % 129));
+            u128 remainder = random_bits(128) % divisor;
+            detail::u256 value = detail::add(
+                detail::multiply(quotient, divisor),
+                detail::from_u128(remainder));
+            detail::div_result result = detail::divide(value, divisor);
+            assert(result.quotient.hi == 0 && result.quotient.lo == quotient);
+            assert(result.remainder == remainder);
+            assert(detail::modulo(value, divisor) == remainder);
+        }
+        // 商が128ビットを超える場合: (2^256 - 1) / 3 = 0x5555...
+        detail::div_result all = detail::divide({~u128(0), ~u128(0)}, 3);
+        assert(all.remainder == 0);
+        assert(all.quotient.hi == ~u128(0) / 3 && all.quotient.lo == ~u128(0) / 3);
+        all = detail::divide({~u128(0), ~u128(0)}, (u128(1) << 64) + 1);
+        assert(detail::compare(
+                   detail::add(detail::add(
+                                   detail::multiply(all.quotient.lo,
+                                                    (u128(1) << 64) + 1),
+                                   detail::u256{
+                                       all.quotient.hi * ((u128(1) << 64) + 1),
+                                       0}),
+                               detail::from_u128(all.remainder)),
+                   detail::u256{~u128(0), ~u128(0)}) == 0);
+    }
+
+    // __int128 で、64ビットに収まるときの近道と通常の経路の切り替わり
+    // (2^63 と 2^64 の前後) を、素朴解が __int128 に収まる組み合わせで試す。
+    void test_boundary() {
+        using F = fraction<i128>;
+        auto small = [&]() {
+            return static_cast<i128>(random_engine() % 2000001) - 1000000;
+        };
+        auto near = [&](bool allow_64) {
+            i128 pivot = i128(1) << (allow_64 && random_engine() % 2 ? 64 : 63);
+            i128 value = pivot + static_cast<i128>(random_engine() % 7) - 3;
+            return random_engine() % 2 == 0 ? value : -value;
+        };
+        for (int trial = 0; trial < 20000; ++trial) {
+            i128 a, b, c, d;
+            if (trial % 2 == 0) {
+                // 分子が境界の近く、分母は小さい
+                a = random_engine() % 4 == 0 ? small() : near(true);
+                c = random_engine() % 4 == 0 ? small() : near(true);
+                b = small();
+                d = small();
+            } else {
+                // 分母が境界の近く、分子は小さい
+                a = small();
+                c = small();
+                b = random_engine() % 4 == 0 ? small() : near(false);
+                d = random_engine() % 4 == 0 ? small() : near(false);
+            }
+            if (b == 0) b = 1;
+            if (d == 0) d = 1;
+            Exact ex = normalize(a, b), ey = normalize(c, d);
+            const F x(a, b), y(c, d);
+            assert(same(x, ex) && same(y, ey));
+
+            check<i128>(normalize(ex.num * ey.den + ey.num * ex.den,
+                                  ex.den * ey.den),
+                        [&] { return x + y; });
+            check<i128>(normalize(ex.num * ey.den - ey.num * ex.den,
+                                  ex.den * ey.den),
+                        [&] { return x - y; });
+            // 積と商は、素朴解の途中計算が収まる向きだけ確かめる
+            if (trial % 2 == 0) {
+                check<i128>(normalize(ex.num * ey.den, ex.den * ey.num),
+                            [&] { return x / y; });
+            } else {
+                check<i128>(normalize(ex.num * ey.num, ex.den * ey.den),
+                            [&] { return x * y; });
+            }
+            i128 left = ex.num * ey.den, right = ey.num * ex.den;
+            assert((x < y) == (left < right));
+            assert((y < x) == (right < left));
+            assert((x == y) == (left == right));
+        }
+    }
+
     // __int128 で、途中の積が128ビットを超える経路を通す。
     // 答えが分かる形に値を組み立てて比べる。
     void test_wide() {
@@ -412,6 +545,8 @@ int main() {
     test_parse_fixed<long long>();
     test_parse_fixed<i128>();
 
+    test_detail();
+    test_boundary();
     test_wide();
 
     long long a, b;

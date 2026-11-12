@@ -95,6 +95,24 @@ namespace yesantikiss {
                 return {{0, value.lo / divisor}, value.lo % divisor};
             }
 
+            // 割る数が64ビットに収まるなら、64ビットずつ4回の割り算で済む。
+            if ((divisor >> 64) == 0) {
+                constexpr u128 mask64 = (u128(1) << 64) - 1;
+                const u128 limbs[4] = {
+                    value.hi >> 64, value.hi & mask64,
+                    value.lo >> 64, value.lo & mask64};
+                u128 digits[4];
+                u128 carry = 0;
+                for (int i = 0; i < 4; ++i) {
+                    u128 current = (carry << 64) | limbs[i];
+                    digits[i] = current / divisor;
+                    carry = current % divisor;
+                }
+                return {{(digits[0] << 64) | digits[1],
+                         (digits[2] << 64) | digits[3]},
+                        carry};
+            }
+
             u256 quotient;
             u128 remainder = 0;
             for (int bit_index = 255; bit_index >= 0; --bit_index) {
@@ -132,13 +150,66 @@ namespace yesantikiss {
             return result.quotient;
         }
 
-        inline u128 gcd(u128 a, u128 b) {
-            while (b != 0) {
-                u128 r = a % b;
-                a = b;
-                b = r;
+        // 割り算を使わない binary gcd。大小の入れ替えを分岐なしで書く。
+        inline unsigned long long gcd64(
+            unsigned long long a, unsigned long long b) {
+            if (a == 0 || b == 0) return a | b;
+            int a_zeros = __builtin_ctzll(a);
+            int b_zeros = __builtin_ctzll(b);
+            int shift = a_zeros < b_zeros ? a_zeros : b_zeros;
+            a >>= a_zeros;
+            b >>= b_zeros;
+            // ここから a, b はどちらも奇数
+            while (a != b) {
+                unsigned long long difference = a > b ? a - b : b - a;
+                b = a < b ? a : b;
+                a = difference >> __builtin_ctzll(difference);
             }
-            return a;
+            return a << shift;
+        }
+
+        inline int count_trailing_zeros(u128 x) {
+            unsigned long long lo = static_cast<unsigned long long>(x);
+            if (lo != 0) return __builtin_ctzll(lo);
+            return 64 + __builtin_ctzll(
+                static_cast<unsigned long long>(x >> 64));
+        }
+
+        // 128ビットの剰余は遅いので、64ビットに収まり次第 gcd64 に切り替える。
+        inline u128 gcd(u128 a, u128 b) {
+            if ((a >> 64) == 0 && (b >> 64) == 0) {
+                return gcd64(
+                    static_cast<unsigned long long>(a),
+                    static_cast<unsigned long long>(b));
+            }
+            if (a < b) {
+                u128 t = a;
+                a = b;
+                b = t;
+            }
+            if (b == 0) return a;
+            // 桁数の差が大きいときに備えて、最初に1回だけ剰余を取る。
+            a %= b;
+            if (a == 0) return b;
+
+            int shift = count_trailing_zeros(a | b);
+            a >>= count_trailing_zeros(a);
+            do {
+                b >>= count_trailing_zeros(b);
+                if (a > b) {
+                    u128 t = a;
+                    a = b;
+                    b = t;
+                }
+                if ((b >> 64) == 0) {
+                    return static_cast<u128>(gcd64(
+                               static_cast<unsigned long long>(a),
+                               static_cast<unsigned long long>(b)))
+                           << shift;
+                }
+                b -= a;
+            } while (b != 0);
+            return a << shift;
         }
 
         struct signed_u256 {
@@ -302,7 +373,83 @@ namespace yesantikiss {
             };
         }
 
+        using u64 = unsigned long long;
+
+        // 分子の絶対値が 2^63 以下、分母が 2^63 未満なら、途中の積と和が
+        // u128 に収まるので、256ビットの計算を使わずに済む。
+        static bool is_small(const fraction& x) {
+            if constexpr (sizeof(T) <= sizeof(u64)) {
+                return true;
+            } else {
+                constexpr u128 limit = u128(1) << 63;
+                return magnitude(x.num) <= limit &&
+                       static_cast<u128>(x.den) < limit;
+            }
+        }
+
+        fraction& add_or_subtract_small(const fraction& other, bool subtract) {
+            u64 b = static_cast<u64>(den);
+            u64 d = static_cast<u64>(other.den);
+            u64 common = fraction_detail::gcd64(b, d);
+            u64 b_reduced = b / common;
+
+            u128 left = magnitude(num) * (d / common);
+            u128 right = magnitude(other.num) * b_reduced;
+            bool left_negative = num < 0;
+            bool right_negative = (other.num < 0) != subtract;
+
+            bool negative;
+            u128 numerator;
+            if (left_negative == right_negative) {
+                negative = left_negative;
+                numerator = left + right;
+            } else if (left >= right) {
+                negative = left_negative;
+                numerator = left - right;
+            } else {
+                negative = right_negative;
+                numerator = right - left;
+            }
+            if (numerator == 0) {
+                num = 0;
+                den = 1;
+                return *this;
+            }
+
+            u64 reduction = common;
+            if (common != 1) {
+                reduction = fraction_detail::gcd64(
+                    static_cast<u64>(numerator % common), common);
+                numerator /= reduction;
+            }
+            assign_reduced(
+                negative,
+                fraction_detail::from_u128(numerator),
+                fraction_detail::from_u128(
+                    static_cast<u128>(b_reduced) * (d / reduction)));
+            return *this;
+        }
+
+        // (a / b) * (c / d) を、a, b, c, d が 2^63 以下のときに計算する。
+        fraction& multiply_small(bool negative, u64 a, u64 b, u64 c, u64 d) {
+            u64 left_reduction = fraction_detail::gcd64(a, d);
+            u64 right_reduction = fraction_detail::gcd64(c, b);
+            assign_reduced(
+                negative,
+                fraction_detail::from_u128(
+                    static_cast<u128>(a / left_reduction) *
+                    (c / right_reduction)),
+                fraction_detail::from_u128(
+                    static_cast<u128>(b / right_reduction) *
+                    (d / left_reduction)));
+            return *this;
+        }
+
         fraction& add_or_subtract(const fraction& other, bool subtract) {
+            if (is_small(*this) && is_small(other)) {
+                return add_or_subtract_small(other, subtract);
+            }
+
             u128 b = static_cast<u128>(den);
             u128 d = static_cast<u128>(other.den);
             u128 common = fraction_detail::gcd(b, d);
@@ -456,6 +603,15 @@ namespace yesantikiss {
                 return *this;
             }
 
+            if (is_small(*this) && is_small(other)) {
+                return multiply_small(
+                    (num < 0) != (other.num < 0),
+                    static_cast<u64>(magnitude(num)),
+                    static_cast<u64>(den),
+                    static_cast<u64>(magnitude(other.num)),
+                    static_cast<u64>(other.den));
+            }
+
             u128 a = magnitude(num);
             u128 b = static_cast<u128>(den);
             u128 c = magnitude(other.num);
@@ -482,6 +638,16 @@ namespace yesantikiss {
             if (num == 0) {
                 den = 1;
                 return *this;
+            }
+
+            if (is_small(*this) && is_small(other)) {
+                // (a / b) / (c / d) = (a / b) * (d / c)
+                return multiply_small(
+                    (num < 0) != (other.num < 0),
+                    static_cast<u64>(magnitude(num)),
+                    static_cast<u64>(den),
+                    static_cast<u64>(other.den),
+                    static_cast<u64>(magnitude(other.num)));
             }
 
             u128 a = magnitude(num);
@@ -534,6 +700,12 @@ namespace yesantikiss {
 
         friend bool operator<(const fraction& a, const fraction& b) {
             if ((a.num < 0) != (b.num < 0)) return a.num < 0;
+
+            if (is_small(a) && is_small(b)) {
+                u128 left = magnitude(a.num) * static_cast<u128>(b.den);
+                u128 right = magnitude(b.num) * static_cast<u128>(a.den);
+                return a.num < 0 ? left > right : left < right;
+            }
 
             u256 left = fraction_detail::multiply(
                 magnitude(a.num), static_cast<u128>(b.den));
