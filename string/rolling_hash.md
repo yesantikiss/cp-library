@@ -37,7 +37,8 @@ std::sort(idx.begin(), idx.end(), [&](int i, int j) { return rh.compare(i, n, j,
 - `==`, `!=`: 比較。`map` / `set` のキーにしたいときは `get` の値を使ってください。
 - `Hash(c)`, `Hash(s)`: 1 文字・文字列全体の `Hash` を prefix hash を持たずに求めます（`explicit`）。
 - `Hash(val, len)`: ハッシュ値と長さから直接作ります。
-- `RollingHash::concat(h1, h2, len2)`: `get` の値のまま連結する版です。`len2` は後ろ側の長さです。
+- `len` は `long long` です。`+` を繰り返して `10^18` 程度の長さの文字列のハッシュも組み立てられます。
+- `RollingHash::concat(h1, h2, len2)`: `get` の値のまま連結する版です。`len2` は後ろ側の長さ (`long long`) です。
 
 ```cpp
 RollingHash a("abra"), b("cadabra"), c("abracadabra");
@@ -70,4 +71,6 @@ bool same = seg.prod(l1, r1) == seg.prod(l2, r2);
 
 構築は `O(N)` 時間・メモリ、部分文字列ハッシュと比較は `O(1)` です。
 `lcp`, `compare` は `O(log N)` です。
-連結は、基数の累乗テーブルが足りていれば `O(1)`（足りない分は初回のみ伸長）、`Hash(s)` は `O(|s|)` です。
+連結は、後ろ側の長さが基数の累乗テーブルの範囲内 (これまでに構築した最長の文字列の長さ以下) なら `O(1)`、
+それより長ければ繰り返し二乗法で `O(log len)` です。連結ではテーブルを伸ばさないので、
+長いハッシュを組み立ててもメモリは増えません。`Hash(s)` は `O(|s|)` です。

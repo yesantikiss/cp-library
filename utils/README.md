@@ -45,3 +45,13 @@ SplitMix64 を用いた `yesantikiss::custom_hash` で利用するための
 - `rotate90(a)`, `rotate180(a)`, `rotate270(a)`
 - `rotate(a, k)`: 時計回りに `90k°`。`k` は負でもよい
 - 計算量: `O(HW)`
+
+## `fraction.hpp`
+
+符号付き整数 `T` を分子・分母に使う有理数型 `yesantikiss::fraction<T>` です。値は常に既約で、分母は正です。`fraction<__int128>` の別名 `yesantikiss::fr` もあります。
+
+- 四則演算、複合代入、比較、ストリーム入出力
+- `inv()`, `abs(x)`, `is_integer()`, `floor()`, `ceil()`, `to_ld()`, `to_double()`
+- `parse(s, out)`: 整数・小数・分数の文字列を解析
+- 結果が `T` に収まらない演算は `std::overflow_error` を送出
+- 各演算の時間はほぼ gcd で決まり、値が 64 bit に収まる範囲なら 64 bit の binary gcd で計算
