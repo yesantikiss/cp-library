@@ -170,7 +170,7 @@ data:
   isVerificationFile: false
   path: tree/heavy_light_decomposition.hpp
   requiredBy: []
-  timestamp: '2026-11-12 13:13:02+09:00'
+  timestamp: '2026-11-12 13:12:40+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/random_tree_lca_hld.test.cpp

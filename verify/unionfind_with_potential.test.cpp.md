@@ -90,7 +90,7 @@ data:
   isVerificationFile: true
   path: verify/unionfind_with_potential.test.cpp
   requiredBy: []
-  timestamp: '2026-11-12 13:13:02+09:00'
+  timestamp: '2026-11-12 13:12:40+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/unionfind_with_potential.test.cpp
