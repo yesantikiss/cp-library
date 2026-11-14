@@ -258,6 +258,14 @@ int main() {
         assert(hash.compare(0, 4, 7, 11) == 0 && hash.compare(1, 4, 0, 4) > 0);
         RollingHash high(std::string("a\xff")), low("ab");
         assert(RollingHash::compare(high, 0, 2, low, 0, 2) > 0);
+
+        // 整数の列
+        RollingHash rv(std::vector<int>{3, -1, 4, -1, 5, 0, 0});
+        assert(rv.equals(1, 2, 3, 4) && !rv.equals(5, 6, 5, 7));
+        assert(rv.compare(1, 2, 0, 1) < 0 && rv.compare(0, 3, 0, 2) > 0);
+        assert(rv.slice(0, 3) == Hash(std::vector<long long>{3, -1, 4}));
+        assert(Hash(3) + Hash(-1) == rv.slice(0, 2));
+        assert(Hash(-1) != Hash(7) && Hash(0) != Hash());
     }
     {
         std::vector<std::vector<int>> graph(7);
