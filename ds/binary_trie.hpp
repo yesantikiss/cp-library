@@ -62,6 +62,32 @@ namespace yesantikiss {
             return y;
         }
     
+        // number of elements y in {x xor T} with y < r (r may be >= 2^B)
+        long long count_less(ull r, ull T = 0) const {
+            if ((r >> B) != 0) return size();
+            int v = 0;
+            long long res = 0;
+            for (int b = B - 1; b >= 0; --b) {
+                int tb = (T >> b) & 1ULL;
+                int rb = (r >> b) & 1ULL;
+                if (rb == 1) {
+                    int vz = tr[v].ch[tb]; // ybit=0 subtree is entirely < r
+                    if (vz != -1) res += tr[vz].cnt;
+                    v = tr[v].ch[tb ^ 1];
+                } else {
+                    v = tr[v].ch[tb];
+                }
+                if (v == -1) return res;
+            }
+            return res;
+        }
+    
+        // number of elements y in {x xor T} with l <= y < r (0 if l >= r)
+        long long count_range(ull l, ull r, ull T = 0) const {
+            if (l >= r) return 0;
+            return count_less(r, T) - count_less(l, T);
+        }
+    
         ull min_element(ull T = 0) const {
             assert(!empty());
             return kth(0, T);

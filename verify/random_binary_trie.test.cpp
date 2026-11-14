@@ -33,7 +33,7 @@ namespace {
             for (int query = 0; query < 80; ++query) {
                 ull x = value();
                 ull mask = random() % 4 == 0 ? 0 : random() & value_mask;
-                int type = static_cast<int>(random() % 4);
+                int type = static_cast<int>(random() % 5);
                 if (type == 0) {
                     trie.insert(x);
                     values.insert(x);
@@ -50,6 +50,30 @@ namespace {
                     assert(trie.kth(k, mask) == sorted[k]);
                     assert(trie.min_element(mask) == sorted.front());
                     assert(trie.max_element(mask) == sorted.back());
+                } else if (type == 3) {
+                    // count_range(l, r, T) は {x xor T} のうち [l, r) の個数
+                    auto bound = [&]() -> ull {
+                        int kind = static_cast<int>(random() % 6);
+                        if (kind == 0) return 0;
+                        if (kind == 1) return value_mask + 1; // 2^B
+                        if (kind == 2) return ~0ULL;
+                        ull y = value() ^ mask; // 変換後の既存値ちょうど
+                        if (kind == 3) return y;
+                        if (kind == 4) return y + 1;
+                        return random() & value_mask;
+                    };
+                    ull l = bound(), r = bound();
+                    long long less_l = 0, less_r = 0, in_range = 0;
+                    for (ull y : values) {
+                        ull z = y ^ mask;
+                        if (z < l) ++less_l;
+                        if (z < r) ++less_r;
+                        if (l <= z && z < r) ++in_range;
+                    }
+                    assert(trie.count_less(l, mask) == less_l);
+                    assert(trie.count_less(r, mask) == less_r);
+                    assert(trie.count_range(l, r, mask) == in_range);
+                    assert(trie.count_range(l, l, mask) == 0);
                 } else {
                     // count(v, T) は {x xor T} の中の v の個数
                     assert(trie.count(x, mask) ==
