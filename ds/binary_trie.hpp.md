@@ -40,21 +40,34 @@ data:
     \        k -= cnt_pref;\n                    v = tr[v].ch[other]; // ybit=1\n\
     \                    assert(v != -1);\n                    y |= (1ULL << b);\n\
     \                }\n            }\n            return y;\n        }\n    \n  \
-    \      ull min_element(ull T = 0) const {\n            assert(!empty());\n   \
-    \         return kth(0, T);\n        }\n    \n        ull max_element(ull T =\
-    \ 0) const {\n            assert(!empty());\n            return kth(size() - 1,\
-    \ T);\n        }\n    \n    private:\n        void add_raw(ull x, long long delta)\
-    \ {\n            int v = 0;\n            tr[v].cnt += delta;\n            for\
-    \ (int b = B - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n\
-    \                if (tr[v].ch[bit] == -1) {\n                    tr[v].ch[bit]\
-    \ = (int)tr.size();\n                    tr.emplace_back();\n                }\n\
-    \                v = tr[v].ch[bit];\n                tr[v].cnt += delta;\n   \
-    \         }\n            tr[v].end += delta;\n        }\n    \n        long long\
-    \ count_raw(ull x) const {\n            int v = 0;\n            for (int b = B\
-    \ - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n          \
-    \      v = tr[v].ch[bit];\n                if (v == -1) return 0;\n          \
-    \  }\n            return tr[v].end;\n        }\n    };\n    \n    // usage example:\n\
-    \    // using BT = BinaryTrie<30>; // for [0, 1e9]\n    \n}\n"
+    \      // number of elements y in {x xor T} with y < r (r may be >= 2^B)\n   \
+    \     long long count_less(ull r, ull T = 0) const {\n            if ((r >> B)\
+    \ != 0) return size();\n            int v = 0;\n            long long res = 0;\n\
+    \            for (int b = B - 1; b >= 0; --b) {\n                int tb = (T >>\
+    \ b) & 1ULL;\n                int rb = (r >> b) & 1ULL;\n                if (rb\
+    \ == 1) {\n                    int vz = tr[v].ch[tb]; // ybit=0 subtree is entirely\
+    \ < r\n                    if (vz != -1) res += tr[vz].cnt;\n                \
+    \    v = tr[v].ch[tb ^ 1];\n                } else {\n                    v =\
+    \ tr[v].ch[tb];\n                }\n                if (v == -1) return res;\n\
+    \            }\n            return res;\n        }\n    \n        // number of\
+    \ elements y in {x xor T} with l <= y < r (0 if l >= r)\n        long long count_range(ull\
+    \ l, ull r, ull T = 0) const {\n            if (l >= r) return 0;\n          \
+    \  return count_less(r, T) - count_less(l, T);\n        }\n    \n        ull min_element(ull\
+    \ T = 0) const {\n            assert(!empty());\n            return kth(0, T);\n\
+    \        }\n    \n        ull max_element(ull T = 0) const {\n            assert(!empty());\n\
+    \            return kth(size() - 1, T);\n        }\n    \n    private:\n     \
+    \   void add_raw(ull x, long long delta) {\n            int v = 0;\n         \
+    \   tr[v].cnt += delta;\n            for (int b = B - 1; b >= 0; --b) {\n    \
+    \            int bit = (x >> b) & 1ULL;\n                if (tr[v].ch[bit] ==\
+    \ -1) {\n                    tr[v].ch[bit] = (int)tr.size();\n               \
+    \     tr.emplace_back();\n                }\n                v = tr[v].ch[bit];\n\
+    \                tr[v].cnt += delta;\n            }\n            tr[v].end +=\
+    \ delta;\n        }\n    \n        long long count_raw(ull x) const {\n      \
+    \      int v = 0;\n            for (int b = B - 1; b >= 0; --b) {\n          \
+    \      int bit = (x >> b) & 1ULL;\n                v = tr[v].ch[bit];\n      \
+    \          if (v == -1) return 0;\n            }\n            return tr[v].end;\n\
+    \        }\n    };\n    \n    // usage example:\n    // using BT = BinaryTrie<30>;\
+    \ // for [0, 1e9]\n    \n}\n"
   code: "#pragma once\n\n#include <cassert>\n#include <vector>\n\nnamespace yesantikiss\
     \ {\n    template<int B>\n    struct BinaryTrie {\n        static_assert(0 < B\
     \ && B <= 63);\n        using ull = unsigned long long;\n    \n        struct\
@@ -81,26 +94,39 @@ data:
     \     k -= cnt_pref;\n                    v = tr[v].ch[other]; // ybit=1\n   \
     \                 assert(v != -1);\n                    y |= (1ULL << b);\n  \
     \              }\n            }\n            return y;\n        }\n    \n    \
-    \    ull min_element(ull T = 0) const {\n            assert(!empty());\n     \
-    \       return kth(0, T);\n        }\n    \n        ull max_element(ull T = 0)\
-    \ const {\n            assert(!empty());\n            return kth(size() - 1, T);\n\
-    \        }\n    \n    private:\n        void add_raw(ull x, long long delta) {\n\
-    \            int v = 0;\n            tr[v].cnt += delta;\n            for (int\
-    \ b = B - 1; b >= 0; --b) {\n                int bit = (x >> b) & 1ULL;\n    \
-    \            if (tr[v].ch[bit] == -1) {\n                    tr[v].ch[bit] = (int)tr.size();\n\
-    \                    tr.emplace_back();\n                }\n                v\
-    \ = tr[v].ch[bit];\n                tr[v].cnt += delta;\n            }\n     \
-    \       tr[v].end += delta;\n        }\n    \n        long long count_raw(ull\
-    \ x) const {\n            int v = 0;\n            for (int b = B - 1; b >= 0;\
-    \ --b) {\n                int bit = (x >> b) & 1ULL;\n                v = tr[v].ch[bit];\n\
-    \                if (v == -1) return 0;\n            }\n            return tr[v].end;\n\
+    \    // number of elements y in {x xor T} with y < r (r may be >= 2^B)\n     \
+    \   long long count_less(ull r, ull T = 0) const {\n            if ((r >> B) !=\
+    \ 0) return size();\n            int v = 0;\n            long long res = 0;\n\
+    \            for (int b = B - 1; b >= 0; --b) {\n                int tb = (T >>\
+    \ b) & 1ULL;\n                int rb = (r >> b) & 1ULL;\n                if (rb\
+    \ == 1) {\n                    int vz = tr[v].ch[tb]; // ybit=0 subtree is entirely\
+    \ < r\n                    if (vz != -1) res += tr[vz].cnt;\n                \
+    \    v = tr[v].ch[tb ^ 1];\n                } else {\n                    v =\
+    \ tr[v].ch[tb];\n                }\n                if (v == -1) return res;\n\
+    \            }\n            return res;\n        }\n    \n        // number of\
+    \ elements y in {x xor T} with l <= y < r (0 if l >= r)\n        long long count_range(ull\
+    \ l, ull r, ull T = 0) const {\n            if (l >= r) return 0;\n          \
+    \  return count_less(r, T) - count_less(l, T);\n        }\n    \n        ull min_element(ull\
+    \ T = 0) const {\n            assert(!empty());\n            return kth(0, T);\n\
+    \        }\n    \n        ull max_element(ull T = 0) const {\n            assert(!empty());\n\
+    \            return kth(size() - 1, T);\n        }\n    \n    private:\n     \
+    \   void add_raw(ull x, long long delta) {\n            int v = 0;\n         \
+    \   tr[v].cnt += delta;\n            for (int b = B - 1; b >= 0; --b) {\n    \
+    \            int bit = (x >> b) & 1ULL;\n                if (tr[v].ch[bit] ==\
+    \ -1) {\n                    tr[v].ch[bit] = (int)tr.size();\n               \
+    \     tr.emplace_back();\n                }\n                v = tr[v].ch[bit];\n\
+    \                tr[v].cnt += delta;\n            }\n            tr[v].end +=\
+    \ delta;\n        }\n    \n        long long count_raw(ull x) const {\n      \
+    \      int v = 0;\n            for (int b = B - 1; b >= 0; --b) {\n          \
+    \      int bit = (x >> b) & 1ULL;\n                v = tr[v].ch[bit];\n      \
+    \          if (v == -1) return 0;\n            }\n            return tr[v].end;\n\
     \        }\n    };\n    \n    // usage example:\n    // using BT = BinaryTrie<30>;\
     \ // for [0, 1e9]\n    \n}\n"
   dependsOn: []
   isVerificationFile: false
   path: ds/binary_trie.hpp
   requiredBy: []
-  timestamp: '2026-11-12 13:24:34+09:00'
+  timestamp: '2026-11-14 15:53:04+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/random_binary_trie.test.cpp
@@ -122,12 +148,17 @@ title: Binary Trie
 - `count(v, T)`, `contains(v, T)`: 多重集合 `{x xor T}` に含まれる
   `v` の個数・有無を返します。`T` の既定値は `0` です。
 - `kth(k, T)`: `{x xor T}` を昇順に並べた 0-indexed の `k` 番目を返します。
+- `count_less(r, T)`: `{x xor T}` のうち `r` 未満の要素数を返します。
+  `r >= 2^B` のときは `size()` を返します。
+- `count_range(l, r, T)`: `{x xor T}` のうち半開区間 `[l, r)` に入る要素数を
+  返します。`l >= r` のときは `0` です。
 - `min_element(T)`, `max_element(T)`: 変換後の最小値・最大値を返します。
 - `size()`, `empty()`: 重複を含む要素数・空判定です。
 
 ## 要件・注意
 
 - `1 <= B <= 63` が必要です。
+- `count_less`, `count_range` の `l`, `r` は `2^B` 以上でも構いません。
 - 格納する値と XOR マスクは `B` ビット以内、すなわち
   `0 <= x, T < 2^B` としてください。上位ビットは区別されません。
 - `kth` は `0 <= k < size()`、最小値・最大値の取得は非空の場合に限ります。

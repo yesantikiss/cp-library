@@ -114,7 +114,7 @@ data:
   isVerificationFile: true
   path: verify/random_binary_search.test.cpp
   requiredBy: []
-  timestamp: '2026-11-12 13:24:34+09:00'
+  timestamp: '2026-11-14 15:53:04+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/random_binary_search.test.cpp

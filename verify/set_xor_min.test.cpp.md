@@ -41,7 +41,20 @@ data:
     \                } else {\n                    k -= cnt_pref;\n              \
     \      v = tr[v].ch[other]; // ybit=1\n                    assert(v != -1);\n\
     \                    y |= (1ULL << b);\n                }\n            }\n   \
-    \         return y;\n        }\n    \n        ull min_element(ull T = 0) const\
+    \         return y;\n        }\n    \n        // number of elements y in {x xor\
+    \ T} with y < r (r may be >= 2^B)\n        long long count_less(ull r, ull T =\
+    \ 0) const {\n            if ((r >> B) != 0) return size();\n            int v\
+    \ = 0;\n            long long res = 0;\n            for (int b = B - 1; b >= 0;\
+    \ --b) {\n                int tb = (T >> b) & 1ULL;\n                int rb =\
+    \ (r >> b) & 1ULL;\n                if (rb == 1) {\n                    int vz\
+    \ = tr[v].ch[tb]; // ybit=0 subtree is entirely < r\n                    if (vz\
+    \ != -1) res += tr[vz].cnt;\n                    v = tr[v].ch[tb ^ 1];\n     \
+    \           } else {\n                    v = tr[v].ch[tb];\n                }\n\
+    \                if (v == -1) return res;\n            }\n            return res;\n\
+    \        }\n    \n        // number of elements y in {x xor T} with l <= y < r\
+    \ (0 if l >= r)\n        long long count_range(ull l, ull r, ull T = 0) const\
+    \ {\n            if (l >= r) return 0;\n            return count_less(r, T) -\
+    \ count_less(l, T);\n        }\n    \n        ull min_element(ull T = 0) const\
     \ {\n            assert(!empty());\n            return kth(0, T);\n        }\n\
     \    \n        ull max_element(ull T = 0) const {\n            assert(!empty());\n\
     \            return kth(size() - 1, T);\n        }\n    \n    private:\n     \
@@ -77,7 +90,7 @@ data:
   isVerificationFile: true
   path: verify/set_xor_min.test.cpp
   requiredBy: []
-  timestamp: '2026-11-12 13:24:34+09:00'
+  timestamp: '2026-11-14 15:53:04+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/set_xor_min.test.cpp

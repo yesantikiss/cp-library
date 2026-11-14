@@ -70,7 +70,7 @@ data:
   isVerificationFile: false
   path: utils/grid_rotate.hpp
   requiredBy: []
-  timestamp: '2026-11-12 13:24:34+09:00'
+  timestamp: '2026-11-14 15:53:04+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/random_grid_rotate.test.cpp
