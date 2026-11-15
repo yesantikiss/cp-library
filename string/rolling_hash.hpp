@@ -4,6 +4,7 @@
 #include <cassert>
 #include <random>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace yesantikiss {
@@ -60,6 +61,22 @@ namespace yesantikiss {
             return res;
         }
 
+        // 要素を [1, MOD) の値に変換する。単射で大小の順を保つ
+        // 文字は (unsigned char)c + 1
+        static ull code(char c) { return (ull)(unsigned char)c + 1; }
+        // 整数は x + 2^60。|x| <= 2^60 - 2 が必要
+        static constexpr long long INT_LIMIT = (1LL << 60) - 2;
+        template <class T, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T, char>,
+                                            std::nullptr_t> = nullptr>
+        static ull code(T x) {
+            if constexpr (std::is_signed_v<T>) {
+                assert(-INT_LIMIT <= (long long)x && (long long)x <= INT_LIMIT);
+            } else {
+                assert((unsigned long long)x <= (unsigned long long)INT_LIMIT);
+            }
+            return (ull)((long long)x + (1LL << 60));
+        }
+
         // hash(A + B) を hash(A), hash(B), |B| から求める
         // テーブルを伸ばすのは build だけなので、長いハッシュを組み立ててもメモリは増えない
         static ull concat(ull h1, ull h2, long long len2) {
@@ -76,12 +93,26 @@ namespace yesantikiss {
 
             Hash() = default;
             Hash(ull val, long long len) : val(val), len(len) {}
-            // 1 文字 / 文字列全体のハッシュ（prefix hash を持たずに求める）
-            explicit Hash(char c) : val((ull)(unsigned char)c + 1), len(1) { init_base(); }
-            explicit Hash(const std::string &s) : len((long long)s.size()) {
+            // 1 要素 / 列全体のハッシュ（prefix hash を持たずに求める）
+            explicit Hash(char c) : val(code(c)), len(1) { init_base(); }
+            template <class T, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T, char>,
+                                                std::nullptr_t> = nullptr>
+            explicit Hash(T x) : val(code(x)), len(1) { init_base(); }
+            explicit Hash(const std::string &s) { assign(s); }
+            template <class T>
+            explicit Hash(const std::vector<T> &s) { assign(s); }
+
+          private:
+            template <class Seq>
+            void assign(const Seq &s) {
                 init_base();
-                for (char c : s) val = add(mul(val, base), (ull)(unsigned char)c + 1);
+                len = (long long)s.size();
+                for (size_t i = 0; i < s.size(); ++i) {
+                    val = add(mul(val, base), code((typename Seq::value_type)s[i]));
+                }
             }
+
+          public:
 
             friend Hash operator+(const Hash &a, const Hash &b) {
                 return {concat(a.val, b.val, b.len), a.len + b.len};
@@ -98,17 +129,27 @@ namespace yesantikiss {
         RollingHash(const std::string &s) {
             build(s);
         }
+        // 整数の列。各要素は |x| <= 2^60 - 2
+        template <class T>
+        RollingHash(const std::vector<T> &s) {
+            build(s);
+        }
     
-        void build(const std::string &s) {
+        void build(const std::string &s) { build_impl(s); }
+        template <class T>
+        void build(const std::vector<T> &s) { build_impl(s); }
+    
+        template <class Seq>
+        void build_impl(const Seq &s) {
             init_base();
             n = (int)s.size();
             ensure_pow(n);
             hash.assign(n + 1, 0);
             for (int i = 0; i < n; ++i) {
-                hash[i + 1] = add(mul(hash[i], base), (ull)(unsigned char)s[i] + 1);
+                hash[i + 1] = add(mul(hash[i], base), code((typename Seq::value_type)s[i]));
             }
         }
-    
+
         // S[l..r) のハッシュを取得
         ull get(int l, int r) const {
             assert(0 <= l && l <= r && r <= n);
@@ -162,12 +203,12 @@ namespace yesantikiss {
         }
 
         // a の [l1, r1) と b の [l2, r2) を辞書順で比較  O(log N)
-        // 負: a 側が小さい、0: 等しい、正: a 側が大きい（std::string::compare と同じ順序）
+        // 負: a 側が小さい、0: 等しい、正: a 側が大きい（std::string::compare, std::vector の < と同じ順序）
         static int compare(const RollingHash &a, int l1, int r1, const RollingHash &b, int l2, int r2) {
             int len1 = r1 - l1, len2 = r2 - l2;
             int k = lcp(a, l1, r1, b, l2, r2);
             if (k == len1 || k == len2) return (len1 > len2) - (len1 < len2);
-            // 長さ 1 のハッシュは 文字 + 1 そのもの
+            // 長さ 1 のハッシュは code(要素) そのもの
             ull c1 = a.get(l1 + k, l1 + k + 1), c2 = b.get(l2 + k, l2 + k + 1);
             return (c1 > c2) - (c1 < c2);
         }

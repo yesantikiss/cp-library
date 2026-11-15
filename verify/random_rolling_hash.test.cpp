@@ -1,7 +1,9 @@
 // 素朴な実装と突き合わせるランダムテストを通してから A + B を解く。
 #define PROBLEM "https://judge.yosupo.jp/problem/aplusb"
 
+#include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <random>
 #include <string>
@@ -137,6 +139,99 @@ namespace {
         }
         assert(RollingHash::pow_base.size() == table);
     }
+
+    constexpr long long LIM = RollingHash::INT_LIMIT;
+
+    // 値の種類が少ない列と、境界付近の値を含む列を作る
+    std::vector<long long> random_ll_vector(int n) {
+        std::vector<long long> pool;
+        int kind = random_int(0, 3);
+        if (kind == 0) pool = {0};
+        else if (kind == 1) pool = {-1, 0, 7};  // 素朴に ull にすると衝突する組
+        else if (kind == 2) pool = {-LIM, -LIM + 1, LIM - 1, LIM, 0};
+        else for (int i = 0; i < 3; ++i) pool.push_back(random_ll(-LIM, LIM));
+        std::vector<long long> a(n);
+        for (auto &x : a) x = pool[random_int(0, (int)pool.size() - 1)];
+        return a;
+    }
+
+    int naive_compare(const std::vector<long long> &x, const std::vector<long long> &y) {
+        return (y < x) - (x < y);
+    }
+
+    // 整数列の一致・lcp・辞書順比較が素朴な比較と一致する
+    void test_vector_matches_naive() {
+        for (int iter = 0; iter < 300; ++iter) {
+            std::vector<long long> a = random_ll_vector(random_int(0, 30));
+            std::vector<long long> b = random_int(0, 1) ? a : random_ll_vector(random_int(0, 30));
+            if (!b.empty() && random_int(0, 1)) b[random_int(0, (int)b.size() - 1)] = random_ll(-LIM, LIM);
+            RollingHash ra(a), rb(b);
+            const int n = (int)a.size(), m = (int)b.size();
+            for (int q = 0; q < 300; ++q) {
+                int l1 = random_int(0, n), r1 = random_int(l1, n);
+                int l2 = random_int(0, m), r2 = random_int(l2, m);
+                std::vector<long long> x(a.begin() + l1, a.begin() + r1), y(b.begin() + l2, b.begin() + r2);
+                int k = 0;
+                while (k < (int)x.size() && k < (int)y.size() && x[k] == y[k]) ++k;
+                assert(RollingHash::lcp(ra, l1, r1, rb, l2, r2) == k);
+                assert(RollingHash::compare(ra, l1, r1, rb, l2, r2) == naive_compare(x, y));
+                assert((ra.slice(l1, r1) == rb.slice(l2, r2)) == (x == y));
+                assert(ra.slice(l1, r1) == Hash(x));
+                int l3 = random_int(0, n), r3 = random_int(l3, n);
+                std::vector<long long> z(a.begin() + l3, a.begin() + r3);
+                assert(ra.equals(l1, r1, l3, r3) == (x == z));
+            }
+            Hash acc;
+            for (long long x : a) acc += Hash(x);
+            assert(acc == Hash(a) && acc == ra.slice(0, n));
+        }
+    }
+
+    // 0 だけの列は長さで区別でき、型が違っても同じ値なら同じハッシュになる
+    void test_vector_types() {
+        for (int len = 0; len <= 50; ++len) {
+            RollingHash z(std::vector<int>(len, 0));
+            for (int len2 = 0; len2 < len; ++len2) {
+                assert(z.get(0, len) != z.get(0, len2));
+                assert(Hash(std::vector<int>(len, 0)) != Hash(std::vector<int>(len2, 0)));
+            }
+        }
+        for (int iter = 0; iter < 300; ++iter) {
+            int n = random_int(0, 20);
+            std::vector<int> vi(n);
+            for (int &x : vi) x = random_int(-1000000000, 1000000000);
+            std::vector<long long> vl(vi.begin(), vi.end());
+            std::vector<short> vs(n);
+            for (int i = 0; i < n; ++i) vs[i] = (short)(vi[i] % 30000);
+            std::vector<long long> vsl(vs.begin(), vs.end());
+            assert(Hash(vi) == Hash(vl));
+            assert(RollingHash(vi).get(0, n) == RollingHash(vl).get(0, n));
+            assert(Hash(vs) == Hash(vsl));
+            std::vector<unsigned> vu(n);
+            for (int i = 0; i < n; ++i) vu[i] = (unsigned)std::abs(vi[i]);
+            std::vector<long long> vul(vu.begin(), vu.end());
+            assert(Hash(vu) == Hash(vul));
+            std::vector<unsigned long long> vull(vu.begin(), vu.end());
+            assert(RollingHash(vull).get(0, n) == RollingHash(vul).get(0, n));
+            std::vector<bool> vb(n);
+            std::vector<int> vbi(n);
+            for (int i = 0; i < n; ++i) vbi[i] = vb[i] = random_int(0, 1);
+            assert(Hash(vb) == Hash(vbi) && RollingHash(vb).slice(0, n) == Hash(vbi));
+            // vector<char> は string と同じ
+            std::string s = random_string(n, 26);
+            std::vector<char> vc(s.begin(), s.end());
+            assert(Hash(vc) == Hash(s) && RollingHash(vc).get(0, n) == RollingHash(s).get(0, n));
+        }
+        // 境界の値と、素朴に ull にすると衝突する組
+        std::vector<long long> v = {-LIM, -LIM + 1, -1, 0, 7, LIM - 1, LIM};
+        RollingHash rv(v);
+        for (int i = 0; i < (int)v.size(); ++i) {
+            for (int j = 0; j < (int)v.size(); ++j) {
+                assert((rv.get(i, i + 1) == rv.get(j, j + 1)) == (i == j));
+                assert(rv.compare(i, i + 1, j, j + 1) == (i > j) - (i < j));
+            }
+        }
+    }
 }  // namespace
 
 int main() {
@@ -144,6 +239,8 @@ int main() {
     test_concat_matches_string();
     test_long_concat_memory();
     test_huge_repeat();
+    test_vector_matches_naive();
+    test_vector_types();
 
     long long a, b;
     std::cin >> a >> b;
