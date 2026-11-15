@@ -106,7 +106,7 @@ data:
   isVerificationFile: true
   path: verify/lca_euler_tour.test.cpp
   requiredBy: []
-  timestamp: '2026-11-14 15:53:04+09:00'
+  timestamp: '2026-11-15 11:23:52+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/lca_euler_tour.test.cpp

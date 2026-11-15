@@ -82,7 +82,7 @@ data:
   isVerificationFile: true
   path: verify/aoj_dsl_5_b.test.cpp
   requiredBy: []
-  timestamp: '2026-11-14 15:53:04+09:00'
+  timestamp: '2026-11-15 11:23:52+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/aoj_dsl_5_b.test.cpp

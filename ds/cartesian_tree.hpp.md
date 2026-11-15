@@ -60,7 +60,7 @@ data:
   isVerificationFile: false
   path: ds/cartesian_tree.hpp
   requiredBy: []
-  timestamp: '2026-11-14 15:53:04+09:00'
+  timestamp: '2026-11-15 11:23:52+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/cartesian_tree.test.cpp

@@ -17,20 +17,20 @@ data:
   bundledCode: "#line 1 \"verify/zalgorithm.test.cpp\"\n#define PROBLEM \"https://judge.yosupo.jp/problem/zalgorithm\"\
     \n\n#include <iostream>\n#include <string>\n\n#line 2 \"string/rolling_hash.hpp\"\
     \n\n#include <algorithm>\n#include <cassert>\n#include <random>\n#line 7 \"string/rolling_hash.hpp\"\
-    \n#include <vector>\n\nnamespace yesantikiss {\n    struct RollingHash {\n   \
-    \     using ull = unsigned long long;\n        static constexpr ull MOD = (1ULL\
-    \ << 61) - 1;\n    \n        // \u5171\u6709\u8CC7\u6E90\uFF08\u5168\u30A4\u30F3\
-    \u30B9\u30BF\u30F3\u30B9\u3067\u5171\u901A\uFF09\n        inline static ull base\
-    \ = 0;\n        inline static std::vector<ull> pow_base;\n    \n        std::vector<ull>\
-    \ hash;  // hash[i] = S[0..i) \u306E\u30CF\u30C3\u30B7\u30E5\n        int n =\
-    \ 0;\n    \n        // 2^61-1 \u7528\u306E\u6F14\u7B97\n        static inline\
-    \ ull add(ull a, ull b) {\n            ull c = a + b;\n            if (c >= MOD)\
-    \ c -= MOD;\n            return c;\n        }\n        static inline ull mul(ull\
-    \ a, ull b) {\n            unsigned __int128 t = (unsigned __int128)a * b;\n \
-    \           ull res = (ull)(t >> 61) + ((ull)t & MOD);\n            if (res >=\
-    \ MOD) res -= MOD;\n            return res;\n        }\n    \n        static void\
-    \ init_base() {\n            if (base != 0) return;\n            std::mt19937_64\
-    \ rng(std::random_device{}());\n            std::uniform_int_distribution<ull>\
+    \n#include <type_traits>\n#include <vector>\n\nnamespace yesantikiss {\n    struct\
+    \ RollingHash {\n        using ull = unsigned long long;\n        static constexpr\
+    \ ull MOD = (1ULL << 61) - 1;\n    \n        // \u5171\u6709\u8CC7\u6E90\uFF08\
+    \u5168\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u3067\u5171\u901A\uFF09\n        inline\
+    \ static ull base = 0;\n        inline static std::vector<ull> pow_base;\n   \
+    \ \n        std::vector<ull> hash;  // hash[i] = S[0..i) \u306E\u30CF\u30C3\u30B7\
+    \u30E5\n        int n = 0;\n    \n        // 2^61-1 \u7528\u306E\u6F14\u7B97\n\
+    \        static inline ull add(ull a, ull b) {\n            ull c = a + b;\n \
+    \           if (c >= MOD) c -= MOD;\n            return c;\n        }\n      \
+    \  static inline ull mul(ull a, ull b) {\n            unsigned __int128 t = (unsigned\
+    \ __int128)a * b;\n            ull res = (ull)(t >> 61) + ((ull)t & MOD);\n  \
+    \          if (res >= MOD) res -= MOD;\n            return res;\n        }\n \
+    \   \n        static void init_base() {\n            if (base != 0) return;\n\
+    \            std::mt19937_64 rng(std::random_device{}());\n            std::uniform_int_distribution<ull>\
     \ dist(1ULL, MOD - 1);\n            base = dist(rng);\n            pow_base =\
     \ {1};  // pow_base[0] = 1\n        }\n    \n        static void ensure_pow(int\
     \ len) {\n            if ((int)pow_base.size() >= len + 1) return;\n         \
@@ -44,58 +44,81 @@ data:
     \        if (len < (long long)pow_base.size()) return pow_base[len];\n       \
     \     ull res = 1, x = base;\n            for (ull e = (ull)len; e > 0; e >>=\
     \ 1) {\n                if (e & 1) res = mul(res, x);\n                x = mul(x,\
-    \ x);\n            }\n            return res;\n        }\n\n        // hash(A\
-    \ + B) \u3092 hash(A), hash(B), |B| \u304B\u3089\u6C42\u3081\u308B\n        //\
-    \ \u30C6\u30FC\u30D6\u30EB\u3092\u4F38\u3070\u3059\u306E\u306F build \u3060\u3051\
-    \u306A\u306E\u3067\u3001\u9577\u3044\u30CF\u30C3\u30B7\u30E5\u3092\u7D44\u307F\
-    \u7ACB\u3066\u3066\u3082\u30E1\u30E2\u30EA\u306F\u5897\u3048\u306A\u3044\n   \
-    \     static ull concat(ull h1, ull h2, long long len2) {\n            assert(len2\
-    \ >= 0);\n            init_base();\n            return add(mul(h1, pow_of(len2)),\
-    \ h2);\n        }\n\n        // \u9577\u3055\u4ED8\u304D\u306E\u30CF\u30C3\u30B7\
-    \u30E5\u5024\u3002+ \u3067\u6587\u5B57\u5217\u306E\u9023\u7D50\u306B\u5BFE\u5FDC\
-    \u3059\u308B\u30CF\u30C3\u30B7\u30E5\u304C\u5F97\u3089\u308C\u308B\n        //\
-    \ \u65E2\u5B9A\u5024\u306F\u7A7A\u6587\u5B57\u5217\uFF08+ \u306E\u5358\u4F4D\u5143\
-    \uFF09\n        struct Hash {\n            ull val = 0;\n            long long\
-    \ len = 0;  // \u7E70\u308A\u8FD4\u3057\u4E8C\u4E57\u6CD5\u3067\u9023\u7D50\u3059\
-    \u308C\u3070 10^18 \u7A0B\u5EA6\u306E\u9577\u3055\u3082\u6271\u3048\u308B\n\n\
-    \            Hash() = default;\n            Hash(ull val, long long len) : val(val),\
-    \ len(len) {}\n            // 1 \u6587\u5B57 / \u6587\u5B57\u5217\u5168\u4F53\u306E\
-    \u30CF\u30C3\u30B7\u30E5\uFF08prefix hash \u3092\u6301\u305F\u305A\u306B\u6C42\
-    \u3081\u308B\uFF09\n            explicit Hash(char c) : val((ull)(unsigned char)c\
-    \ + 1), len(1) { init_base(); }\n            explicit Hash(const std::string &s)\
-    \ : len((long long)s.size()) {\n                init_base();\n               \
-    \ for (char c : s) val = add(mul(val, base), (ull)(unsigned char)c + 1);\n   \
-    \         }\n\n            friend Hash operator+(const Hash &a, const Hash &b)\
-    \ {\n                return {concat(a.val, b.val, b.len), a.len + b.len};\n  \
-    \          }\n            Hash &operator+=(const Hash &o) { return *this = *this\
-    \ + o; }\n            friend bool operator==(const Hash &a, const Hash &b) {\n\
-    \                return a.val == b.val && a.len == b.len;\n            }\n   \
-    \         friend bool operator!=(const Hash &a, const Hash &b) { return !(a ==\
-    \ b); }\n        };\n\n        RollingHash() : n(0) {}\n    \n        RollingHash(const\
-    \ std::string &s) {\n            build(s);\n        }\n    \n        void build(const\
-    \ std::string &s) {\n            init_base();\n            n = (int)s.size();\n\
-    \            ensure_pow(n);\n            hash.assign(n + 1, 0);\n            for\
-    \ (int i = 0; i < n; ++i) {\n                hash[i + 1] = add(mul(hash[i], base),\
-    \ (ull)(unsigned char)s[i] + 1);\n            }\n        }\n    \n        // S[l..r)\
-    \ \u306E\u30CF\u30C3\u30B7\u30E5\u3092\u53D6\u5F97\n        ull get(int l, int\
-    \ r) const {\n            assert(0 <= l && l <= r && r <= n);\n            ull\
-    \ res = hash[r] + MOD - mul(hash[l], pow_base[r - l]);\n            if (res >=\
-    \ MOD) res -= MOD;\n            return res;\n        }\n    \n        // S[l..r)\
-    \ \u306E\u9577\u3055\u4ED8\u304D\u30CF\u30C3\u30B7\u30E5\u3092\u53D6\u5F97\uFF08\
-    + \u3067\u9023\u7D50\u3067\u304D\u308B\uFF09\n        Hash slice(int l, int r)\
-    \ const {\n            return {get(l, r), r - l};\n        }\n\n        // \u540C\
-    \u3058\u6587\u5B57\u5217\u306E\u4E2D\u3067\u90E8\u5206\u6587\u5B57\u5217\u304C\
-    \u7B49\u3057\u3044\u304B\n        bool equals(int l1, int r1, int l2, int r2)\
-    \ const {\n            if (r1 - l1 != r2 - l2) return false;\n            return\
-    \ get(l1, r1) == get(l2, r2);\n        }\n\n        // a \u306E [l1, r1) \u3068\
-    \ b \u306E [l2, r2) \u306E\u6700\u9577\u5171\u901A\u63A5\u982D\u8F9E\u306E\u9577\
-    \u3055  O(log N)\n        static int lcp(const RollingHash &a, int l1, int r1,\
-    \ const RollingHash &b, int l2, int r2) {\n            assert(0 <= l1 && l1 <=\
-    \ r1 && r1 <= a.n);\n            assert(0 <= l2 && l2 <= r2 && r2 <= b.n);\n \
-    \           // get(l1, l1 + len) == get(l2, l2 + len) \u3092\u4E57\u7B97 1 \u56DE\
-    \u3067\u5224\u5B9A\u3059\u308B\n            const ull diff = add(a.hash[l1], MOD\
-    \ - b.hash[l2]);\n            auto same = [&](int len) {\n                return\
-    \ add(a.hash[l1 + len], MOD - b.hash[l2 + len]) == mul(diff, pow_base[len]);\n\
+    \ x);\n            }\n            return res;\n        }\n\n        // \u8981\u7D20\
+    \u3092 [1, MOD) \u306E\u5024\u306B\u5909\u63DB\u3059\u308B\u3002\u5358\u5C04\u3067\
+    \u5927\u5C0F\u306E\u9806\u3092\u4FDD\u3064\n        // \u6587\u5B57\u306F (unsigned\
+    \ char)c + 1\n        static ull code(char c) { return (ull)(unsigned char)c +\
+    \ 1; }\n        // \u6574\u6570\u306F x + 2^60\u3002|x| <= 2^60 - 2 \u304C\u5FC5\
+    \u8981\n        static constexpr long long INT_LIMIT = (1LL << 60) - 2;\n    \
+    \    template <class T, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T,\
+    \ char>,\n                                            std::nullptr_t> = nullptr>\n\
+    \        static ull code(T x) {\n            if constexpr (std::is_signed_v<T>)\
+    \ {\n                assert(-INT_LIMIT <= (long long)x && (long long)x <= INT_LIMIT);\n\
+    \            } else {\n                assert((unsigned long long)x <= (unsigned\
+    \ long long)INT_LIMIT);\n            }\n            return (ull)((long long)x\
+    \ + (1LL << 60));\n        }\n\n        // hash(A + B) \u3092 hash(A), hash(B),\
+    \ |B| \u304B\u3089\u6C42\u3081\u308B\n        // \u30C6\u30FC\u30D6\u30EB\u3092\
+    \u4F38\u3070\u3059\u306E\u306F build \u3060\u3051\u306A\u306E\u3067\u3001\u9577\
+    \u3044\u30CF\u30C3\u30B7\u30E5\u3092\u7D44\u307F\u7ACB\u3066\u3066\u3082\u30E1\
+    \u30E2\u30EA\u306F\u5897\u3048\u306A\u3044\n        static ull concat(ull h1,\
+    \ ull h2, long long len2) {\n            assert(len2 >= 0);\n            init_base();\n\
+    \            return add(mul(h1, pow_of(len2)), h2);\n        }\n\n        // \u9577\
+    \u3055\u4ED8\u304D\u306E\u30CF\u30C3\u30B7\u30E5\u5024\u3002+ \u3067\u6587\u5B57\
+    \u5217\u306E\u9023\u7D50\u306B\u5BFE\u5FDC\u3059\u308B\u30CF\u30C3\u30B7\u30E5\
+    \u304C\u5F97\u3089\u308C\u308B\n        // \u65E2\u5B9A\u5024\u306F\u7A7A\u6587\
+    \u5B57\u5217\uFF08+ \u306E\u5358\u4F4D\u5143\uFF09\n        struct Hash {\n  \
+    \          ull val = 0;\n            long long len = 0;  // \u7E70\u308A\u8FD4\
+    \u3057\u4E8C\u4E57\u6CD5\u3067\u9023\u7D50\u3059\u308C\u3070 10^18 \u7A0B\u5EA6\
+    \u306E\u9577\u3055\u3082\u6271\u3048\u308B\n\n            Hash() = default;\n\
+    \            Hash(ull val, long long len) : val(val), len(len) {}\n          \
+    \  // 1 \u8981\u7D20 / \u5217\u5168\u4F53\u306E\u30CF\u30C3\u30B7\u30E5\uFF08\
+    prefix hash \u3092\u6301\u305F\u305A\u306B\u6C42\u3081\u308B\uFF09\n         \
+    \   explicit Hash(char c) : val(code(c)), len(1) { init_base(); }\n          \
+    \  template <class T, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T,\
+    \ char>,\n                                                std::nullptr_t> = nullptr>\n\
+    \            explicit Hash(T x) : val(code(x)), len(1) { init_base(); }\n    \
+    \        explicit Hash(const std::string &s) { assign(s); }\n            template\
+    \ <class T>\n            explicit Hash(const std::vector<T> &s) { assign(s); }\n\
+    \n          private:\n            template <class Seq>\n            void assign(const\
+    \ Seq &s) {\n                init_base();\n                len = (long long)s.size();\n\
+    \                for (size_t i = 0; i < s.size(); ++i) {\n                   \
+    \ val = add(mul(val, base), code((typename Seq::value_type)s[i]));\n         \
+    \       }\n            }\n\n          public:\n\n            friend Hash operator+(const\
+    \ Hash &a, const Hash &b) {\n                return {concat(a.val, b.val, b.len),\
+    \ a.len + b.len};\n            }\n            Hash &operator+=(const Hash &o)\
+    \ { return *this = *this + o; }\n            friend bool operator==(const Hash\
+    \ &a, const Hash &b) {\n                return a.val == b.val && a.len == b.len;\n\
+    \            }\n            friend bool operator!=(const Hash &a, const Hash &b)\
+    \ { return !(a == b); }\n        };\n\n        RollingHash() : n(0) {}\n    \n\
+    \        RollingHash(const std::string &s) {\n            build(s);\n        }\n\
+    \        // \u6574\u6570\u306E\u5217\u3002\u5404\u8981\u7D20\u306F |x| <= 2^60\
+    \ - 2\n        template <class T>\n        RollingHash(const std::vector<T> &s)\
+    \ {\n            build(s);\n        }\n    \n        void build(const std::string\
+    \ &s) { build_impl(s); }\n        template <class T>\n        void build(const\
+    \ std::vector<T> &s) { build_impl(s); }\n    \n        template <class Seq>\n\
+    \        void build_impl(const Seq &s) {\n            init_base();\n         \
+    \   n = (int)s.size();\n            ensure_pow(n);\n            hash.assign(n\
+    \ + 1, 0);\n            for (int i = 0; i < n; ++i) {\n                hash[i\
+    \ + 1] = add(mul(hash[i], base), code((typename Seq::value_type)s[i]));\n    \
+    \        }\n        }\n\n        // S[l..r) \u306E\u30CF\u30C3\u30B7\u30E5\u3092\
+    \u53D6\u5F97\n        ull get(int l, int r) const {\n            assert(0 <= l\
+    \ && l <= r && r <= n);\n            ull res = hash[r] + MOD - mul(hash[l], pow_base[r\
+    \ - l]);\n            if (res >= MOD) res -= MOD;\n            return res;\n \
+    \       }\n    \n        // S[l..r) \u306E\u9577\u3055\u4ED8\u304D\u30CF\u30C3\
+    \u30B7\u30E5\u3092\u53D6\u5F97\uFF08+ \u3067\u9023\u7D50\u3067\u304D\u308B\uFF09\
+    \n        Hash slice(int l, int r) const {\n            return {get(l, r), r -\
+    \ l};\n        }\n\n        // \u540C\u3058\u6587\u5B57\u5217\u306E\u4E2D\u3067\
+    \u90E8\u5206\u6587\u5B57\u5217\u304C\u7B49\u3057\u3044\u304B\n        bool equals(int\
+    \ l1, int r1, int l2, int r2) const {\n            if (r1 - l1 != r2 - l2) return\
+    \ false;\n            return get(l1, r1) == get(l2, r2);\n        }\n\n      \
+    \  // a \u306E [l1, r1) \u3068 b \u306E [l2, r2) \u306E\u6700\u9577\u5171\u901A\
+    \u63A5\u982D\u8F9E\u306E\u9577\u3055  O(log N)\n        static int lcp(const RollingHash\
+    \ &a, int l1, int r1, const RollingHash &b, int l2, int r2) {\n            assert(0\
+    \ <= l1 && l1 <= r1 && r1 <= a.n);\n            assert(0 <= l2 && l2 <= r2 &&\
+    \ r2 <= b.n);\n            // get(l1, l1 + len) == get(l2, l2 + len) \u3092\u4E57\
+    \u7B97 1 \u56DE\u3067\u5224\u5B9A\u3059\u308B\n            const ull diff = add(a.hash[l1],\
+    \ MOD - b.hash[l2]);\n            auto same = [&](int len) {\n               \
+    \ return add(a.hash[l1 + len], MOD - b.hash[l2 + len]) == mul(diff, pow_base[len]);\n\
     \            };\n            const int limit = std::min(r1 - l1, r2 - l2);\n \
     \           // \u7B54\u3048\u304C\u77ED\u3044\u5834\u5408\u306B\u901F\u3044\u3088\
     \u3046\u3001\u9577\u3055 32 \u307E\u3067\u306F\u500D\u3005\u3067\u78BA\u304B\u3081\
@@ -111,21 +134,21 @@ data:
     \ r1, *this, l2, r2);\n        }\n\n        // a \u306E [l1, r1) \u3068 b \u306E\
     \ [l2, r2) \u3092\u8F9E\u66F8\u9806\u3067\u6BD4\u8F03  O(log N)\n        // \u8CA0\
     : a \u5074\u304C\u5C0F\u3055\u3044\u30010: \u7B49\u3057\u3044\u3001\u6B63: a \u5074\
-    \u304C\u5927\u304D\u3044\uFF08std::string::compare \u3068\u540C\u3058\u9806\u5E8F\
-    \uFF09\n        static int compare(const RollingHash &a, int l1, int r1, const\
-    \ RollingHash &b, int l2, int r2) {\n            int len1 = r1 - l1, len2 = r2\
-    \ - l2;\n            int k = lcp(a, l1, r1, b, l2, r2);\n            if (k ==\
-    \ len1 || k == len2) return (len1 > len2) - (len1 < len2);\n            // \u9577\
-    \u3055 1 \u306E\u30CF\u30C3\u30B7\u30E5\u306F \u6587\u5B57 + 1 \u305D\u306E\u3082\
-    \u306E\n            ull c1 = a.get(l1 + k, l1 + k + 1), c2 = b.get(l2 + k, l2\
-    \ + k + 1);\n            return (c1 > c2) - (c1 < c2);\n        }\n        int\
-    \ compare(int l1, int r1, int l2, int r2) const {\n            return compare(*this,\
-    \ l1, r1, *this, l2, r2);\n        }\n    };\n    \n}\n#line 7 \"verify/zalgorithm.test.cpp\"\
-    \n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n\
-    \n    std::string s;\n    std::cin >> s;\n    const int n = (int)s.size();\n\n\
-    \    yesantikiss::RollingHash hash(s);\n    for (int i = 0; i < n; ++i) {\n  \
-    \      if (i != 0) std::cout << ' ';\n        std::cout << hash.lcp(0, n, i, n);\n\
-    \    }\n    std::cout << '\\n';\n}\n"
+    \u304C\u5927\u304D\u3044\uFF08std::string::compare, std::vector \u306E < \u3068\
+    \u540C\u3058\u9806\u5E8F\uFF09\n        static int compare(const RollingHash &a,\
+    \ int l1, int r1, const RollingHash &b, int l2, int r2) {\n            int len1\
+    \ = r1 - l1, len2 = r2 - l2;\n            int k = lcp(a, l1, r1, b, l2, r2);\n\
+    \            if (k == len1 || k == len2) return (len1 > len2) - (len1 < len2);\n\
+    \            // \u9577\u3055 1 \u306E\u30CF\u30C3\u30B7\u30E5\u306F code(\u8981\
+    \u7D20) \u305D\u306E\u3082\u306E\n            ull c1 = a.get(l1 + k, l1 + k +\
+    \ 1), c2 = b.get(l2 + k, l2 + k + 1);\n            return (c1 > c2) - (c1 < c2);\n\
+    \        }\n        int compare(int l1, int r1, int l2, int r2) const {\n    \
+    \        return compare(*this, l1, r1, *this, l2, r2);\n        }\n    };\n  \
+    \  \n}\n#line 7 \"verify/zalgorithm.test.cpp\"\n\nint main() {\n    std::ios::sync_with_stdio(false);\n\
+    \    std::cin.tie(nullptr);\n\n    std::string s;\n    std::cin >> s;\n    const\
+    \ int n = (int)s.size();\n\n    yesantikiss::RollingHash hash(s);\n    for (int\
+    \ i = 0; i < n; ++i) {\n        if (i != 0) std::cout << ' ';\n        std::cout\
+    \ << hash.lcp(0, n, i, n);\n    }\n    std::cout << '\\n';\n}\n"
   code: "#define PROBLEM \"https://judge.yosupo.jp/problem/zalgorithm\"\n\n#include\
     \ <iostream>\n#include <string>\n\n#include \"string/rolling_hash.hpp\"\n\nint\
     \ main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n\
@@ -138,7 +161,7 @@ data:
   isVerificationFile: true
   path: verify/zalgorithm.test.cpp
   requiredBy: []
-  timestamp: '2026-11-14 15:53:04+09:00'
+  timestamp: '2026-11-15 11:23:52+09:00'
   verificationStatus: TEST_ACCEPTED
   verifiedWith: []
 documentation_of: verify/zalgorithm.test.cpp

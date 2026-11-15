@@ -113,7 +113,7 @@ data:
   requiredBy:
   - geometry/line.hpp
   - geometry/argument_sort.hpp
-  timestamp: '2026-11-14 15:53:04+09:00'
+  timestamp: '2026-11-15 11:23:52+09:00'
   verificationStatus: LIBRARY_ALL_AC
   verifiedWith:
   - verify/cgl_1_a.test.cpp
