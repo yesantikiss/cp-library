@@ -105,3 +105,13 @@
 - `potential(a)`: `pot[a] - pot[leader(a)]`
 - `leader(a)`, `same(a, b)`, `size(a)`, `groups()`
 - `groups()` 以外の償却計算量: `O(α(N))`
+
+## `rollback_dsu.hpp`
+
+直前の `merge` を取り消せる Union-Find `yesantikiss::rollback_dsu` です。
+
+- `merge(a, b)`: 併合して leader を返す。同じ成分どうしでも履歴を 1 件積む
+- `undo()`: 直前の `merge` を 1 回取り消す `O(1)`
+- `snapshot()`, `rollback(state)`: 現在の履歴の長さを取得し、その時点まで戻す
+- `leader(a)`, `same(a, b)`, `size(a)`, `count()`: `O(log N)`。`count()` は連結成分数で `O(1)`
+- `groups()`: `O(N)`

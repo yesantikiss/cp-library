@@ -16,6 +16,7 @@
 #include "ds/interval_map.hpp"
 #include "ds/persistent_segtree.hpp"
 #include "ds/potential_dsu.hpp"
+#include "ds/rollback_dsu.hpp"
 #include "math/factor.hpp"
 #include "string/aho_corasick.hpp"
 #include "string/rolling_hash.hpp"
@@ -196,6 +197,19 @@ int main() {
         dsu.merge(1, 2, -1);
         assert(dsu.same(0, 2) && dsu.diff(0, 2) == 2);
         assert(dsu.size(1) == 3 && dsu.groups().size() == 2);
+    }
+    {
+        rollback_dsu dsu(4);
+        dsu.merge(0, 1);
+        int state = dsu.snapshot();
+        dsu.merge(1, 2);
+        dsu.merge(0, 2); // 同じ成分どうしでも undo 1 回分の履歴を積む
+        assert(dsu.same(0, 2) && dsu.size(1) == 3 && dsu.count() == 2);
+        dsu.undo();
+        assert(dsu.same(0, 2) && dsu.count() == 2);
+        dsu.rollback(state);
+        assert(dsu.same(0, 1) && !dsu.same(0, 2) && dsu.count() == 3);
+        assert(dsu.groups().size() == 3);
     }
     {
         Factor factor(30);
