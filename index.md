@@ -39,6 +39,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: ds/potential_dsu.hpp
       title: "\u30DD\u30C6\u30F3\u30B7\u30E3\u30EB\u4ED8\u304D Union-Find"
+    - icon: ':heavy_check_mark:'
+      path: ds/rollback_dsu.hpp
+      title: "\u30ED\u30FC\u30EB\u30D0\u30C3\u30AF\u4ED8\u304D Union-Find"
   - name: geometry
     pages:
     - icon: ':heavy_check_mark:'
@@ -137,6 +140,9 @@ data:
       path: verify/many_aplusb_128bit.test.cpp
       title: verify/many_aplusb_128bit.test.cpp
     - icon: ':heavy_check_mark:'
+      path: verify/persistent_unionfind.test.cpp
+      title: verify/persistent_unionfind.test.cpp
+    - icon: ':heavy_check_mark:'
       path: verify/random_binary_search.test.cpp
       title: verify/random_binary_search.test.cpp
     - icon: ':heavy_check_mark:'
@@ -166,6 +172,9 @@ data:
     - icon: ':heavy_check_mark:'
       path: verify/random_persistent_segtree.test.cpp
       title: verify/random_persistent_segtree.test.cpp
+    - icon: ':heavy_check_mark:'
+      path: verify/random_rollback_dsu.test.cpp
+      title: verify/random_rollback_dsu.test.cpp
     - icon: ':heavy_check_mark:'
       path: verify/random_rolling_hash.test.cpp
       title: verify/random_rolling_hash.test.cpp
